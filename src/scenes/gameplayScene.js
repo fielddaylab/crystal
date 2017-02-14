@@ -30,11 +30,16 @@ var GamePlayScene = function(game, stage)
     self.click_ticks = 1000000;
 
     var worldevt = {wx:0,wy:0};
+    var worldoff = {wx:0,wy:0};
     self.shouldClick = function(evt)
     {
       worldevt.wx = worldSpaceX(cam,canv,evt.doX);
       worldevt.wy = worldSpaceY(cam,canv,evt.doY);
-      return worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
+      var hit = false
+      hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
+      for(var i = 0; !hit && i < self.blocks.length; i++)
+        hit = worldPtWithin(self.wx+self.blocks[i].wx,self.wy+self.blocks[i].wy,1.,1.,worldevt.wx,worldevt.wy);
+      return hit;
     }
     self.click = function(evt)
     {
@@ -60,14 +65,18 @@ var GamePlayScene = function(game, stage)
     }
     self.dragStart = function(evt)
     {
+      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      worldoff.wx = worldevt.wx-self.wx;
+      worldoff.wy = worldevt.wy-self.wy;
       self.drag(evt);
     }
     self.drag = function(evt)
     {
       worldevt.wx = worldSpaceX(cam,canv,evt.doX);
       worldevt.wy = worldSpaceY(cam,canv,evt.doY);
-      self.wx = worldevt.wx;
-      self.wy = worldevt.wy;
+      self.wx = worldevt.wx-worldoff.wx;
+      self.wy = worldevt.wy-worldoff.wy;
     }
     self.dragFinish = function(evt)
     {
@@ -111,9 +120,19 @@ var GamePlayScene = function(game, stage)
 
       if(self.rot_ticks == n_max)
       {
-        self.base_rot = self.target_rot;
-        self.rot = self.target_rot;
-        self.tmp_target_rot = self.target_rot;
+        if(abs(self.target_rot-halfpi) < 0.001)
+        {
+          for(var i = 0; i < self.blocks.length; i++)
+          {
+            var tmp = self.blocks[i].wy;
+            self.blocks[i].wy = -self.blocks[i].wx;
+            self.blocks[i].wx = tmp;
+          }
+        }
+        self.base_rot       = 0;
+        self.rot            = 0;
+        self.tmp_target_rot = 0;
+        self.target_rot     = 0;
       }
     }
 
