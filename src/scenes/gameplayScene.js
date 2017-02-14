@@ -38,13 +38,12 @@ var GamePlayScene = function(game, stage)
     }
     self.click = function(evt)
     {
-      if(self.click_ticks < 100)
+      if(self.click_ticks < 20)
       {
         self.base_rot = self.rot;
         self.target_rot += halfpi;
         if(self.target_rot >= twopi-0.001) self.target_rot = 0;
         self.rot_ticks = 0;
-        console.log("gotem "+self.target_rot);
       }
       self.click_ticks = 0;
     }
@@ -86,38 +85,29 @@ var GamePlayScene = function(game, stage)
       self.click_ticks++;
       self.rot_ticks++;
       var t;
-      var n_min;
-      var n_max;
+      var n_min = 0;
+      var n_max = 0;
 
       //windup
-      n_min = 1;
-      n_max = 10;
-      if(self.rot_ticks == n_min) self.tmp_target_rot = self.base_rot - 0.01*(self.target_rot - self.base_rot);
-      if(self.rot_ticks > n_min && self.rot_ticks < n_max)
-      {
-        t = (self.rot_ticks-n_min)/(n_max-n_min)
-        self.rot = lerp(self.rot,self.tmp_target_rot,t);
-      }
+      n_min = n_max+1;
+      n_max = 8;
+      if(self.rot_ticks == n_min) self.tmp_target_rot = self.base_rot - 0.2*(self.target_rot - self.base_rot);
+      if(self.rot_ticks >= n_min && self.rot_ticks < n_max)
+        self.rot = lerp(self.rot,self.tmp_target_rot,0.4);
 
       //overshoot
-      n_min = 80;
-      n_max = 90;
-      if(self.rot_ticks == n_min) self.tmp_target_rot = self.target_rot - 0.01*(self.target_rot - self.base_rot);
-      if(self.rot_ticks > n_min && self.rot_ticks < n_max)
-      {
-        t = (self.rot_ticks-n_min)/(n_max-n_min)
-        self.rot = lerp(self.rot,self.tmp_target_rot,t);
-      }
+      n_min = n_max+1;
+      n_max = 15;
+      if(self.rot_ticks == n_min) self.tmp_target_rot = self.target_rot + 0.1*(self.target_rot - self.base_rot);
+      if(self.rot_ticks >= n_min && self.rot_ticks < n_max)
+        self.rot = lerp(self.rot,self.tmp_target_rot,0.5);
 
       //relax
-      n_min = 90;
-      n_max = 100;
-      if(self.rot_ticks == n_min) self.tmp_target_rot = self.target_rot - 0.01*(self.target_rot - self.base_rot);
-      if(self.rot_ticks > n_min && self.rot_ticks < n_max)
-      {
-        t = (self.rot_ticks-n_min)/(n_max-n_min)
-        self.rot = lerp(self.rot,self.tmp_target_rot,t);
-      }
+      n_min = n_max+1;
+      n_max = 20;
+      if(self.rot_ticks == n_min) self.tmp_target_rot = self.target_rot;
+      if(self.rot_ticks >= n_min && self.rot_ticks < n_max)
+        self.rot = lerp(self.rot,self.tmp_target_rot,0.5);
 
       if(self.rot_ticks == n_max)
       {
@@ -125,22 +115,36 @@ var GamePlayScene = function(game, stage)
         self.rot = self.target_rot;
         self.tmp_target_rot = self.target_rot;
       }
-      console.log(self.rot);
     }
 
+    var cblock = {x:0,y:0,w:0,h:0,wx:1,wy:1,ww:1,wh:1}
     var block = {x:0,y:0,w:0,h:0,wx:1,wy:1,ww:1,wh:1}
+    var tx;
+    var ty;
     self.draw = function()
     {
-      block.wx = self.wx;
-      block.wy = self.wy;
-      screenSpace(cam,canv,block);
-      ctx.fillRect(block.x,block.y,block.w,block.h);
+      cblock.wx = self.wx;
+      cblock.wy = self.wy;
+      screenSpace(cam,canv,cblock);
+      tx = cblock.x+cblock.w/2;
+      ty = cblock.y+cblock.h/2;
+
+      ctx.save();
+      ctx.translate(tx,ty);
+      ctx.rotate(self.rot);
+      ctx.fillRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
+      ctx.restore();
       for(var i = 0; i < self.blocks.length; i++)
       {
         block.wx = self.wx+self.blocks[i].wx;
         block.wy = self.wy+self.blocks[i].wy;
         screenSpace(cam,canv,block);
-        ctx.fillRect(block.x,block.y,block.w,block.h);
+
+        ctx.save();
+        ctx.translate(tx,ty);
+        ctx.rotate(self.rot);
+        ctx.fillRect(block.x-tx,block.y-ty,block.w,block.h);
+        ctx.restore();
       }
     }
   }
