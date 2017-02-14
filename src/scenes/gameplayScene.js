@@ -9,8 +9,20 @@ var GamePlayScene = function(game, stage)
   var clicker;
   var dragger;
 
+  var dragging_shape = 0;
   var coord = {x:0,y:0};
-  var cam = { wx:0, wy:0, ww:8, wh:4 };
+  var cam = { wx:0, wy:0, ww:16, wh:8 };
+
+  var template_blocks = [];
+  template_blocks[0] = [{wx:-1,wy:0},{wx:0,wy:1}];// _|
+  var copy_template = function(template,blocks)
+  {
+    for(var i = 0; i < template.length; i++)
+      blocks[i] = {wx:template[i].wx,wy:template[i].wy};
+  }
+
+  var templates = [];
+  var shapes = [];
 
   var shape = function()
   {
@@ -33,6 +45,7 @@ var GamePlayScene = function(game, stage)
     var worldoff = {wx:0,wy:0};
     self.shouldClick = function(evt)
     {
+      if(evt.hitUI) return false;
       worldevt.wx = worldSpaceX(cam,canv,evt.doX);
       worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       var hit = false
@@ -49,18 +62,25 @@ var GamePlayScene = function(game, stage)
         self.target_rot += halfpi;
         if(self.target_rot >= twopi-0.001) self.target_rot = 0;
         self.rot_ticks = 0;
+        evt.hitUI = true;
       }
       self.click_ticks = 0;
     }
 
     self.shouldDrag = function(evt)
     {
+      if(dragging_shape || evt.hitUI) return false;
       worldevt.wx = worldSpaceX(cam,canv,evt.doX);
       worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       var hit = false
       hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
         hit = worldPtWithin(self.wx+self.blocks[i].wx,self.wy+self.blocks[i].wy,1.,1.,worldevt.wx,worldevt.wy);
+      if(hit)
+      {
+        evt.hitUI = true;
+        dragging_shape = self;
+      }
       return hit;
     }
     self.dragStart = function(evt)
@@ -87,6 +107,7 @@ var GamePlayScene = function(game, stage)
     {
       self.wx = round(self.wx+0.5)-0.5;
       self.wy = round(self.wy+0.5)-0.5;
+      if(dragging_shape == self) dragging_shape = 0;
     }
 
     self.tick = function()
@@ -152,6 +173,7 @@ var GamePlayScene = function(game, stage)
       ctx.translate(tx,ty);
       ctx.rotate(self.rot);
       ctx.fillRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
+      ctx.strokeRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
       ctx.restore();
       for(var i = 0; i < self.blocks.length; i++)
       {
@@ -163,20 +185,97 @@ var GamePlayScene = function(game, stage)
         ctx.translate(tx,ty);
         ctx.rotate(self.rot);
         ctx.fillRect(block.x-tx,block.y-ty,block.w,block.h);
+        ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
         ctx.restore();
       }
     }
   }
 
-  var shapes = [];
+  var template = function()
+  {
+    var self = this;
+
+    self.blocks = [];
+
+    self.wx  = 0;
+    self.wy  = 0;
+
+    var worldevt = {wx:0,wy:0};
+    var worldoff = {wx:0,wy:0};
+
+    self.shouldDrag = function(evt)
+    {
+      if(dragging_shape || evt.hitUI) return false;
+      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      var hit = false
+      hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
+      for(var i = 0; !hit && i < self.blocks.length; i++)
+        hit = worldPtWithin(self.wx+self.blocks[i].wx,self.wy+self.blocks[i].wy,1.,1.,worldevt.wx,worldevt.wy);
+      if(hit)
+      {
+        evt.hitUI = true;
+        var s = new shape();
+        s.wx = self.wx;
+        s.wy = self.wy;
+        copy_template(self.blocks,s.blocks);
+        s.dragging = true;
+        dragging_shape = s;
+        shapes[shapes.length] = s;
+      }
+      return hit;
+    }
+    self.dragStart = function(evt)
+    {
+    }
+    self.drag = function(evt)
+    {
+    }
+    self.dragFinish = function(evt)
+    {
+    }
+
+    var cblock = {x:0,y:0,w:0,h:0,wx:1,wy:1,ww:1,wh:1}
+    var block = {x:0,y:0,w:0,h:0,wx:1,wy:1,ww:1,wh:1}
+    var tx;
+    var ty;
+    self.draw = function()
+    {
+      cblock.wx = self.wx;
+      cblock.wy = self.wy;
+      screenSpace(cam,canv,cblock);
+      tx = cblock.x+cblock.w/2;
+      ty = cblock.y+cblock.h/2;
+
+      ctx.save();
+      ctx.translate(tx,ty);
+      ctx.fillRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
+      ctx.strokeRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
+      ctx.restore();
+      for(var i = 0; i < self.blocks.length; i++)
+      {
+        block.wx = self.wx+self.blocks[i].wx;
+        block.wy = self.wy+self.blocks[i].wy;
+        screenSpace(cam,canv,block);
+
+        ctx.save();
+        ctx.translate(tx,ty);
+        ctx.fillRect(block.x-tx,block.y-ty,block.w,block.h);
+        ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
+        ctx.restore();
+      }
+    }
+  }
 
   self.ready = function()
   {
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
 
-    shapes[0] = new shape();
-    shapes[0].blocks = [{wx:-1,wy:0},{wx:0,wy:1}];
+    templates[0] = new template();
+    templates[0].wx = -cam.ww/2+2.;
+    templates[0].wy =  cam.wh/2-2.;
+    copy_template(template_blocks[0],templates[0].blocks);
   };
 
   self.tick = function()
@@ -184,6 +283,8 @@ var GamePlayScene = function(game, stage)
     for(var i = 0; i < shapes.length; i++)
       clicker.filter(shapes[i]);
     clicker.flush();
+    for(var i = 0; i < templates.length; i++)
+      dragger.filter(templates[i]);
     for(var i = 0; i < shapes.length; i++)
       dragger.filter(shapes[i]);
     dragger.flush();
@@ -205,6 +306,8 @@ var GamePlayScene = function(game, stage)
 
     var v_spacing = 1;
     var h_spacing = 1;
+
+    ctx.strokeStyle = "#AAAAAA";
 
     //horizontal
     wy = floor(min_wy/v_spacing)*v_spacing;
@@ -229,6 +332,11 @@ var GamePlayScene = function(game, stage)
       wx += h_spacing;
     }
 
+    ctx.fillStyle   = "#000000";
+    ctx.strokeStyle = "#AAAAAA";
+
+    for(var i = 0; i < templates.length; i++)
+      templates[i].draw();
     for(var i = 0; i < shapes.length; i++)
       shapes[i].draw();
   };
