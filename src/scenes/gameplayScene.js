@@ -15,11 +15,11 @@ var GamePlayScene = function(game, stage)
   var shadow_dist = 8;
 
   var template_blocks = [];
-  template_blocks[0] = [{wx:-1,wy:0},{wx:0,wy:1}];// _|
+  template_blocks[0] = [{cx:-1,cy:0},{cx:0,cy:1}];// _|
   var copy_template = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
-      blocks[i] = {wx:template[i].wx,wy:template[i].wy};
+      blocks[i] = {cx:template[i].cx,cy:template[i].cy};
   }
 
   var templates = [];
@@ -41,6 +41,8 @@ var GamePlayScene = function(game, stage)
     self.rot_ticks = 10000000;
     self.click_ticks = 1000000;
     self.up = true;
+    self.cx = 0;
+    self.cy = 0;
 
 
     var worldevt = {wx:0,wy:0};
@@ -61,7 +63,7 @@ var GamePlayScene = function(game, stage)
       var hit = false
       hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
-        hit = worldPtWithin(self.wx+self.blocks[i].wx,self.wy+self.blocks[i].wy,1.,1.,worldevt.wx,worldevt.wy);
+        hit = worldPtWithin(self.wx+self.blocks[i].cx,self.wy+self.blocks[i].cy,1.,1.,worldevt.wx,worldevt.wy);
       return hit;
     }
     self.click = function(evt)
@@ -93,7 +95,7 @@ var GamePlayScene = function(game, stage)
       var hit = false
       hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
-        hit = worldPtWithin(self.wx+self.blocks[i].wx,self.wy+self.blocks[i].wy,1.,1.,worldevt.wx,worldevt.wy);
+        hit = worldPtWithin(self.wx+self.blocks[i].cx,self.wy+self.blocks[i].cy,1.,1.,worldevt.wx,worldevt.wy);
       if(hit)
       {
         evt.hitUI = true;
@@ -132,10 +134,35 @@ var GamePlayScene = function(game, stage)
 
     self.snap = function()
     {
-      self.wx = round(self.wx+0.5)-0.5;
-      self.wy = round(self.wy+0.5)-0.5;
-      if(dragging_shape == self) dragging_shape = 0;
+      var shape;
+      var cx = round(self.wx+0.5);
+      var cy = round(self.wy+0.5);
       self.up = false;
+      for(var i = 0; !self.up && i < shapes.length; i++)
+      {
+        shape = shapes[i];
+        if(shape == self) continue;
+        if(cx == shape.cx && cy == shape.cy)
+          self.up = true; //check centers
+        for(var k = 0; !self.up && k < shape.blocks.length; k++) //check center against their blocks
+          if(shape.cx+shape.blocks[k].cx == cx && shape.cy+shape.blocks[k].cy == cy)
+            self.up = true;
+        for(var j = 0; !self.up && j < self.blocks.length; j++) //check their center against blocks
+          if(cx+self.blocks[j].cx == shape.cx && cy+self.blocks[j].cy == shape.cy)
+            self.up = true;
+        for(var j = 0; !self.up && j < self.blocks.length; j++) //check blocks against blocks
+          for(var k = 0; !self.up && k < shape.blocks.length; k++)
+            if(cx+self.blocks[j].cx == shape.cx+shape.blocks[k].cx && cy+self.blocks[j].cy == shape.cy+shape.blocks[k].cy)
+              self.up = true;
+      }
+      if(!self.up)
+      {
+        self.cx == cx;
+        self.cy == cy;
+        self.wx = cx-0.5;
+        self.wy = cy-0.5;
+      }
+      if(dragging_shape == self) dragging_shape = 0;
     }
 
     self.tick = function()
@@ -173,9 +200,9 @@ var GamePlayScene = function(game, stage)
         {
           for(var i = 0; i < self.blocks.length; i++)
           {
-            var tmp = self.blocks[i].wy;
-            self.blocks[i].wy = -self.blocks[i].wx;
-            self.blocks[i].wx = tmp;
+            var tmp = self.blocks[i].cy;
+            self.blocks[i].cy = -self.blocks[i].cx;
+            self.blocks[i].cx = tmp;
           }
         }
         self.base_rot       = 0;
@@ -214,8 +241,8 @@ var GamePlayScene = function(game, stage)
         ctx.restore();
         for(var i = 0; i < self.blocks.length; i++)
         {
-          block.wx = self.wx+self.blocks[i].wx;
-          block.wy = self.wy+self.blocks[i].wy;
+          block.wx = self.wx+self.blocks[i].cx;
+          block.wy = self.wy+self.blocks[i].cy;
           screenSpace(cam,canv,block);
           block.x += shadow_dist*(1-t);
           block.y += shadow_dist*(1-t);
@@ -245,8 +272,8 @@ var GamePlayScene = function(game, stage)
         ctx.restore();
         for(var i = 0; i < self.blocks.length; i++)
         {
-          block.wx = self.wx+self.blocks[i].wx;
-          block.wy = self.wy+self.blocks[i].wy;
+          block.wx = self.wx+self.blocks[i].cx;
+          block.wy = self.wy+self.blocks[i].cy;
           screenSpace(cam,canv,block);
           block.x += shadow_dist;
           block.y += shadow_dist;
@@ -275,8 +302,8 @@ var GamePlayScene = function(game, stage)
         ctx.restore();
         for(var i = 0; i < self.blocks.length; i++)
         {
-          block.wx = self.wx+self.blocks[i].wx;
-          block.wy = self.wy+self.blocks[i].wy;
+          block.wx = self.wx+self.blocks[i].cx;
+          block.wy = self.wy+self.blocks[i].cy;
           screenSpace(cam,canv,block);
 
           ctx.save();
@@ -309,7 +336,7 @@ var GamePlayScene = function(game, stage)
       var hit = false
       hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
-        hit = worldPtWithin(self.wx+self.blocks[i].wx,self.wy+self.blocks[i].wy,1.,1.,worldevt.wx,worldevt.wy);
+        hit = worldPtWithin(self.wx+self.blocks[i].cx,self.wy+self.blocks[i].cy,1.,1.,worldevt.wx,worldevt.wy);
       if(hit)
       {
         evt.hitUI = true;
@@ -355,8 +382,8 @@ var GamePlayScene = function(game, stage)
       ctx.restore();
       for(var i = 0; i < self.blocks.length; i++)
       {
-        block.wx = self.wx+self.blocks[i].wx;
-        block.wy = self.wy+self.blocks[i].wy;
+        block.wx = self.wx+self.blocks[i].cx;
+        block.wy = self.wy+self.blocks[i].cy;
         screenSpace(cam,canv,block);
 
         ctx.save();
