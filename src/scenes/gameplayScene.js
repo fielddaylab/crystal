@@ -40,6 +40,7 @@ var GamePlayScene = function(game, stage)
     self.target_rot = 0;
     self.rot_ticks = 10000000;
     self.click_ticks = 1000000;
+    self.up_ticks = 1000000;
     self.up = true;
     self.cx = 0;
     self.cy = 0;
@@ -100,22 +101,22 @@ var GamePlayScene = function(game, stage)
       {
         evt.hitUI = true;
         self.up = true;
+        for(var i = 0; i < shapes.length; i++)
+        {
+          if(shapes[i] == self)
+          {
+            shapes[i] = shapes[0];
+            shapes[0] = self;
+          }
+        }
         dragging_shape = self;
       }
       return hit;
     }
     self.dragStart = function(evt)
     {
-      if(self.up)
-      {
-        worldevt.wx = worldSpaceX(cam,canv,evt.doX+shadow_dist);
-        worldevt.wy = worldSpaceY(cam,canv,evt.doY+shadow_dist);
-      }
-      else
-      {
-        worldevt.wx = worldSpaceX(cam,canv,evt.doX);
-        worldevt.wy = worldSpaceY(cam,canv,evt.doY);
-      }
+      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       worldoff.wx = worldevt.wx-self.wx;
       worldoff.wy = worldevt.wy-self.wy;
       self.drag(evt);
@@ -141,7 +142,7 @@ var GamePlayScene = function(game, stage)
       for(var i = 0; !self.up && i < shapes.length; i++)
       {
         shape = shapes[i];
-        if(shape == self) continue;
+        if(shape == self || shape.up) continue;
         if(cx == shape.cx && cy == shape.cy)
           self.up = true; //check centers
         for(var k = 0; !self.up && k < shape.blocks.length; k++) //check center against their blocks
@@ -157,10 +158,11 @@ var GamePlayScene = function(game, stage)
       }
       if(!self.up)
       {
-        self.cx == cx;
-        self.cy == cy;
+        self.cx = cx;
+        self.cy = cy;
         self.wx = cx-0.5;
         self.wy = cy-0.5;
+        self.up_ticks = 0;
       }
       if(dragging_shape == self) dragging_shape = 0;
     }
@@ -169,6 +171,7 @@ var GamePlayScene = function(game, stage)
     {
       self.click_ticks++;
       self.rot_ticks++;
+      if(self.up) self.up_ticks++;
       var t;
       var n_min = 0;
       var n_max = 0;
@@ -209,6 +212,7 @@ var GamePlayScene = function(game, stage)
         self.rot            = 0;
         self.tmp_target_rot = 0;
         self.target_rot     = 0;
+        self.snap();
       }
     }
 
@@ -223,8 +227,6 @@ var GamePlayScene = function(game, stage)
       if(self.up)
       {
         //shadow
-        var t = min(self.click_ticks,10)/10;
-
         cblock.wx = self.wx;
         cblock.wy = self.wy;
         screenSpace(cam,canv,cblock);
@@ -232,8 +234,6 @@ var GamePlayScene = function(game, stage)
         ty = cblock.y+cblock.h/2;
 
         ctx.fillStyle = "rgba(0,0,0,.1)";
-        cblock.x += shadow_dist*(1-t);
-        cblock.y += shadow_dist*(1-t);
         ctx.save();
         ctx.translate(tx,ty);
         ctx.rotate(self.rot);
@@ -244,8 +244,6 @@ var GamePlayScene = function(game, stage)
           block.wx = self.wx+self.blocks[i].cx;
           block.wy = self.wy+self.blocks[i].cy;
           screenSpace(cam,canv,block);
-          block.x += shadow_dist*(1-t);
-          block.y += shadow_dist*(1-t);
 
           ctx.save();
           ctx.translate(tx,ty);
@@ -255,15 +253,17 @@ var GamePlayScene = function(game, stage)
         }
 
         //real
+        var t = clamp(0,10,self.up_ticks-5)/10;
+
         cblock.wx = self.wx;
         cblock.wy = self.wy;
         screenSpace(cam,canv,cblock);
+        cblock.x += shadow_dist*t
+        cblock.y += shadow_dist*t
         tx = cblock.x+cblock.w/2;
-        ty = cblock.y+cblock.h/2;
+        ty = cblock.y+cblock.h/2
 
         ctx.fillStyle = "#000000";
-        cblock.x += shadow_dist;
-        cblock.y += shadow_dist;
         ctx.save();
         ctx.translate(tx,ty);
         ctx.rotate(self.rot);
@@ -275,8 +275,8 @@ var GamePlayScene = function(game, stage)
           block.wx = self.wx+self.blocks[i].cx;
           block.wy = self.wy+self.blocks[i].cy;
           screenSpace(cam,canv,block);
-          block.x += shadow_dist;
-          block.y += shadow_dist;
+          block.x += shadow_dist*t
+          block.y += shadow_dist*t
 
           ctx.save();
           ctx.translate(tx,ty);
@@ -347,6 +347,8 @@ var GamePlayScene = function(game, stage)
         s.dragging = true;
         dragging_shape = s;
         shapes[shapes.length] = s;
+        shapes[shapes.length-1] = shapes[0];
+        shapes[0] = s;
       }
       return hit;
     }
@@ -462,7 +464,7 @@ var GamePlayScene = function(game, stage)
 
     for(var i = 0; i < templates.length; i++)
       templates[i].draw();
-    for(var i = 0; i < shapes.length; i++)
+    for(var i = shapes.length-1; i >= 0; i--)
       shapes[i].draw();
   };
 
