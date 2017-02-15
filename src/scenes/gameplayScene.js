@@ -12,6 +12,7 @@ var GamePlayScene = function(game, stage)
   var dragging_shape = 0;
   var coord = {x:0,y:0};
   var cam = { wx:0, wy:0, ww:16, wh:8 };
+  var shadow_dist = 8;
 
   var template_blocks = [];
   template_blocks[0] = [{wx:-1,wy:0},{wx:0,wy:1}];// _|
@@ -38,16 +39,25 @@ var GamePlayScene = function(game, stage)
     self.tmp_target_rot = 0;
     self.target_rot = 0;
     self.rot_ticks = 10000000;
-
     self.click_ticks = 1000000;
+    self.up = true;
+
 
     var worldevt = {wx:0,wy:0};
     var worldoff = {wx:0,wy:0};
     self.shouldClick = function(evt)
     {
       if(evt.hitUI) return false;
-      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
-      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      if(self.up)
+      {
+        worldevt.wx = worldSpaceX(cam,canv,evt.doX-shadow_dist);
+        worldevt.wy = worldSpaceY(cam,canv,evt.doY-shadow_dist);
+      }
+      else
+      {
+        worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+        worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      }
       var hit = false
       hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
@@ -70,8 +80,16 @@ var GamePlayScene = function(game, stage)
     self.shouldDrag = function(evt)
     {
       if(dragging_shape || evt.hitUI) return false;
-      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
-      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      if(self.up)
+      {
+        worldevt.wx = worldSpaceX(cam,canv,evt.doX-shadow_dist);
+        worldevt.wy = worldSpaceY(cam,canv,evt.doY-shadow_dist);
+      }
+      else
+      {
+        worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+        worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      }
       var hit = false
       hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
@@ -79,14 +97,23 @@ var GamePlayScene = function(game, stage)
       if(hit)
       {
         evt.hitUI = true;
+        self.up = true;
         dragging_shape = self;
       }
       return hit;
     }
     self.dragStart = function(evt)
     {
-      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
-      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      if(self.up)
+      {
+        worldevt.wx = worldSpaceX(cam,canv,evt.doX+shadow_dist);
+        worldevt.wy = worldSpaceY(cam,canv,evt.doY+shadow_dist);
+      }
+      else
+      {
+        worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+        worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      }
       worldoff.wx = worldevt.wx-self.wx;
       worldoff.wy = worldevt.wy-self.wy;
       self.drag(evt);
@@ -108,6 +135,7 @@ var GamePlayScene = function(game, stage)
       self.wx = round(self.wx+0.5)-0.5;
       self.wy = round(self.wy+0.5)-0.5;
       if(dragging_shape == self) dragging_shape = 0;
+      self.up = false;
     }
 
     self.tick = function()
@@ -163,30 +191,101 @@ var GamePlayScene = function(game, stage)
     var ty;
     self.draw = function()
     {
-      cblock.wx = self.wx;
-      cblock.wy = self.wy;
-      screenSpace(cam,canv,cblock);
-      tx = cblock.x+cblock.w/2;
-      ty = cblock.y+cblock.h/2;
+      ctx.strokeStyle = "#AAAAAA";
 
-      ctx.save();
-      ctx.translate(tx,ty);
-      ctx.rotate(self.rot);
-      ctx.fillRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
-      ctx.strokeRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
-      ctx.restore();
-      for(var i = 0; i < self.blocks.length; i++)
+      if(self.up)
       {
-        block.wx = self.wx+self.blocks[i].wx;
-        block.wy = self.wy+self.blocks[i].wy;
-        screenSpace(cam,canv,block);
+        //shadow
+        var t = min(self.click_ticks,10)/10;
+
+        cblock.wx = self.wx;
+        cblock.wy = self.wy;
+        screenSpace(cam,canv,cblock);
+        tx = cblock.x+cblock.w/2;
+        ty = cblock.y+cblock.h/2;
+
+        ctx.fillStyle = "rgba(0,0,0,.1)";
+        cblock.x += shadow_dist*(1-t);
+        cblock.y += shadow_dist*(1-t);
+        ctx.save();
+        ctx.translate(tx,ty);
+        ctx.rotate(self.rot);
+        ctx.fillRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
+        ctx.restore();
+        for(var i = 0; i < self.blocks.length; i++)
+        {
+          block.wx = self.wx+self.blocks[i].wx;
+          block.wy = self.wy+self.blocks[i].wy;
+          screenSpace(cam,canv,block);
+          block.x += shadow_dist*(1-t);
+          block.y += shadow_dist*(1-t);
+
+          ctx.save();
+          ctx.translate(tx,ty);
+          ctx.rotate(self.rot);
+          ctx.fillRect(block.x-tx,block.y-ty,block.w,block.h);
+          ctx.restore();
+        }
+
+        //real
+        cblock.wx = self.wx;
+        cblock.wy = self.wy;
+        screenSpace(cam,canv,cblock);
+        tx = cblock.x+cblock.w/2;
+        ty = cblock.y+cblock.h/2;
+
+        ctx.fillStyle = "#000000";
+        cblock.x += shadow_dist;
+        cblock.y += shadow_dist;
+        ctx.save();
+        ctx.translate(tx,ty);
+        ctx.rotate(self.rot);
+        ctx.fillRect(  cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
+        ctx.strokeRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
+        ctx.restore();
+        for(var i = 0; i < self.blocks.length; i++)
+        {
+          block.wx = self.wx+self.blocks[i].wx;
+          block.wy = self.wy+self.blocks[i].wy;
+          screenSpace(cam,canv,block);
+          block.x += shadow_dist;
+          block.y += shadow_dist;
+
+          ctx.save();
+          ctx.translate(tx,ty);
+          ctx.rotate(self.rot);
+          ctx.fillRect(  block.x-tx,block.y-ty,block.w,block.h);
+          ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
+          ctx.restore();
+        }
+      }
+      else
+      {
+        cblock.wx = self.wx;
+        cblock.wy = self.wy;
+        screenSpace(cam,canv,cblock);
+        tx = cblock.x+cblock.w/2;
+        ty = cblock.y+cblock.h/2;
 
         ctx.save();
         ctx.translate(tx,ty);
         ctx.rotate(self.rot);
-        ctx.fillRect(block.x-tx,block.y-ty,block.w,block.h);
-        ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
+        ctx.fillRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
+        ctx.strokeRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
         ctx.restore();
+        for(var i = 0; i < self.blocks.length; i++)
+        {
+          block.wx = self.wx+self.blocks[i].wx;
+          block.wy = self.wy+self.blocks[i].wy;
+          screenSpace(cam,canv,block);
+
+          ctx.save();
+          ctx.translate(tx,ty);
+          ctx.rotate(self.rot);
+          ctx.fillRect(block.x-tx,block.y-ty,block.w,block.h);
+          ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
+          ctx.restore();
+        }
       }
     }
   }
@@ -201,7 +300,6 @@ var GamePlayScene = function(game, stage)
     self.wy  = 0;
 
     var worldevt = {wx:0,wy:0};
-    var worldoff = {wx:0,wy:0};
 
     self.shouldDrag = function(evt)
     {
@@ -241,6 +339,9 @@ var GamePlayScene = function(game, stage)
     var ty;
     self.draw = function()
     {
+      ctx.strokeStyle = "#AAAAAA";
+      ctx.fillStyle   = "#000000";
+
       cblock.wx = self.wx;
       cblock.wy = self.wy;
       screenSpace(cam,canv,cblock);
@@ -331,9 +432,6 @@ var GamePlayScene = function(game, stage)
       ctx.stroke();
       wx += h_spacing;
     }
-
-    ctx.fillStyle   = "#000000";
-    ctx.strokeStyle = "#AAAAAA";
 
     for(var i = 0; i < templates.length; i++)
       templates[i].draw();
