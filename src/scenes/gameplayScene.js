@@ -15,7 +15,8 @@ var GamePlayScene = function(game, stage)
   var shadow_dist = 8;
 
   var template_blocks = [];
-  template_blocks[0] = [{cx:-1,cy:0},{cx:0,cy:1}];// _|
+  template_blocks[0] = [{cx:-1,cy:0},{cx:0,cy:1}];// _|           |
+  template_blocks[1] = [{cx:-1,cy:0},{cx:0,cy:1},{cx:0,cy:2}];// _|
   var copy_template = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
@@ -222,7 +223,7 @@ var GamePlayScene = function(game, stage)
     var ty;
     self.draw = function()
     {
-      ctx.strokeStyle = "#AAAAAA";
+      ctx.strokeStyle = "#B11111";
 
       if(self.up)
       {
@@ -263,7 +264,7 @@ var GamePlayScene = function(game, stage)
         tx = cblock.x+cblock.w/2;
         ty = cblock.y+cblock.h/2
 
-        ctx.fillStyle = "#000000";
+        ctx.fillStyle = "#D44444";
         ctx.save();
         ctx.translate(tx,ty);
         ctx.rotate(self.rot);
@@ -368,8 +369,35 @@ var GamePlayScene = function(game, stage)
     var ty;
     self.draw = function()
     {
-      ctx.strokeStyle = "#AAAAAA";
-      ctx.fillStyle   = "#000000";
+      //border
+      var b = 4;
+      ctx.fillStyle   = "#DDDDDD";
+
+      cblock.wx = self.wx;
+      cblock.wy = self.wy;
+      screenSpace(cam,canv,cblock);
+      tx = cblock.x+cblock.w/2;
+      ty = cblock.y+cblock.h/2;
+
+      ctx.save();
+      ctx.translate(tx,ty);
+      ctx.fillRect(cblock.x-tx-b,cblock.y-ty-b,cblock.w+2*b,cblock.h+2*b);
+      ctx.restore();
+      for(var i = 0; i < self.blocks.length; i++)
+      {
+        block.wx = self.wx+self.blocks[i].cx;
+        block.wy = self.wy+self.blocks[i].cy;
+        screenSpace(cam,canv,block);
+
+        ctx.save();
+        ctx.translate(tx,ty);
+        ctx.fillRect(block.x-tx-b,block.y-ty-b,block.w+2*b,block.h+2*b);
+        ctx.restore();
+      }
+
+      //real
+      ctx.strokeStyle = "#B11111";
+      ctx.fillStyle   = "#D44444";
 
       cblock.wx = self.wx;
       cblock.wy = self.wy;
@@ -394,6 +422,7 @@ var GamePlayScene = function(game, stage)
         ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
         ctx.restore();
       }
+
     }
   }
 
@@ -406,6 +435,10 @@ var GamePlayScene = function(game, stage)
     templates[0].wx = -cam.ww/2+2.;
     templates[0].wy =  cam.wh/2-2.;
     copy_template(template_blocks[0],templates[0].blocks);
+    templates[1] = new template();
+    templates[1].wx = -cam.ww/2+2.;
+    templates[1].wy =  cam.wh/2-2.-4.;
+    copy_template(template_blocks[1],templates[1].blocks);
   };
 
   self.tick = function()
@@ -413,10 +446,10 @@ var GamePlayScene = function(game, stage)
     for(var i = 0; i < shapes.length; i++)
       clicker.filter(shapes[i]);
     clicker.flush();
-    for(var i = 0; i < templates.length; i++)
-      dragger.filter(templates[i]);
     for(var i = 0; i < shapes.length; i++)
       dragger.filter(shapes[i]);
+    for(var i = 0; i < templates.length; i++)
+      dragger.filter(templates[i]);
     dragger.flush();
 
     for(var i = 0; i < shapes.length; i++)
@@ -437,7 +470,7 @@ var GamePlayScene = function(game, stage)
     var v_spacing = 1;
     var h_spacing = 1;
 
-    ctx.strokeStyle = "#AAAAAA";
+    ctx.strokeStyle = "#CCCCCC";
 
     //horizontal
     wy = floor(min_wy/v_spacing)*v_spacing;
