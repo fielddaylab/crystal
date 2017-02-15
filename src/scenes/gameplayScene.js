@@ -13,6 +13,7 @@ var GamePlayScene = function(game, stage)
   var coord = {x:0,y:0};
   var cam = { wx:0, wy:0, ww:16, wh:8 };
   var bounds = {wx:1.5, wy:0, ww:11, wh:6, x:0,y:0,w:0,h:0 };
+  var scroll = {wx:-6.5, wy:0, ww:3, wh:8, x:0,y:0,w:0,h:0 };
   var shadow_dist = 8;
 
   var template_blocks = [];
@@ -111,6 +112,8 @@ var GamePlayScene = function(game, stage)
               shapes[j+1] = shapes[j];
             shapes[0] = self;
             self.up = true;
+            for(var j = 0; j < i; j++)
+              shapes[i].snap();
           }
         }
         dragging_shape = self;
@@ -456,6 +459,7 @@ var GamePlayScene = function(game, stage)
     copy_template(template_blocks[1],templates[1].blocks);
 
     screenSpace(cam,canv,bounds);
+    screenSpace(cam,canv,scroll);
   };
 
   self.tick = function()
@@ -513,8 +517,9 @@ var GamePlayScene = function(game, stage)
     }
 
     ctx.strokeStyle = "#000000";
-
     ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
+    ctx.fillStyle = "rgba(66,66,66,0.5)";
+    ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
 
     for(var i = 0; i < templates.length; i++)
       templates[i].draw();
