@@ -12,6 +12,7 @@ var GamePlayScene = function(game, stage)
   var dragging_shape = 0;
   var coord = {x:0,y:0};
   var cam = { wx:0, wy:0, ww:16, wh:8 };
+  var bounds = {wx:1.5, wy:0, ww:11, wh:6, x:0,y:0,w:0,h:0 };
   var shadow_dist = 8;
 
   var template_blocks = [];
@@ -101,13 +102,15 @@ var GamePlayScene = function(game, stage)
       if(hit)
       {
         evt.hitUI = true;
-        self.up = true;
-        for(var i = 0; i < shapes.length; i++)
+        self.up = false;
+        for(var i = 0; !self.up && i < shapes.length; i++)
         {
           if(shapes[i] == self)
           {
-            shapes[i] = shapes[0];
+            for(var j = i-1; j >= 0; j--)
+              shapes[j+1] = shapes[j];
             shapes[0] = self;
+            self.up = true;
           }
         }
         dragging_shape = self;
@@ -164,6 +167,18 @@ var GamePlayScene = function(game, stage)
         self.wx = cx-0.5;
         self.wy = cy-0.5;
         self.up_ticks = 0;
+
+        self.up = true;
+        for(var i = 0; self.up && i < shapes.length; i++)
+        {
+          if(shapes[i] == self)
+          {
+            for(var j = i; j < shapes.length-1; j++)
+              shapes[j] = shapes[j+1];
+            shapes[shapes.length-1] = self;
+            self.up = false;
+          }
+        }
       }
       if(dragging_shape == self) dragging_shape = 0;
     }
@@ -347,8 +362,8 @@ var GamePlayScene = function(game, stage)
         copy_template(self.blocks,s.blocks);
         s.dragging = true;
         dragging_shape = s;
-        shapes[shapes.length] = s;
-        shapes[shapes.length-1] = shapes[0];
+        for(var i = shapes.length-1; i >= 0; i--)
+          shapes[i+1] = shapes[i];
         shapes[0] = s;
       }
       return hit;
@@ -439,6 +454,8 @@ var GamePlayScene = function(game, stage)
     templates[1].wx = -cam.ww/2+2.;
     templates[1].wy =  cam.wh/2-2.-4.;
     copy_template(template_blocks[1],templates[1].blocks);
+
+    screenSpace(cam,canv,bounds);
   };
 
   self.tick = function()
@@ -495,10 +512,15 @@ var GamePlayScene = function(game, stage)
       wx += h_spacing;
     }
 
+    ctx.strokeStyle = "#000000";
+
+    ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
+
     for(var i = 0; i < templates.length; i++)
       templates[i].draw();
     for(var i = shapes.length-1; i >= 0; i--)
       shapes[i].draw();
+
   };
 
   self.cleanup = function()
