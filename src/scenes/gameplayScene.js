@@ -18,9 +18,9 @@ var GamePlayScene = function(game, stage)
   var template_blocks = [];
   var i = 0;
   //"c" placement of charge. 0 = no charge, 1 = top, 2 = right, 3 = bottom, 4 = left (+ means positive charge, - means negative)
-  template_blocks[i++] = [{cx:-1,cy:0,c:1},{cx:0,cy:1,c:0}];// _|               |
-  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:-2},{cx:0,cy:2,c:0}];// _|
-  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0},{cx:1,cy:1,c:4}];// _|-
+  template_blocks[i++] = [{cx:0,cy:0,c:0},{cx:-1,cy:0,c:1},{cx:0,cy:1,c:0}];// _|               |
+  template_blocks[i++] = [{cx:0,cy:0,c:0},{cx:-1,cy:0,c:0},{cx:0,cy:1,c:-2},{cx:0,cy:2,c:0}];// _|
+  template_blocks[i++] = [{cx:0,cy:0,c:0},{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0},{cx:1,cy:1,c:3}];// _|-
   var copy_blocks = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
@@ -51,19 +51,6 @@ var GamePlayScene = function(game, stage)
     tx = dblock.x+dblock.w/2;
     ty = dblock.y+dblock.h/2;
 
-    if(shadow) ctx.fillStyle = shadow_fill;
-    else
-    {
-      ctx.fillStyle = block_fill;
-      ctx.strokeStyle = block_stroke;
-    }
-    ctx.save();
-    ctx.translate(tx,ty);
-    ctx.rotate(rot);
-    ctx.fillRect(  dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
-    if(!shadow)
-    ctx.strokeRect(dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
-    ctx.restore();
     for(var i = 0; i < blocks.length; i++)
     {
       dblock.wx = wx+blocks[i].cx;
@@ -223,6 +210,8 @@ var GamePlayScene = function(game, stage)
     self.click_ticks = 1000000;
     self.up_ticks = 1000000;
     self.up = true;
+    self.happy_ticks = 100000;
+    self.happy = 0;
     self.cx = 0;
     self.cy = 0;
 
@@ -243,7 +232,6 @@ var GamePlayScene = function(game, stage)
         worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       }
       var hit = false
-      hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
         hit = worldPtWithin(self.wx+self.blocks[i].cx,self.wy+self.blocks[i].cy,1.,1.,worldevt.wx,worldevt.wy);
       return hit;
@@ -275,7 +263,6 @@ var GamePlayScene = function(game, stage)
         worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       }
       var hit = false
-      hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
         hit = worldPtWithin(self.wx+self.blocks[i].cx,self.wy+self.blocks[i].cy,1.,1.,worldevt.wx,worldevt.wy);
       if(hit)
@@ -319,15 +306,7 @@ var GamePlayScene = function(game, stage)
       {
         shape = shapes[i];
         if(shape == self || shape.up) continue;
-        if(cx == shape.cx && cy == shape.cy)
-          self.up = true; //check centers
-        for(var k = 0; !self.up && k < shape.blocks.length; k++) //check center against their blocks
-          if(shape.cx+shape.blocks[k].cx == cx && shape.cy+shape.blocks[k].cy == cy)
-            self.up = true;
-        for(var j = 0; !self.up && j < self.blocks.length; j++) //check their center against blocks
-          if(cx+self.blocks[j].cx == shape.cx && cy+self.blocks[j].cy == shape.cy)
-            self.up = true;
-        for(var j = 0; !self.up && j < self.blocks.length; j++) //check blocks against blocks
+        for(var j = 0; !self.up && j < self.blocks.length; j++)
           for(var k = 0; !self.up && k < shape.blocks.length; k++)
             if(cx+self.blocks[j].cx == shape.cx+shape.blocks[k].cx && cy+self.blocks[j].cy == shape.cy+shape.blocks[k].cy)
               self.up = true;
@@ -352,6 +331,7 @@ var GamePlayScene = function(game, stage)
       self.click_ticks++;
       self.rot_ticks++;
       if(self.up) self.up_ticks++;
+      if(self.happy != 0) self.happy_ticks++;
       var t;
       var n_min = 0;
       var n_max = 0;
@@ -389,10 +369,6 @@ var GamePlayScene = function(game, stage)
       }
     }
 
-    var cblock = {x:0,y:0,w:0,h:0,wx:1,wy:1,ww:1,wh:1}
-    var block = {x:0,y:0,w:0,h:0,wx:1,wy:1,ww:1,wh:1}
-    var tx;
-    var ty;
     self.draw = function()
     {
       if(self.up)
@@ -407,7 +383,62 @@ var GamePlayScene = function(game, stage)
       {
         draw_blocks(self.wx,self.wy,self.rot,false,0,self.blocks);
       }
+      ctx.fillStyle = "#000000";
+      var x = screenSpaceX(cam,canv,self.wx);
+      var y = screenSpaceY(cam,canv,self.wy);
+      ctx.fillText(self.happy,x,y);
     }
+  }
+  var block_happiness = function(a,b)
+  {
+    var happy = 0;
+    for(var i = 0; i < a.blocks.length; i++)
+    {
+      if(a.blocks[i].c == 0) continue;
+      for(var j = 0; j < b.blocks.length; j++)
+      {
+        if(b.blocks[j].c == 0) continue;
+        if(a.wx+a.blocks[i].cx == b.wx+b.blocks[j].cx) //vert aligned
+        {
+          if((a.wy+a.blocks[i].cy) - (b.wy+b.blocks[j].cy) ==  1) //a above b
+          {
+            if(abs(a.blocks[i].c) == 3 && abs(b.blocks[j].c) == 1)
+            {
+              if(a.blocks[i].c * b.blocks[j].c > 0) happy--;
+              else                                  happy++;
+            }
+          }
+          if((a.wy+a.blocks[i].cy) - (b.wy+b.blocks[j].cy) == -1) //a below b
+          {
+            if(abs(a.blocks[i].c) == 1 && abs(b.blocks[j].c) == 3)
+            {
+              if(a.blocks[i].c * b.blocks[j].c > 0) happy--;
+              else                                  happy++;
+            }
+          }
+        }
+        if(a.wy+a.blocks[i].cy == b.wy+b.blocks[j].cy) //horiz aligned
+        {
+          if((a.wx+a.blocks[i].cx) - (b.wx+b.blocks[j].cx) ==  1) //a right of b
+          {
+            if(abs(a.blocks[i].c) == 4 && abs(b.blocks[j].c) == 2)
+            {
+              if(a.blocks[i].c * b.blocks[j].c > 0) happy--;
+              else                                  happy++;
+            }
+          }
+          if((a.wx+a.blocks[i].cx) - (b.wx+b.blocks[j].cx) == -1) //a left of b
+          {
+            if(abs(a.blocks[i].c) == 2 && abs(b.blocks[j].c) == 4)
+            {
+              if(a.blocks[i].c * b.blocks[j].c > 0) happy--;
+              else                                  happy++;
+            }
+          }
+        }
+      }
+    }
+    return happy;
   }
 
   var template = function()
@@ -428,10 +459,6 @@ var GamePlayScene = function(game, stage)
       return hit;
     }
 
-    var cblock = {x:0,y:0,w:0,h:0,wx:1,wy:1,ww:1,wh:1}
-    var block = {x:0,y:0,w:0,h:0,wx:1,wy:1,ww:1,wh:1}
-    var tx;
-    var ty;
     self.draw = function()
     {
       //border
@@ -478,6 +505,21 @@ var GamePlayScene = function(game, stage)
     //for(var i = 0; i < templates.length; i++)
       //dragger.filter(templates[i]);
     dragger.flush();
+
+    var happy = 0;
+    for(var i = 0; i < shapes.length; i++)
+      shapes[i].happy = 0;
+    for(var i = 0; i < shapes.length; i++)
+    {
+      if(shapes[i].up) continue;
+      for(var j = i+1; j < shapes.length; j++)
+      {
+        if(shapes[j].up) continue;
+        happy = block_happiness(shapes[i],shapes[j]);
+        shapes[i].happy += happy;
+        shapes[j].happy += happy;
+      }
+    }
 
     for(var i = 0; i < shapes.length; i++)
       shapes[i].tick();
