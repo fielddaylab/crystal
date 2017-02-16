@@ -179,7 +179,7 @@ var GamePlayScene = function(game, stage)
     }
     self.click = function(evt)
     {
-      if(self.click_ticks < 20)
+      if(self.click_ticks < 20 && self.target_rot == 0)
       {
         self.base_rot = self.rot;
         self.target_rot += halfpi;
@@ -239,7 +239,7 @@ var GamePlayScene = function(game, stage)
 
     self.snap = function()
     {
-      if(!self.up) return;
+      var was_up = self.up; //not much, was up with you?
       var shape;
       var cx = round(self.wx+0.5);
       var cy = round(self.wy+0.5);
@@ -261,7 +261,7 @@ var GamePlayScene = function(game, stage)
             if(cx+self.blocks[j].cx == shape.cx+shape.blocks[k].cx && cy+self.blocks[j].cy == shape.cy+shape.blocks[k].cy)
               self.up = true;
       }
-      if(!self.up)
+      if(was_up && !self.up)
       {
         self.cx = cx;
         self.cy = cy;
@@ -269,6 +269,10 @@ var GamePlayScene = function(game, stage)
         self.wy = cy-0.5;
         self.up_ticks = 0;
         bring_to_bottom(self);
+      }
+      if(!was_up && self.up)
+      {
+        bring_to_top(self);
       }
     }
 
