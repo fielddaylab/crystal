@@ -31,7 +31,7 @@ var Clicker = function(init)
     for(var i = 0; i < evts.length; i++)
     {
       evt = evts[i];
-      if((clickable.shouldClick && clickable.shouldClick(evt)) || doEvtWithinBB(evt, clickable))
+      if((clickable.shouldClick && clickable.shouldClick(evt)) || (!clickable.shouldClick && doEvtWithinBB(evt, clickable)))
         clickable.click(evt);
     }
   }

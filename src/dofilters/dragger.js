@@ -92,7 +92,7 @@ var Dragger = function(init)
         {
           if(!draggable.dragging)
           {
-            if((draggable.shouldDrag && draggable.shouldDrag(evt)) || doEvtWithinBB(evt, draggable))
+            if((draggable.shouldDrag && draggable.shouldDrag(evt)) || (!draggable.shouldDrag && doEvtWithinBB(evt, draggable)))
             {
               draggable.dragging = true;
               draggable.dragStart(evt);
