@@ -18,9 +18,9 @@ var GamePlayScene = function(game, stage)
   var template_blocks = [];
   var i = 0;
   //"c" placement of charge. 0 = no charge, 1 = top, 2 = right, 3 = bottom, 4 = left (+ means positive charge, - means negative)
-  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0}];// _|               |
-  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0},{cx:0,cy:2,c:0}];// _|
-  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0},{cx:1,cy:1,c:0}];// _|-
+  template_blocks[i++] = [{cx:-1,cy:0,c:1},{cx:0,cy:1,c:0}];// _|               |
+  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:-2},{cx:0,cy:2,c:0}];// _|
+  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0},{cx:1,cy:1,c:4}];// _|-
   var copy_blocks = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
@@ -40,21 +40,22 @@ var GamePlayScene = function(game, stage)
   var tx;
   var ty;
   var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
+  var shadow_fill  = "rgba(0,0,0,.1)";
+  var block_fill   = "#A77777";
+  var block_stroke = "#822222";
   var draw_blocks = function(wx,wy,rot,shadow,b,blocks)
   {
-    ctx.strokeStyle = "#B11111";
-
     dblock.wx = wx;
     dblock.wy = wy;
     screenSpace(cam,canv,dblock);
     tx = dblock.x+dblock.w/2;
     ty = dblock.y+dblock.h/2;
 
-    if(shadow) ctx.fillStyle = "rgba(0,0,0,.1)";
+    if(shadow) ctx.fillStyle = shadow_fill;
     else
     {
-      ctx.fillStyle = "#D44444";
-      ctx.strokeStyle = "#B11111";
+      ctx.fillStyle = block_fill;
+      ctx.strokeStyle = block_stroke;
     }
     ctx.save();
     ctx.translate(tx,ty);
@@ -69,11 +70,11 @@ var GamePlayScene = function(game, stage)
       dblock.wy = wy+blocks[i].cy;
       screenSpace(cam,canv,dblock);
 
-      if(shadow) ctx.fillStyle = "rgba(0,0,0,.1)";
+      if(shadow) ctx.fillStyle = shadow_fill;
       else
       {
-        ctx.fillStyle = "#D44444";
-        ctx.strokeStyle = "#B11111";
+        ctx.fillStyle = block_fill;
+        ctx.strokeStyle = block_stroke;
       }
       ctx.save();
       ctx.translate(tx,ty);
@@ -86,10 +87,10 @@ var GamePlayScene = function(game, stage)
         if(blocks[i].c < 0) ctx.strokeStyle = "#FF0000";
         switch(abs(blocks[i].c))
         {
-          case 1: ctx.beginPath(); ctx.moveTo(dblock.x         +5,dblock.y         +5); ctx.moveTo(dblock.x+dblock.w-5,dblock.y         +5); ctx.stroke(); break;
-          case 2: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-5,dblock.y         +5); ctx.moveTo(dblock.x+dblock.w-5,dblock.y+dblock.h-5); ctx.stroke(); break;
-          case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +5,dblock.y+dblock.h-5); ctx.moveTo(dblock.x+dblock.w-5,dblock.y+dblock.h-5); ctx.stroke(); break;
-          case 4: ctx.beginPath(); ctx.moveTo(dblock.x         +5,dblock.y         +5); ctx.moveTo(dblock.x         +5,dblock.y+dblock.h-5); ctx.stroke(); break;
+          case 1: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.stroke(); break;
+          case 2: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
+          case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
+          case 4: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
         }
       }
       ctx.restore();
@@ -394,8 +395,6 @@ var GamePlayScene = function(game, stage)
     var ty;
     self.draw = function()
     {
-      ctx.strokeStyle = "#B11111";
-
       if(self.up)
       {
         //shadow
