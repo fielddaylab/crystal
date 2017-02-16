@@ -41,6 +41,7 @@ var GamePlayScene = function(game, stage)
   var ty;
   var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
   var shadow_fill  = "rgba(0,0,0,.1)";
+  var border_fill  = "#FFFFFF";
   var block_fill   = "#A77777";
   var block_stroke = "#822222";
   var draw_blocks = function(wx,wy,rot,shadow,b,blocks)
@@ -57,7 +58,7 @@ var GamePlayScene = function(game, stage)
       dblock.wy = wy+blocks[i].cy;
       screenSpace(cam,canv,dblock);
 
-      if(shadow) ctx.fillStyle = shadow_fill;
+      if(shadow) ctx.fillStyle = shadow;
       else
       {
         ctx.fillStyle = block_fill;
@@ -374,7 +375,7 @@ var GamePlayScene = function(game, stage)
       if(self.up)
       {
         //shadow
-        draw_blocks(self.wx,self.wy,self.rot,true,0,self.blocks);
+        draw_blocks(self.wx,self.wy,self.rot,shadow_fill,0,self.blocks);
         //real
         var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
         draw_blocks(self.wx+t,self.wy-t,self.rot,false,0,self.blocks);
@@ -462,7 +463,7 @@ var GamePlayScene = function(game, stage)
     self.draw = function()
     {
       //border
-      draw_blocks(self.wx,self.wy+scroll.scroll_wy,0,true,4,self.blocks);
+      draw_blocks(self.wx,self.wy+scroll.scroll_wy,0,border_fill,4,self.blocks);
       //real
       draw_blocks(self.wx,self.wy+scroll.scroll_wy,0,false,0,self.blocks);
     }
