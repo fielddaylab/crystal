@@ -111,9 +111,10 @@ var GamePlayScene = function(game, stage)
     {
       if(shapes[i] == shape)
       {
-        for(var j = i; j < shapes.length-1; j++)
+        var j;
+        for(j = i; j < shapes.length-1 && shapes[j+1].up; j++)
           shapes[j] = shapes[j+1];
-        shapes[shapes.length-1] = shape;
+        shapes[j] = shape;
         found = true;
       }
     }
