@@ -41,7 +41,7 @@ var GamePlayScene = function(game, stage)
           shapes[j+1] = shapes[j];
         shapes[0] = shape;
         found = true;
-        for(var j = 0; j < i; j++)
+        for(var j = 1; j < shapes.length; j++)
           shapes[i].snap();
       }
     }
@@ -167,6 +167,7 @@ var GamePlayScene = function(game, stage)
       var shape;
       var cx = round(self.wx+0.5);
       var cy = round(self.wy+0.5);
+      var was_up = self.up; //not much, was up with you?
       self.up = false;
       for(var i = 0; !self.up && i < shapes.length; i++)
       {
@@ -192,11 +193,11 @@ var GamePlayScene = function(game, stage)
         self.wx = cx-0.5;
         self.wy = cy-0.5;
         self.up_ticks = 0;
-        bring_to_bottom(self);
+        if(was_up) bring_to_bottom(self);
       }
       else
       {
-        bring_to_top(self);
+        if(!was_up) bring_to_top(self);
       }
       if(dragging_shape == self) dragging_shape = 0;
     }
