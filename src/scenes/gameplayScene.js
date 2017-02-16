@@ -13,8 +13,6 @@ var GamePlayScene = function(game, stage)
   var coord = {x:0,y:0};
   var cam = { wx:0, wy:0, ww:16, wh:8 };
   var bounds = {wx:1.5, wy:0, ww:11, wh:6, x:0,y:0,w:0,h:0 };
-  var scroll = {wx:-6.5, wy:0, ww:3, wh:8, x:0,y:0,w:0,h:0 };
-  var scroll_y = 0;
   var shadow_dist = 8;
 
   var template_blocks = [];
@@ -28,6 +26,7 @@ var GamePlayScene = function(game, stage)
       blocks[i] = {cx:template[i].cx,cy:template[i].cy};
   }
 
+  var scroller;
   var templates = [];
   var shapes = [];
   var bring_to_top = function(shape)
@@ -58,6 +57,81 @@ var GamePlayScene = function(game, stage)
         shapes[shapes.length-1] = shape;
         found = true;
       }
+    }
+  }
+
+  var scroller = function()
+  {
+    var self = this;
+    self.wx = -6.5;
+    self.wy = 0;
+    self.ww = 3;
+    self.wh = 8;
+    self.x = 0;
+    self.y = 0;
+    self.w = 0;
+    self.h = 0;
+
+    self.scroll_wy = 0;
+
+    var last_drag_wevt = {wx:0,wy:0};
+    var worldevt = {wx:0,wy:0};
+    self.shouldDrag = function(evt)
+    {
+      if(dragging_shape || evt.hitUI) return false;
+      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      var hit = worldPtWithin(self.wx,self.wy,self.ww,self.wh,worldevt.wx,worldevt.wy);
+      if(hit)
+      {
+        evt.hitUI = true;
+      }
+      return hit;
+    }
+    self.dragStart = function(evt)
+    {
+      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      last_drag_wevt.wx = worldevt.wx;
+      last_drag_wevt.wy = worldevt.wy;
+    }
+    self.drag = function(evt)
+    {
+      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      var x_toward_board = worldevt.wx-last_drag_wevt.wx;
+      var template_hit = 0;
+      for(var i = 0; !template_hit && i < templates.length; i++)
+      {
+        if(templates[i].ptWithin(worldevt.wx,worldevt.wy))
+          template_hit = templates[i];
+      }
+
+      if(
+        template_hit &&
+        x_toward_board > abs(worldevt.wy-last_drag_wevt.wy) &&
+        x_toward_board > 0.02
+      )
+      {
+        self.dragging = false;
+        var s = new shape();
+        s.wx = template_hit.wx;
+        s.wy = template_hit.wy+self.scroll_wy;
+        copy_template(template_hit.blocks,s.blocks);
+        s.dragging = true;
+        dragging_shape = s;
+        shapes[shapes.length] = s;
+        bring_to_top(s);
+      }
+      else
+      {
+        self.scroll_wy += worldevt.wy-last_drag_wevt.wy;
+      }
+      last_drag_wevt.wx = worldevt.wx;
+      last_drag_wevt.wy = worldevt.wy;
+    }
+    self.dragFinish = function(evt)
+    {
     }
   }
 
@@ -361,39 +435,13 @@ var GamePlayScene = function(game, stage)
     self.wx  = 0;
     self.wy  = 0;
 
-    var worldevt = {wx:0,wy:0};
-
-    self.shouldDrag = function(evt)
+    self.ptWithin = function(wx,wy)
     {
-      if(dragging_shape || evt.hitUI) return false;
-      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
-      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       var hit = false
-      hit = worldPtWithin(self.wx,self.wy,1.,1.,worldevt.wx,worldevt.wy);
+      hit = worldPtWithin(self.wx,self.wy+scroll.scroll_wy,1.,1.,wx,wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
-        hit = worldPtWithin(self.wx+self.blocks[i].cx,self.wy+self.blocks[i].cy,1.,1.,worldevt.wx,worldevt.wy);
-      if(hit)
-      {
-        evt.hitUI = true;
-        var s = new shape();
-        s.wx = self.wx;
-        s.wy = self.wy;
-        copy_template(self.blocks,s.blocks);
-        s.dragging = true;
-        dragging_shape = s;
-        shapes[shapes.length] = s;
-        bring_to_top(s);
-      }
+        hit = worldPtWithin(self.wx+self.blocks[i].cx,self.wy+scroll.scroll_wy+self.blocks[i].cy,1.,1.,wx,wy);
       return hit;
-    }
-    self.dragStart = function(evt)
-    {
-    }
-    self.drag = function(evt)
-    {
-    }
-    self.dragFinish = function(evt)
-    {
     }
 
     var cblock = {x:0,y:0,w:0,h:0,wx:1,wy:1,ww:1,wh:1}
@@ -407,7 +455,7 @@ var GamePlayScene = function(game, stage)
       ctx.fillStyle   = "#DDDDDD";
 
       cblock.wx = self.wx;
-      cblock.wy = self.wy;
+      cblock.wy = self.wy+scroll.scroll_wy;
       screenSpace(cam,canv,cblock);
       tx = cblock.x+cblock.w/2;
       ty = cblock.y+cblock.h/2;
@@ -419,7 +467,7 @@ var GamePlayScene = function(game, stage)
       for(var i = 0; i < self.blocks.length; i++)
       {
         block.wx = self.wx+self.blocks[i].cx;
-        block.wy = self.wy+self.blocks[i].cy;
+        block.wy = self.wy+scroll.scroll_wy+self.blocks[i].cy;
         screenSpace(cam,canv,block);
 
         ctx.save();
@@ -433,7 +481,7 @@ var GamePlayScene = function(game, stage)
       ctx.fillStyle   = "#D44444";
 
       cblock.wx = self.wx;
-      cblock.wy = self.wy;
+      cblock.wy = self.wy+scroll.scroll_wy;
       screenSpace(cam,canv,cblock);
       tx = cblock.x+cblock.w/2;
       ty = cblock.y+cblock.h/2;
@@ -446,7 +494,7 @@ var GamePlayScene = function(game, stage)
       for(var i = 0; i < self.blocks.length; i++)
       {
         block.wx = self.wx+self.blocks[i].cx;
-        block.wy = self.wy+self.blocks[i].cy;
+        block.wy = self.wy+scroll.scroll_wy+self.blocks[i].cy;
         screenSpace(cam,canv,block);
 
         ctx.save();
@@ -455,7 +503,6 @@ var GamePlayScene = function(game, stage)
         ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
         ctx.restore();
       }
-
     }
   }
 
@@ -481,6 +528,7 @@ var GamePlayScene = function(game, stage)
     copy_template(template_blocks[i],templates[i].blocks);
 
     screenSpace(cam,canv,bounds);
+    scroll = new scroller();
     screenSpace(cam,canv,scroll);
   };
 
@@ -491,8 +539,9 @@ var GamePlayScene = function(game, stage)
     clicker.flush();
     for(var i = 0; i < shapes.length; i++)
       dragger.filter(shapes[i]);
-    for(var i = 0; i < templates.length; i++)
-      dragger.filter(templates[i]);
+    dragger.filter(scroll);
+    //for(var i = 0; i < templates.length; i++)
+      //dragger.filter(templates[i]);
     dragger.flush();
 
     for(var i = 0; i < shapes.length; i++)
