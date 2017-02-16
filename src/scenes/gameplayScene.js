@@ -17,13 +17,83 @@ var GamePlayScene = function(game, stage)
 
   var template_blocks = [];
   var i = 0;
-  template_blocks[i++] = [{cx:-1,cy:0},{cx:0,cy:1}];// _|           |
-  template_blocks[i++] = [{cx:-1,cy:0},{cx:0,cy:1},{cx:0,cy:2}];// _|
-  template_blocks[i++] = [{cx:-1,cy:0},{cx:0,cy:1},{cx:1,cy:1}];// _|-
-  var copy_template = function(template,blocks)
+  //"c" placement of charge. 0 = no charge, 1 = top, 2 = right, 3 = bottom, 4 = left (+ means positive charge, - means negative)
+  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0}];// _|               |
+  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0},{cx:0,cy:2,c:0}];// _|
+  template_blocks[i++] = [{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0},{cx:1,cy:1,c:0}];// _|-
+  var copy_blocks = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
-      blocks[i] = {cx:template[i].cx,cy:template[i].cy};
+      blocks[i] = {cx:template[i].cx,cy:template[i].cy,c:template[i].c};
+  }
+  var rotate_blocks = function(blocks)
+  {
+    for(var i = 0; i < blocks.length; i++)
+    {
+      var tmp = blocks[i].cy;
+      blocks[i].cy = -blocks[i].cx;
+      blocks[i].cx = tmp;
+      if(blocks[i].c < 0) { blocks[i].c -= 1; if(blocks[i].c < -4) blocks[i].c = -1; }
+      if(blocks[i].c > 0) { blocks[i].c += 1; if(blocks[i].c >  4) blocks[i].c =  1; }
+    }
+  }
+  var tx;
+  var ty;
+  var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
+  var draw_blocks = function(wx,wy,rot,shadow,b,blocks)
+  {
+    ctx.strokeStyle = "#B11111";
+
+    dblock.wx = wx;
+    dblock.wy = wy;
+    screenSpace(cam,canv,dblock);
+    tx = dblock.x+dblock.w/2;
+    ty = dblock.y+dblock.h/2;
+
+    if(shadow) ctx.fillStyle = "rgba(0,0,0,.1)";
+    else
+    {
+      ctx.fillStyle = "#D44444";
+      ctx.strokeStyle = "#B11111";
+    }
+    ctx.save();
+    ctx.translate(tx,ty);
+    ctx.rotate(rot);
+    ctx.fillRect(  dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
+    if(!shadow)
+    ctx.strokeRect(dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
+    ctx.restore();
+    for(var i = 0; i < blocks.length; i++)
+    {
+      dblock.wx = wx+blocks[i].cx;
+      dblock.wy = wy+blocks[i].cy;
+      screenSpace(cam,canv,dblock);
+
+      if(shadow) ctx.fillStyle = "rgba(0,0,0,.1)";
+      else
+      {
+        ctx.fillStyle = "#D44444";
+        ctx.strokeStyle = "#B11111";
+      }
+      ctx.save();
+      ctx.translate(tx,ty);
+      ctx.rotate(rot);
+      ctx.fillRect(  dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
+      if(!shadow)
+      {
+        ctx.strokeRect(dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
+        if(blocks[i].c > 0) ctx.strokeStyle = "#00FF00";
+        if(blocks[i].c < 0) ctx.strokeStyle = "#FF0000";
+        switch(abs(blocks[i].c))
+        {
+          case 1: ctx.beginPath(); ctx.moveTo(dblock.x         +5,dblock.y         +5); ctx.moveTo(dblock.x+dblock.w-5,dblock.y         +5); ctx.stroke(); break;
+          case 2: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-5,dblock.y         +5); ctx.moveTo(dblock.x+dblock.w-5,dblock.y+dblock.h-5); ctx.stroke(); break;
+          case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +5,dblock.y+dblock.h-5); ctx.moveTo(dblock.x+dblock.w-5,dblock.y+dblock.h-5); ctx.stroke(); break;
+          case 4: ctx.beginPath(); ctx.moveTo(dblock.x         +5,dblock.y         +5); ctx.moveTo(dblock.x         +5,dblock.y+dblock.h-5); ctx.stroke(); break;
+        }
+      }
+      ctx.restore();
+    }
   }
 
   var scroller;
@@ -117,7 +187,7 @@ var GamePlayScene = function(game, stage)
         var s = new shape();
         s.wx = template_hit.wx;
         s.wy = template_hit.wy+self.scroll_wy;
-        copy_template(template_hit.blocks,s.blocks);
+        copy_blocks(template_hit.blocks,s.blocks);
         s.dragging = true;
         dragging_shape = s;
         shapes[shapes.length] = s;
@@ -309,14 +379,7 @@ var GamePlayScene = function(game, stage)
       if(self.rot_ticks == n_max)
       {
         if(abs(self.target_rot-halfpi) < 0.001)
-        {
-          for(var i = 0; i < self.blocks.length; i++)
-          {
-            var tmp = self.blocks[i].cy;
-            self.blocks[i].cy = -self.blocks[i].cx;
-            self.blocks[i].cx = tmp;
-          }
-        }
+          rotate_blocks(self.blocks);
         self.base_rot       = 0;
         self.rot            = 0;
         self.tmp_target_rot = 0;
@@ -336,92 +399,14 @@ var GamePlayScene = function(game, stage)
       if(self.up)
       {
         //shadow
-        cblock.wx = self.wx;
-        cblock.wy = self.wy;
-        screenSpace(cam,canv,cblock);
-        tx = cblock.x+cblock.w/2;
-        ty = cblock.y+cblock.h/2;
-
-        ctx.fillStyle = "rgba(0,0,0,.1)";
-        ctx.save();
-        ctx.translate(tx,ty);
-        ctx.rotate(self.rot);
-        ctx.fillRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
-        ctx.restore();
-        for(var i = 0; i < self.blocks.length; i++)
-        {
-          block.wx = self.wx+self.blocks[i].cx;
-          block.wy = self.wy+self.blocks[i].cy;
-          screenSpace(cam,canv,block);
-
-          ctx.save();
-          ctx.translate(tx,ty);
-          ctx.rotate(self.rot);
-          ctx.fillRect(block.x-tx,block.y-ty,block.w,block.h);
-          ctx.restore();
-        }
-
+        draw_blocks(self.wx,self.wy,self.rot,true,0,self.blocks);
         //real
-        var t = clamp(0,10,self.up_ticks-5)/10;
-
-        cblock.wx = self.wx;
-        cblock.wy = self.wy;
-        screenSpace(cam,canv,cblock);
-        cblock.x += shadow_dist*t
-        cblock.y += shadow_dist*t
-        tx = cblock.x+cblock.w/2;
-        ty = cblock.y+cblock.h/2
-
-        ctx.fillStyle = "#D44444";
-        ctx.save();
-        ctx.translate(tx,ty);
-        ctx.rotate(self.rot);
-        ctx.fillRect(  cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
-        ctx.strokeRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
-        ctx.restore();
-        for(var i = 0; i < self.blocks.length; i++)
-        {
-          block.wx = self.wx+self.blocks[i].cx;
-          block.wy = self.wy+self.blocks[i].cy;
-          screenSpace(cam,canv,block);
-          block.x += shadow_dist*t
-          block.y += shadow_dist*t
-
-          ctx.save();
-          ctx.translate(tx,ty);
-          ctx.rotate(self.rot);
-          ctx.fillRect(  block.x-tx,block.y-ty,block.w,block.h);
-          ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
-          ctx.restore();
-        }
+        var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
+        draw_blocks(self.wx+t,self.wy-t,self.rot,false,0,self.blocks);
       }
       else
       {
-        cblock.wx = self.wx;
-        cblock.wy = self.wy;
-        screenSpace(cam,canv,cblock);
-        tx = cblock.x+cblock.w/2;
-        ty = cblock.y+cblock.h/2;
-
-        ctx.save();
-        ctx.translate(tx,ty);
-        ctx.rotate(self.rot);
-        ctx.fillRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
-        ctx.strokeRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
-        ctx.restore();
-        for(var i = 0; i < self.blocks.length; i++)
-        {
-          block.wx = self.wx+self.blocks[i].cx;
-          block.wy = self.wy+self.blocks[i].cy;
-          screenSpace(cam,canv,block);
-
-          ctx.save();
-          ctx.translate(tx,ty);
-          ctx.rotate(self.rot);
-          ctx.fillRect(block.x-tx,block.y-ty,block.w,block.h);
-          ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
-          ctx.restore();
-        }
+        draw_blocks(self.wx,self.wy,self.rot,false,0,self.blocks);
       }
     }
   }
@@ -451,58 +436,9 @@ var GamePlayScene = function(game, stage)
     self.draw = function()
     {
       //border
-      var b = 4;
-      ctx.fillStyle   = "#DDDDDD";
-
-      cblock.wx = self.wx;
-      cblock.wy = self.wy+scroll.scroll_wy;
-      screenSpace(cam,canv,cblock);
-      tx = cblock.x+cblock.w/2;
-      ty = cblock.y+cblock.h/2;
-
-      ctx.save();
-      ctx.translate(tx,ty);
-      ctx.fillRect(cblock.x-tx-b,cblock.y-ty-b,cblock.w+2*b,cblock.h+2*b);
-      ctx.restore();
-      for(var i = 0; i < self.blocks.length; i++)
-      {
-        block.wx = self.wx+self.blocks[i].cx;
-        block.wy = self.wy+scroll.scroll_wy+self.blocks[i].cy;
-        screenSpace(cam,canv,block);
-
-        ctx.save();
-        ctx.translate(tx,ty);
-        ctx.fillRect(block.x-tx-b,block.y-ty-b,block.w+2*b,block.h+2*b);
-        ctx.restore();
-      }
-
+      draw_blocks(self.wx,self.wy+scroll.scroll_wy,0,true,4,self.blocks);
       //real
-      ctx.strokeStyle = "#B11111";
-      ctx.fillStyle   = "#D44444";
-
-      cblock.wx = self.wx;
-      cblock.wy = self.wy+scroll.scroll_wy;
-      screenSpace(cam,canv,cblock);
-      tx = cblock.x+cblock.w/2;
-      ty = cblock.y+cblock.h/2;
-
-      ctx.save();
-      ctx.translate(tx,ty);
-      ctx.fillRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
-      ctx.strokeRect(cblock.x-tx,cblock.y-ty,cblock.w,cblock.h);
-      ctx.restore();
-      for(var i = 0; i < self.blocks.length; i++)
-      {
-        block.wx = self.wx+self.blocks[i].cx;
-        block.wy = self.wy+scroll.scroll_wy+self.blocks[i].cy;
-        screenSpace(cam,canv,block);
-
-        ctx.save();
-        ctx.translate(tx,ty);
-        ctx.fillRect(block.x-tx,block.y-ty,block.w,block.h);
-        ctx.strokeRect(block.x-tx,block.y-ty,block.w,block.h);
-        ctx.restore();
-      }
+      draw_blocks(self.wx,self.wy+scroll.scroll_wy,0,false,0,self.blocks);
     }
   }
 
@@ -515,17 +451,17 @@ var GamePlayScene = function(game, stage)
     templates[i] = new template();
     templates[i].wx = -cam.ww/2+2.;
     templates[i].wy =  cam.wh/2-2.;
-    copy_template(template_blocks[i],templates[i].blocks);
+    copy_blocks(template_blocks[i],templates[i].blocks);
     i++;
     templates[i] = new template();
     templates[i].wx = -cam.ww/2+2.;
     templates[i].wy =  cam.wh/2-2.-4.;
-    copy_template(template_blocks[i],templates[i].blocks);
+    copy_blocks(template_blocks[i],templates[i].blocks);
     i++;
     templates[i] = new template();
     templates[i].wx = -cam.ww/2+2.;
     templates[i].wy =  cam.wh/2-2.-7.;
-    copy_template(template_blocks[i],templates[i].blocks);
+    copy_blocks(template_blocks[i],templates[i].blocks);
 
     screenSpace(cam,canv,bounds);
     scroll = new scroller();
