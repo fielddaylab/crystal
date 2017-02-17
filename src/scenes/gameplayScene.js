@@ -33,8 +33,8 @@ var GamePlayScene = function(game, stage)
     //2-no
   template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge}];
     //3-no
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge},{cx:0,cy:2,c:no_charge}]; //line
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge},{cx:1,cy:0,c:no_charge}]; //crook
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge},{cx:0,cy:-1,c:no_charge}]; //line
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge},{cx:1,cy: 0,c:no_charge}]; //crook
     //4-no
   template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy:-1,c:no_charge},{cx: 0,cy:1,c:no_charge},{cx: 0,cy:2,c:no_charge}]; //line
   template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy: 1,c:no_charge},{cx: 0,cy:2,c:no_charge},{cx: 1,cy:0,c:no_charge}]; //L
@@ -117,7 +117,7 @@ var GamePlayScene = function(game, stage)
     }
   }
 
-  var scroller;
+  var scroll;
   var templates = [];
   var shapes = [];
   var bring_to_top = function(shape)
@@ -204,6 +204,7 @@ var GamePlayScene = function(game, stage)
       worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       last_drag_wevt.wx = worldevt.wx;
       last_drag_wevt.wy = worldevt.wy;
+      self.scroll_wyv = 0.;
     }
     self.drag = function(evt)
     {
@@ -219,7 +220,7 @@ var GamePlayScene = function(game, stage)
 
       if(
         template_hit &&
-        x_toward_board > 2*abs(worldevt.wy-last_drag_wevt.wy) &&
+        x_toward_board > abs(worldevt.wy-last_drag_wevt.wy) &&
         x_toward_board > 0.02
       )
       {
@@ -236,14 +237,25 @@ var GamePlayScene = function(game, stage)
       else
       {
         self.scroll_wy -= worldevt.wy-last_drag_wevt.wy;
-        if(self.scroll_wy > self.scroll_wy_max) self.scroll_wy = self.scroll_wy_max;
-        if(self.scroll_wy < self.scroll_wy_min) self.scroll_wy = self.scroll_wy_min;
+        self.scroll_wy = clamp(self.scroll_wy_min,self.scroll_wy_max,self.scroll_wy);
+        self.scroll_wyv -= (worldevt.wy-last_drag_wevt.wy)*0.1;
       }
       last_drag_wevt.wx = worldevt.wx;
       last_drag_wevt.wy = worldevt.wy;
     }
     self.dragFinish = function(evt)
     {
+    }
+
+    self.tick = function(evt)
+    {
+      if(!self.dragging)
+      {
+        self.scroll_wy += self.scroll_wyv;
+        self.scroll_wy = clamp(self.scroll_wy_min,self.scroll_wy_max,self.scroll_wy);
+        self.scroll_wyv *= 0.8;
+      }
+      self.scroll_wyv *= 0.99;
     }
   }
 
@@ -551,6 +563,7 @@ var GamePlayScene = function(game, stage)
 
     for(var i = 0; i < shapes.length; i++)
       shapes[i].tick();
+    scroll.tick();
   };
 
   self.draw = function()
