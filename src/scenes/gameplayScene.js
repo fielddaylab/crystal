@@ -17,10 +17,10 @@ var GamePlayScene = function(game, stage)
 
   var template_blocks = [];
   var i = 0;
-  //"c" placement of charge. 0 = no charge, 1 = top, 2 = right, 3 = bottom, 4 = left (+ means positive charge, - means negative)
-  template_blocks[i++] = [{cx:0,cy:0,c:0},{cx:-1,cy:0,c:1},{cx:0,cy:1,c:0}];// _|               |
-  template_blocks[i++] = [{cx:0,cy:0,c:0},{cx:-1,cy:0,c:0},{cx:0,cy:1,c:-2},{cx:0,cy:2,c:0}];// _|
-  template_blocks[i++] = [{cx:0,cy:0,c:0},{cx:-1,cy:0,c:0},{cx:0,cy:1,c:0},{cx:1,cy:1,c:3}];// _|-
+  //"c" placement of charge
+  template_blocks[i++] = [{cx:0,cy:0,c:[1,1,1,1]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]}];// _|                       |
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:0,cy:2,c:[0,0,0,0]}];// _|
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:1,cy:1,c:[0,0,0,0]}];// _|-
   var copy_blocks = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
@@ -33,8 +33,10 @@ var GamePlayScene = function(game, stage)
       var tmp = blocks[i].cy;
       blocks[i].cy = -blocks[i].cx;
       blocks[i].cx = tmp;
-      if(blocks[i].c < 0) { blocks[i].c -= 1; if(blocks[i].c < -4) blocks[i].c = -1; }
-      if(blocks[i].c > 0) { blocks[i].c += 1; if(blocks[i].c >  4) blocks[i].c =  1; }
+      var last = blocks[i].c[3];
+      for(var j = 3; j > 0; j--)
+        blocks[i].c[j] = blocks[i].c[j-1];
+      blocks[i].c[0] = last;
     }
   }
   var tx;
@@ -71,14 +73,18 @@ var GamePlayScene = function(game, stage)
       if(!shadow)
       {
         ctx.strokeRect(dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
-        if(blocks[i].c > 0) ctx.strokeStyle = "#00FF00";
-        if(blocks[i].c < 0) ctx.strokeStyle = "#FF0000";
-        switch(abs(blocks[i].c))
+        for(var j = 0; j < 4; j++)
         {
-          case 1: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.stroke(); break;
-          case 2: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
-          case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
-          case 4: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
+               if(blocks[i].c[j] > 0) ctx.strokeStyle = "#00FF00";
+          else if(blocks[i].c[j] < 0) ctx.strokeStyle = "#FF0000";
+          else continue;
+          switch(j)
+          {
+            case 0: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.stroke(); break;
+            case 1: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
+            case 2: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
+            case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
+          }
         }
       }
       ctx.restore();
@@ -412,47 +418,21 @@ var GamePlayScene = function(game, stage)
     var happy = 0;
     for(var i = 0; i < a.blocks.length; i++)
     {
-      if(a.blocks[i].c == 0) continue;
       for(var j = 0; j < b.blocks.length; j++)
       {
-        if(b.blocks[j].c == 0) continue;
         if(a.wx+a.blocks[i].cx == b.wx+b.blocks[j].cx) //vert aligned
         {
           if((a.wy+a.blocks[i].cy) - (b.wy+b.blocks[j].cy) ==  1) //a above b
-          {
-            if(abs(a.blocks[i].c) == 3 && abs(b.blocks[j].c) == 1)
-            {
-              if(a.blocks[i].c * b.blocks[j].c > 0) happy--;
-              else                                  happy++;
-            }
-          }
+            happy -= (a.blocks[i].c[2] * b.blocks[i].c[0]);
           if((a.wy+a.blocks[i].cy) - (b.wy+b.blocks[j].cy) == -1) //a below b
-          {
-            if(abs(a.blocks[i].c) == 1 && abs(b.blocks[j].c) == 3)
-            {
-              if(a.blocks[i].c * b.blocks[j].c > 0) happy--;
-              else                                  happy++;
-            }
-          }
+            happy -= (a.blocks[i].c[0] * b.blocks[i].c[2]);
         }
         if(a.wy+a.blocks[i].cy == b.wy+b.blocks[j].cy) //horiz aligned
         {
           if((a.wx+a.blocks[i].cx) - (b.wx+b.blocks[j].cx) ==  1) //a right of b
-          {
-            if(abs(a.blocks[i].c) == 4 && abs(b.blocks[j].c) == 2)
-            {
-              if(a.blocks[i].c * b.blocks[j].c > 0) happy--;
-              else                                  happy++;
-            }
-          }
+            happy -= (a.blocks[i].c[3] * b.blocks[i].c[1]);
           if((a.wx+a.blocks[i].cx) - (b.wx+b.blocks[j].cx) == -1) //a left of b
-          {
-            if(abs(a.blocks[i].c) == 2 && abs(b.blocks[j].c) == 4)
-            {
-              if(a.blocks[i].c * b.blocks[j].c > 0) happy--;
-              else                                  happy++;
-            }
-          }
+            happy -= (a.blocks[i].c[1] * b.blocks[i].c[3]);
         }
       }
     }
