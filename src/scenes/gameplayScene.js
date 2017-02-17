@@ -111,10 +111,25 @@ var GamePlayScene = function(game, stage)
     {
       if(shapes[i] == shape)
       {
-        var j;
-        for(j = i; j < shapes.length-1 && shapes[j+1].up; j++)
+        var j = i;
+        while(j < shapes.length-1 && shapes[j+1].up)
+        {
           shapes[j] = shapes[j+1];
+          j++;
+        }
         shapes[j] = shape;
+        found = true;
+      }
+    }
+  }
+  var remove_shape = function(shape)
+  {
+    var found = false;
+    for(var i = 0; !found && i < shapes.length; i++)
+    {
+      if(shapes[i] == shape)
+      {
+        shapes.splice(i,1);
         found = true;
       }
     }
@@ -217,7 +232,6 @@ var GamePlayScene = function(game, stage)
     self.cx = 0;
     self.cy = 0;
 
-
     var worldevt = {wx:0,wy:0};
     var worldoff = {wx:0,wy:0};
     self.shouldClick = function(evt)
@@ -293,6 +307,8 @@ var GamePlayScene = function(game, stage)
     }
     self.dragFinish = function(evt)
     {
+      if(self.wx < -4.)
+        remove_shape(self);
       self.snap();
       if(dragging_shape == self) dragging_shape = 0;
     }
@@ -568,9 +584,9 @@ var GamePlayScene = function(game, stage)
 
     ctx.strokeStyle = "#000000";
     ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
+
     ctx.fillStyle = "rgba(66,66,66,0.5)";
     ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
-
     for(var i = 0; i < templates.length; i++)
       templates[i].draw();
     for(var i = shapes.length-1; i >= 0; i--)
