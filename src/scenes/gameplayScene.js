@@ -15,28 +15,42 @@ var GamePlayScene = function(game, stage)
   var bounds = {wx:1.5, wy:0, ww:11, wh:6, x:0,y:0,w:0,h:0 };
   var shadow_dist = 8;
 
+  var no_charge  = [ 0, 0, 0, 0];
+  var top_pos    = [ 1, 0, 0, 0];
+  var bottom_pos = [ 0, 0, 1, 0];
+  var left_pos   = [ 0, 0, 0, 1];
+  var right_pos  = [ 0, 1, 0, 0];
+  var top_neg    = [-1, 0, 0, 0];
+  var bottom_neg = [ 0, 0,-1, 0];
+  var left_neg   = [ 0, 0, 0,-1];
+  var right_neg  = [ 0,-1, 0, 0];
+
   var template_blocks = [];
   var i = 0;
   //"c" placement of charge
     //1-no
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]}];
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge}];
     //2-no
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]}];
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge}];
     //3-no
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:0,cy:2,c:[0,0,0,0]}]; //line
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:1,cy:0,c:[0,0,0,0]}]; //crook
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge},{cx:0,cy:2,c:no_charge}]; //line
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge},{cx:1,cy:0,c:no_charge}]; //crook
     //4-no
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy:-1,c:[0,0,0,0]},{cx: 0,cy:1,c:[0,0,0,0]},{cx: 0,cy:2,c:[0,0,0,0]}]; //line
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[0,0,0,0]},{cx: 1,cy:0,c:[0,0,0,0]}]; //L
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]}]; //J
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:-1,cy: 1,c:[0,0,0,0]},{cx: 0,cy:1,c:[0,0,0,0]},{cx: 1,cy:0,c:[0,0,0,0]}]; //Z
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:-1,cy: 0,c:[0,0,0,0]},{cx: 0,cy:1,c:[0,0,0,0]},{cx: 1,cy:1,c:[0,0,0,0]}]; //S
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx: 1,cy:0,c:[0,0,0,0]}]; //T
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 1,cy:0,c:[0,0,0,0]},{cx: 1,cy:1,c:[0,0,0,0]}]; //box
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy:-1,c:no_charge},{cx: 0,cy:1,c:no_charge},{cx: 0,cy:2,c:no_charge}]; //line
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy: 1,c:no_charge},{cx: 0,cy:2,c:no_charge},{cx: 1,cy:0,c:no_charge}]; //L
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy: 1,c:no_charge},{cx: 0,cy:2,c:no_charge},{cx:-1,cy:0,c:no_charge}]; //J
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:-1,cy: 1,c:no_charge},{cx: 0,cy:1,c:no_charge},{cx: 1,cy:0,c:no_charge}]; //Z
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:-1,cy: 0,c:no_charge},{cx: 0,cy:1,c:no_charge},{cx: 1,cy:1,c:no_charge}]; //S
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy: 1,c:no_charge},{cx:-1,cy:0,c:no_charge},{cx: 1,cy:0,c:no_charge}]; //T
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy: 1,c:no_charge},{cx: 1,cy:0,c:no_charge},{cx: 1,cy:1,c:no_charge}]; //box
   var copy_blocks = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
-      blocks[i] = {cx:template[i].cx,cy:template[i].cy,c:template[i].c};
+    {
+      blocks[i] = {cx:template[i].cx,cy:template[i].cy,c:[]};
+      for(var j = 0; j < 4; j++)
+        blocks[i].c[j] = template[i].c[j];
+    }
   }
   var rotate_blocks = function(blocks)
   {
