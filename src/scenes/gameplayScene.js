@@ -11,8 +11,8 @@ var GamePlayScene = function(game, stage)
 
   var dragging_shape = 0;
   var coord = {x:0,y:0};
-  var cam = { wx:0, wy:0, ww:16, wh:8 };
-  var bounds = {wx:1.5, wy:0, ww:11, wh:6, x:0,y:0,w:0,h:0 };
+  var cam = { wx:0, wy:0, ww:20, wh:10 };
+  var bounds = {wx:2, wy:0, ww:12, wh:6, x:0,y:0,w:0,h:0 };
   var shadow_dist = 8;
 
   var no_charge  = [ 0, 0, 0, 0];
@@ -27,22 +27,33 @@ var GamePlayScene = function(game, stage)
 
   var template_blocks = [];
   var i = 0;
-  //"c" placement of charge
-    //1-no
-  template_blocks[i++] = [{cx:0,cy:0,c:top_pos   }];
-    //2-no
-  template_blocks[i++] = [{cx:0,cy:0,c:left_neg  },{cx:0,cy:1,c:no_charge }];
-    //3-no
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:left_neg  },{cx:0,cy:-1,c:right_pos }]; //line
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:right_pos },{cx:1,cy: 0,c:top_neg   }]; //crook
-    //4-no
-  template_blocks[i++] = [{cx:0,cy:0,c:left_pos  },{cx: 0,cy:-1,c:left_pos  },{cx: 0,cy:1,c:right_neg },{cx: 0,cy:2,c:no_charge }]; //line
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:right_neg },{cx: 1,cy:0,c:top_neg   }]; //L
-  template_blocks[i++] = [{cx:0,cy:0,c:bottom_neg},{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:no_charge },{cx:-1,cy:0,c:bottom_pos}]; //J
-  template_blocks[i++] = [{cx:0,cy:0,c:bottom_pos},{cx:-1,cy: 1,c:left_pos  },{cx: 0,cy:1,c:no_charge },{cx: 1,cy:0,c:no_charge }]; //Z
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:-1,cy: 0,c:bottom_neg},{cx: 0,cy:1,c:no_charge },{cx: 1,cy:1,c:bottom_pos}]; //S
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx:-1,cy:0,c:top_pos   },{cx: 1,cy:0,c:right_neg }]; //T
-  template_blocks[i++] = [{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]; //box
+  var url_args = jsonFromURL();
+  var lvl = 0;
+  if(url_args["lvl"]) lvl = parseInt(url_args["lvl"]);
+  if(!lvl) lvl = 0;
+  switch(lvl)
+  {
+    case 0:
+        //1-no
+      template_blocks[i++] = [{cx:0,cy:0,c:top_pos   }];
+        //2-no
+      template_blocks[i++] = [{cx:0,cy:0,c:left_neg  },{cx:0,cy:1,c:no_charge }];
+        //3-no
+      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:left_neg  },{cx:0,cy:-1,c:right_pos }]; //line
+      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:right_pos },{cx:1,cy: 0,c:top_neg   }]; //crook
+        //4-no
+      template_blocks[i++] = [{cx:0,cy:0,c:left_pos  },{cx: 0,cy:-1,c:left_pos  },{cx: 0,cy:1,c:right_neg },{cx: 0,cy:2,c:no_charge }]; //line
+      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:right_neg },{cx: 1,cy:0,c:top_neg   }]; //L
+      template_blocks[i++] = [{cx:0,cy:0,c:bottom_neg},{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:no_charge },{cx:-1,cy:0,c:bottom_pos}]; //J
+      template_blocks[i++] = [{cx:0,cy:0,c:bottom_pos},{cx:-1,cy: 1,c:left_pos  },{cx: 0,cy:1,c:no_charge },{cx: 1,cy:0,c:no_charge }]; //Z
+      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:-1,cy: 0,c:bottom_neg},{cx: 0,cy:1,c:no_charge },{cx: 1,cy:1,c:bottom_pos}]; //S
+      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx:-1,cy:0,c:top_pos   },{cx: 1,cy:0,c:right_neg }]; //T
+      template_blocks[i++] = [{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]; //box
+      break;
+    case 1:
+      template_blocks[i++] = [{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}];
+      break;
+  }
   var copy_blocks = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
@@ -170,17 +181,17 @@ var GamePlayScene = function(game, stage)
   var scroller = function()
   {
     var self = this;
-    self.wx = -6.5;
+    self.wx = -8.5;
     self.wy = 0;
-    self.ww = 3;
-    self.wh = 8;
+    self.ww = 5;
+    self.wh = 10;
     self.x = 0;
     self.y = 0;
     self.w = 0;
     self.h = 0;
 
-    self.scroll_wy_min = 0;
-    self.scroll_wy_max = 0;
+    self.scroll_wy_min = 9999999;
+    self.scroll_wy_max = -999999;
     self.scroll_wyv = 0;
     self.scroll_wy = 0;
 
@@ -356,7 +367,7 @@ var GamePlayScene = function(game, stage)
     }
     self.dragFinish = function(evt)
     {
-      if(self.wx < -4.)
+      if(self.wx < -6.)
         remove_shape(self);
       self.snap();
       if(dragging_shape == self) dragging_shape = 0;
@@ -438,40 +449,36 @@ var GamePlayScene = function(game, stage)
 
     self.draw = function()
     {
+      var s = 0;
+      switch(self.happy)
+      {
+        case -3: s = 0.15; break;
+        case -2: s = 0.08; break;
+        case -1: s = 0.04; break;
+        case  0: s = 0.02; break;
+        case  1: s = 0.008; break;
+        case  2: s = 0.002; break;
+      }
+      if(self.happy >  2) s = 0;
+      if(self.happy < -3) s = self.happy/10;
+      var shake_x = rand0()*s;
+      var shake_y = rand0()*s;
       if(self.up)
       {
         //shadow
-        draw_blocks(self.wx,self.wy,self.rot,shadow_fill,0,self.blocks);
+        draw_blocks(self.wx+shake_x,self.wy+shake_y,self.rot,shadow_fill,0,self.blocks);
         //real
         var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
-        draw_blocks(self.wx+t,self.wy-t,self.rot,false,0,self.blocks);
+        draw_blocks(self.wx+t+shake_x,self.wy-t+shake_y,self.rot,false,0,self.blocks);
       }
       else
       {
-        var s = 0;
-        switch(self.happy)
-        {
-          case -5: s = 0.2; break;
-          case -4: s = 0.1; break;
-          case -3: s = 0.08; break;
-          case -2: s = 0.04; break;
-          case -1: s = 0.02; break;
-          case  0: s = 0.01; break;
-          case  1: s = 0.004; break;
-          case  2: s = 0.002; break;
-          case  3: s = 0.001; break;
-          case  4: s = 0.; break;
-        }
-        if(self.happy >  4) s = 0;
-        if(self.happy < -5) s = self.happy/10;
-        var shake_x = rand0()*s;
-        var shake_y = rand0()*s;
         draw_blocks(self.wx+shake_x,self.wy+shake_y,self.rot,false,0,self.blocks);
       }
       ctx.fillStyle = "#000000";
       var x = screenSpaceX(cam,canv,self.wx);
       var y = screenSpaceY(cam,canv,self.wy);
-      ctx.fillText(self.happy,x,y);
+      //ctx.fillText(self.happy,x,y);
     }
   }
   var block_happiness = function(a,b)

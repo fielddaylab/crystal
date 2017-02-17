@@ -6,6 +6,13 @@
 * rest of the day off to question your life choices. I wish you the best of luck.
 *
 */
+function jsonFromURL()
+{
+  var query = location.search.substr(1);
+  var result = {};
+  query.split("&").forEach(function(part){ var item = part.split("="); result[item[0]] = decodeURIComponent(item[1]); });
+  return result;
+}
 
 //math (raw)
 function mapVal(from_min, from_max, to_min, to_max, v) { return ((v-from_min)/(from_max-from_min))*(to_max-to_min)+to_min; }
