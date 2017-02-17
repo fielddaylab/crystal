@@ -165,6 +165,9 @@ var GamePlayScene = function(game, stage)
     self.w = 0;
     self.h = 0;
 
+    self.scroll_wy_min = 0;
+    self.scroll_wy_max = 0;
+    self.scroll_wyv = 0;
     self.scroll_wy = 0;
 
     var last_drag_wevt = {wx:0,wy:0};
@@ -209,7 +212,7 @@ var GamePlayScene = function(game, stage)
         self.dragging = false;
         var s = new shape();
         s.wx = template_hit.wx;
-        s.wy = template_hit.wy+self.scroll_wy;
+        s.wy = template_hit.wy-self.scroll_wy;
         copy_blocks(template_hit.blocks,s.blocks);
         s.dragging = true;
         dragging_shape = s;
@@ -218,7 +221,9 @@ var GamePlayScene = function(game, stage)
       }
       else
       {
-        self.scroll_wy += worldevt.wy-last_drag_wevt.wy;
+        self.scroll_wy -= worldevt.wy-last_drag_wevt.wy;
+        if(self.scroll_wy > self.scroll_wy_max) self.scroll_wy = self.scroll_wy_max;
+        if(self.scroll_wy < self.scroll_wy_min) self.scroll_wy = self.scroll_wy_min;
       }
       last_drag_wevt.wx = worldevt.wx;
       last_drag_wevt.wy = worldevt.wy;
@@ -465,18 +470,18 @@ var GamePlayScene = function(game, stage)
     self.ptWithin = function(wx,wy)
     {
       var hit = false
-      hit = worldPtWithin(self.wx,self.wy+scroll.scroll_wy,1.,1.,wx,wy);
+      hit = worldPtWithin(self.wx,self.wy-scroll.scroll_wy,1.,1.,wx,wy);
       for(var i = 0; !hit && i < self.blocks.length; i++)
-        hit = worldPtWithin(self.wx+self.blocks[i].cx,self.wy+scroll.scroll_wy+self.blocks[i].cy,1.,1.,wx,wy);
+        hit = worldPtWithin(self.wx+self.blocks[i].cx,self.wy-scroll.scroll_wy+self.blocks[i].cy,1.,1.,wx,wy);
       return hit;
     }
 
     self.draw = function()
     {
       //border
-      draw_blocks(self.wx,self.wy+scroll.scroll_wy,0,border_fill,4,self.blocks);
+      draw_blocks(self.wx,self.wy-scroll.scroll_wy,0,border_fill,4,self.blocks);
       //real
-      draw_blocks(self.wx,self.wy+scroll.scroll_wy,0,false,0,self.blocks);
+      draw_blocks(self.wx,self.wy-scroll.scroll_wy,0,false,0,self.blocks);
     }
   }
 
@@ -485,16 +490,21 @@ var GamePlayScene = function(game, stage)
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
 
+    scroll = new scroller();
     for(var i = 0; i < template_blocks.length; i++)
     {
       templates[i] = new template();
       templates[i].wx = -cam.ww/2+2.;
       templates[i].wy =  cam.wh/2-2.-4*i;
+      if(templates[i].wy < scroll.scroll_wy_min) scroll.scroll_wy_min = templates[i].wy;
+      if(templates[i].wy > scroll.scroll_wy_max) scroll.scroll_wy_max = templates[i].wy;
       copy_blocks(template_blocks[i],templates[i].blocks);
     }
 
+    scroll.scroll_wy_min -= 0.2;
+    scroll.scroll_wy_max += 0.2;
+
     screenSpace(cam,canv,bounds);
-    scroll = new scroller();
     screenSpace(cam,canv,scroll);
   };
 
