@@ -29,20 +29,20 @@ var GamePlayScene = function(game, stage)
   var i = 0;
   //"c" placement of charge
     //1-no
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge}];
+  template_blocks[i++] = [{cx:0,cy:0,c:top_pos   }];
     //2-no
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge}];
+  template_blocks[i++] = [{cx:0,cy:0,c:left_neg  },{cx:0,cy:1,c:no_charge }];
     //3-no
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge},{cx:0,cy:-1,c:no_charge}]; //line
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:0,cy:1,c:no_charge},{cx:1,cy: 0,c:no_charge}]; //crook
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:left_neg  },{cx:0,cy:-1,c:right_pos }]; //line
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:right_pos },{cx:1,cy: 0,c:top_neg   }]; //crook
     //4-no
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy:-1,c:no_charge},{cx: 0,cy:1,c:no_charge},{cx: 0,cy:2,c:no_charge}]; //line
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy: 1,c:no_charge},{cx: 0,cy:2,c:no_charge},{cx: 1,cy:0,c:no_charge}]; //L
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy: 1,c:no_charge},{cx: 0,cy:2,c:no_charge},{cx:-1,cy:0,c:no_charge}]; //J
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:-1,cy: 1,c:no_charge},{cx: 0,cy:1,c:no_charge},{cx: 1,cy:0,c:no_charge}]; //Z
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx:-1,cy: 0,c:no_charge},{cx: 0,cy:1,c:no_charge},{cx: 1,cy:1,c:no_charge}]; //S
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy: 1,c:no_charge},{cx:-1,cy:0,c:no_charge},{cx: 1,cy:0,c:no_charge}]; //T
-  template_blocks[i++] = [{cx:0,cy:0,c:no_charge},{cx: 0,cy: 1,c:no_charge},{cx: 1,cy:0,c:no_charge},{cx: 1,cy:1,c:no_charge}]; //box
+  template_blocks[i++] = [{cx:0,cy:0,c:left_pos  },{cx: 0,cy:-1,c:left_pos  },{cx: 0,cy:1,c:right_neg },{cx: 0,cy:2,c:no_charge }]; //line
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:right_neg },{cx: 1,cy:0,c:top_neg   }]; //L
+  template_blocks[i++] = [{cx:0,cy:0,c:bottom_neg},{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:no_charge },{cx:-1,cy:0,c:bottom_pos}]; //J
+  template_blocks[i++] = [{cx:0,cy:0,c:bottom_pos},{cx:-1,cy: 1,c:left_pos  },{cx: 0,cy:1,c:no_charge },{cx: 1,cy:0,c:no_charge }]; //Z
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:-1,cy: 0,c:bottom_neg},{cx: 0,cy:1,c:no_charge },{cx: 1,cy:1,c:bottom_pos}]; //S
+  template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx:-1,cy:0,c:top_pos   },{cx: 1,cy:0,c:right_neg }]; //T
+  template_blocks[i++] = [{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]; //box
   var copy_blocks = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
@@ -448,8 +448,24 @@ var GamePlayScene = function(game, stage)
       }
       else
       {
-        var shake_x = rand0()*(4-self.happy)*0.005;
-        var shake_y = rand0()*(4-self.happy)*0.005;
+        var s = 0;
+        switch(self.happy)
+        {
+          case -5: s = 0.2; break;
+          case -4: s = 0.1; break;
+          case -3: s = 0.08; break;
+          case -2: s = 0.04; break;
+          case -1: s = 0.02; break;
+          case  0: s = 0.01; break;
+          case  1: s = 0.004; break;
+          case  2: s = 0.002; break;
+          case  3: s = 0.001; break;
+          case  4: s = 0.; break;
+        }
+        if(self.happy >  4) s = 0;
+        if(self.happy < -5) s = self.happy/10;
+        var shake_x = rand0()*s;
+        var shake_y = rand0()*s;
         draw_blocks(self.wx+shake_x,self.wy+shake_y,self.rot,false,0,self.blocks);
       }
       ctx.fillStyle = "#000000";
