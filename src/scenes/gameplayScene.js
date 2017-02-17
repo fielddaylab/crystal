@@ -405,7 +405,9 @@ var GamePlayScene = function(game, stage)
       }
       else
       {
-        draw_blocks(self.wx,self.wy,self.rot,false,0,self.blocks);
+        var shake_x = rand0()*(4-self.happy)*0.005;
+        var shake_y = rand0()*(4-self.happy)*0.005;
+        draw_blocks(self.wx+shake_x,self.wy+shake_y,self.rot,false,0,self.blocks);
       }
       ctx.fillStyle = "#000000";
       var x = screenSpaceX(cam,canv,self.wx);
@@ -423,16 +425,16 @@ var GamePlayScene = function(game, stage)
         if(a.wx+a.blocks[i].cx == b.wx+b.blocks[j].cx) //vert aligned
         {
           if((a.wy+a.blocks[i].cy) - (b.wy+b.blocks[j].cy) ==  1) //a above b
-            happy -= (a.blocks[i].c[2] * b.blocks[i].c[0]);
+            happy -= (a.blocks[i].c[2] * b.blocks[j].c[0]);
           if((a.wy+a.blocks[i].cy) - (b.wy+b.blocks[j].cy) == -1) //a below b
-            happy -= (a.blocks[i].c[0] * b.blocks[i].c[2]);
+            happy -= (a.blocks[i].c[0] * b.blocks[j].c[2]);
         }
         if(a.wy+a.blocks[i].cy == b.wy+b.blocks[j].cy) //horiz aligned
         {
           if((a.wx+a.blocks[i].cx) - (b.wx+b.blocks[j].cx) ==  1) //a right of b
-            happy -= (a.blocks[i].c[3] * b.blocks[i].c[1]);
+            happy -= (a.blocks[i].c[3] * b.blocks[j].c[1]);
           if((a.wx+a.blocks[i].cx) - (b.wx+b.blocks[j].cx) == -1) //a left of b
-            happy -= (a.blocks[i].c[1] * b.blocks[i].c[3]);
+            happy -= (a.blocks[i].c[1] * b.blocks[j].c[3]);
         }
       }
     }
