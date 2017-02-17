@@ -18,9 +18,21 @@ var GamePlayScene = function(game, stage)
   var template_blocks = [];
   var i = 0;
   //"c" placement of charge
-  template_blocks[i++] = [{cx:0,cy:0,c:[1,1,1,1]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]}];// _|                       |
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:0,cy:2,c:[0,0,0,0]}];// _|
-  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:1,cy:1,c:[0,0,0,0]}];// _|-
+    //1-no
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]}];
+    //2-no
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]}];
+    //3-no
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:0,cy:2,c:[0,0,0,0]}]; //line
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:1,cy:0,c:[0,0,0,0]}]; //crook
+    //4-no
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy:-1,c:[0,0,0,0]},{cx: 0,cy:1,c:[0,0,0,0]},{cx: 0,cy:2,c:[0,0,0,0]}]; //line
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[0,0,0,0]},{cx: 1,cy:0,c:[0,0,0,0]}]; //L
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]}]; //J
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:-1,cy: 1,c:[0,0,0,0]},{cx: 0,cy:1,c:[0,0,0,0]},{cx: 1,cy:0,c:[0,0,0,0]}]; //Z
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx:-1,cy: 0,c:[0,0,0,0]},{cx: 0,cy:1,c:[0,0,0,0]},{cx: 1,cy:1,c:[0,0,0,0]}]; //S
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx: 1,cy:0,c:[0,0,0,0]}]; //T
+  template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,0]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 1,cy:0,c:[0,0,0,0]},{cx: 1,cy:1,c:[0,0,0,0]}]; //box
   var copy_blocks = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
@@ -473,21 +485,13 @@ var GamePlayScene = function(game, stage)
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
 
-    var i = 0;
-    templates[i] = new template();
-    templates[i].wx = -cam.ww/2+2.;
-    templates[i].wy =  cam.wh/2-2.;
-    copy_blocks(template_blocks[i],templates[i].blocks);
-    i++;
-    templates[i] = new template();
-    templates[i].wx = -cam.ww/2+2.;
-    templates[i].wy =  cam.wh/2-2.-4.;
-    copy_blocks(template_blocks[i],templates[i].blocks);
-    i++;
-    templates[i] = new template();
-    templates[i].wx = -cam.ww/2+2.;
-    templates[i].wy =  cam.wh/2-2.-7.;
-    copy_blocks(template_blocks[i],templates[i].blocks);
+    for(var i = 0; i < template_blocks.length; i++)
+    {
+      templates[i] = new template();
+      templates[i].wx = -cam.ww/2+2.;
+      templates[i].wy =  cam.wh/2-2.-4*i;
+      copy_blocks(template_blocks[i],templates[i].blocks);
+    }
 
     screenSpace(cam,canv,bounds);
     scroll = new scroller();
