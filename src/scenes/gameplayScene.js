@@ -53,6 +53,9 @@ var GamePlayScene = function(game, stage)
     case 1:
       template_blocks[i++] = [{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}];
       break;
+    case 2:
+      template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]; //L
+      break;
   }
   var copy_blocks = function(template,blocks)
   {
@@ -79,6 +82,7 @@ var GamePlayScene = function(game, stage)
   var tx;
   var ty;
   var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
+  var bounds_fill  = "rgba(0,0,0,.6)";
   var shadow_fill  = "rgba(0,0,0,.1)";
   var border_fill  = "#FFFFFF";
   var block_fill   = "#A77777";
@@ -628,9 +632,6 @@ var GamePlayScene = function(game, stage)
       wx += h_spacing;
     }
 
-    ctx.strokeStyle = "#000000";
-    ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
-
     ctx.fillStyle = "rgba(66,66,66,0.5)";
     ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
     for(var i = 0; i < templates.length; i++)
@@ -638,6 +639,8 @@ var GamePlayScene = function(game, stage)
     for(var i = shapes.length-1; i >= 0; i--)
       shapes[i].draw();
 
+    ctx.strokeStyle = bounds_fill;
+    ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
   };
 
   self.cleanup = function()
