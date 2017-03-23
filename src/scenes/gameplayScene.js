@@ -11,8 +11,8 @@ var GamePlayScene = function(game, stage)
 
   var dragging_shape = 0;
   var coord = {x:0,y:0};
-  var cam = { wx:0, wy:0, ww:20, wh:10 };
-  var bounds = {wx:3, wy:0, ww:12, wh:6, x:0,y:0,w:0,h:0 };
+  var cam = { wx:0, wy:0, ww:12, wh:6 };
+  var bounds = {wx:2, wy:0, ww:6, wh:4, x:0,y:0,w:0,h:0 };
   var shadow_dist = 8;
 
   //start at top, CW
@@ -391,7 +391,7 @@ var GamePlayScene = function(game, stage)
   var scroller = function()
   {
     var self = this;
-    self.ww = 5;
+    self.ww = 4;
     self.wh = cam.wh;
     self.wx = cam.wx-cam.ww/2+self.ww/2;
     self.wy = cam.wy-cam.wh/2+self.wh/2;
@@ -577,7 +577,7 @@ var GamePlayScene = function(game, stage)
     }
     self.dragFinish = function(evt)
     {
-      if(self.wx < -6.)
+      if(self.wx < scroll.wx+scroll.ww/2)
         remove_shape(self);
       self.snap();
       if(dragging_shape == self) dragging_shape = 0;
