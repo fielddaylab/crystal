@@ -12,7 +12,7 @@ var GamePlayScene = function(game, stage)
   var dragging_shape = 0;
   var coord = {x:0,y:0};
   var cam = { wx:0, wy:0, ww:20, wh:10 };
-  var bounds = {wx:2, wy:0, ww:12, wh:6, x:0,y:0,w:0,h:0 };
+  var bounds = {wx:3, wy:0, ww:12, wh:6, x:0,y:0,w:0,h:0 };
   var shadow_dist = 8;
 
   //start at top, CW
@@ -143,7 +143,20 @@ var GamePlayScene = function(game, stage)
     for(var i = 0; i < h; i++)
       for(var j = 0; j < w; j++)
         for(var k = 0; k < 5; k++)
-          board[boardi(j,i)] = {cx:j+1+bounds.wx-bounds.ww/2,cy:i+1+bounds.wy-bounds.wh/2,c:[0,0,0,0],present:0,old_present:0,tentative_present:0,present_t:0,score:0,old_score:0,tentative_score:0,score_t:0};
+          board[boardi(j,i)] =
+          {
+            cx:j+1+bounds.wx-bounds.ww/2,
+            cy:i+1+bounds.wy-bounds.wh/2,
+            c:[0,0,0,0],
+            present:0,
+            old_present:0,
+            tentative_present:0,
+            present_t:0,
+            score:0,
+            old_score:0,
+            tentative_score:0,
+            score_t:0
+          };
   }
   var clearBoard = function()
   {
@@ -179,9 +192,9 @@ var GamePlayScene = function(game, stage)
           block = shape.blocks[j];
           x = shape.cx+block.cx-bounds.wx+bounds.ww/2-1;
           y = shape.cy+block.cy-bounds.wy+bounds.wh/2-1;
-          cell = board[boardi(x,y)];
-          if(cell)
+          if(x == clamp(0,bounds.ww-1,x) && y == clamp(0,bounds.wh-1,y))
           {
+            cell = board[boardi(x,y)];
             for(var k = 0; k < 4; k++)
               cell.c[k] = block.c[k];
             cell.present = 1;
@@ -378,10 +391,10 @@ var GamePlayScene = function(game, stage)
   var scroller = function()
   {
     var self = this;
-    self.wx = -8.5;
-    self.wy = 0;
     self.ww = 5;
-    self.wh = 10;
+    self.wh = cam.wh;
+    self.wx = cam.wx-cam.ww/2+self.ww/2;
+    self.wy = cam.wy-cam.wh/2+self.wh/2;
     self.x = 0;
     self.y = 0;
     self.w = 0;
