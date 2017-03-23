@@ -180,9 +180,12 @@ var GamePlayScene = function(game, stage)
           x = shape.cx+block.cx-bounds.wx+bounds.ww/2-1;
           y = shape.cy+block.cy-bounds.wy+bounds.wh/2-1;
           cell = board[boardi(x,y)];
-          for(var k = 0; k < 4; k++)
-            cell.c[k] = block.c[k];
-          cell.present = 1;
+          if(cell)
+          {
+            for(var k = 0; k < 4; k++)
+              cell.c[k] = block.c[k];
+            cell.present = 1;
+          }
         }
       }
     }
