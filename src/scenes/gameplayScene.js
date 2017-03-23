@@ -143,7 +143,7 @@ var GamePlayScene = function(game, stage)
     for(var i = 0; i < h; i++)
       for(var j = 0; j < w; j++)
         for(var k = 0; k < 5; k++)
-          board[boardi(j,i)] = {cx:j,cy:i,c:[0,0,0,0],present:0,score:0};
+          board[boardi(j,i)] = {cx:j+1+bounds.wx-bounds.ww/2,cy:i+1+bounds.wy-bounds.wh/2,c:[0,0,0,0],present:0,old_present:0,tentative_present:0,present_t:0,score:0,old_score:0,tentative_score:0,score_t:0};
   }
   var clearBoard = function()
   {
@@ -167,8 +167,8 @@ var GamePlayScene = function(game, stage)
     var shape;
     var block;
     var cell;
-    var cx;
-    var cy;
+    var x;
+    var y;
     for(var i = 0; i < shapes.length; i++)
     {
       shape = shapes[i];
@@ -177,9 +177,9 @@ var GamePlayScene = function(game, stage)
         for(var j = 0; j < shape.blocks.length; j++)
         {
           block = shape.blocks[j];
-          cx = shape.cx+block.cx-bounds.wx+bounds.ww/2-1;
-          cy = shape.cy+block.cy-bounds.wy+bounds.wh/2-1;
-          cell = board[boardi(cx,cy)];
+          x = shape.cx+block.cx-bounds.wx+bounds.ww/2-1;
+          y = shape.cy+block.cy-bounds.wy+bounds.wh/2-1;
+          cell = board[boardi(x,y)];
           for(var k = 0; k < 4; k++)
             cell.c[k] = block.c[k];
           cell.present = 1;
@@ -189,17 +189,14 @@ var GamePlayScene = function(game, stage)
   }
   var scoreBoard = function()
   {
-    var shape;
-    var block;
     var cell;
-    score = 0;
     var neighbor;
-    var bi;
+    var cell_score;
+    score = 0;
     for(var i = 0; i < bounds.wh; i++)
     {
       for(var j = 0; j < bounds.ww; j++)
       {
-        bi = boardi(j,i);
         cell = board[boardi(j,i)];
         if(cell.present)
         {
@@ -208,16 +205,120 @@ var GamePlayScene = function(game, stage)
           {
             neighbor = board[boardi(j+1,i)];
             if(neighbor.present)
-              score += cell.c[1]*neighbor.c[3]*-1;
+            {
+              cell_score = cell.c[1]*neighbor.c[3]*-1;
+              score      += cell_score;
+              cell.score += cell_score;
+            }
           }
           if(i != bounds.wh-1) //check up
           {
             neighbor = board[boardi(j,i+1)];
             if(neighbor.present)
-              score += cell.c[0]*neighbor.c[2]*-1;
+            {
+              cell_score = cell.c[0]*neighbor.c[2]*-1;
+              score      += cell_score;
+              cell.score += cell_score;
+            }
           }
         }
       }
+    }
+  }
+  var score_patience = 10;
+  var tickBoard = function()
+  {
+    var cell;
+    var neighbor;
+    var x;
+    var y;
+    for(var i = 0; i < bounds.wh; i++)
+    {
+      for(var j = 0; j < bounds.ww; j++)
+      {
+        cell = board[boardi(j,i)];
+        if(cell.present != cell.old_present)
+        {
+          if(cell.present != cell.tentative_present)
+          {
+            cell.present_t = 0;
+            cell.tentative_present = cell.present;
+          }
+          cell.present_t++;
+          if(cell.present_t >= score_patience)
+          {
+            x = screenSpaceX(cam,canv,cell.cx);
+            y = screenSpaceY(cam,canv,cell.cy);
+            popDelta(x,y,cell.present-cell.old_present)
+            cell.old_present = cell.present;
+            cell.present_t = 0;
+          }
+        }
+        else
+        {
+          cell.tentative_present = cell.present;
+          cell.present_t = 0;
+        }
+
+        if(cell.score != cell.old_score)
+        {
+          if(cell.score != cell.tentative_score)
+          {
+            cell.score_t = 0;
+            cell.tentative_score = cell.score;
+          }
+          cell.score_t++;
+          if(cell.score_t >= score_patience)
+          {
+            x = screenSpaceX(cam,canv,cell.cx);
+            y = screenSpaceY(cam,canv,cell.cy);
+            popDelta(x,y,cell.score-cell.old_score)
+            cell.old_score = cell.score;
+            cell.score_t = 0;
+          }
+        }
+        else
+        {
+          cell.tentative_score = cell.score;
+          cell.score_t = 0;
+        }
+      }
+    }
+  }
+
+  var deltas = [];
+  var delta_max_t = 100;;
+  var popDelta = function(x,y,delta)
+  {
+    var txt;
+    if(delta < 0) txt = ""+delta;
+    if(delta > 0) txt = "+"+delta;
+    deltas.push({x:x,y:y,delta:delta,txt:txt,t:0});
+  }
+  var tickDeltas = function()
+  {
+    for(var i = 0; i < deltas.length; i++)
+    {
+      deltas[i].t++;
+      if(deltas[i].t >= delta_max_t)
+      {
+        deltas.splice(i,1);
+        i--;
+      }
+    }
+  }
+  var drawDeltas = function()
+  {
+    var d;
+    var t;
+    for(var i = 0; i < deltas.length; i++)
+    {
+      d = deltas[i];
+      t = d.t/delta_max_t;
+      if(d.delta > 0) ctx.fillStyle = "rgba(0,255,0,"+(1-t)+")";
+      if(d.delta < 0) ctx.fillStyle = "rgba(255,0,0,"+(1-t)+")";
+
+      ctx.fillText(d.txt,d.x+sin(t*pi*5)*5,d.y-t*100);
     }
   }
 
@@ -686,6 +787,9 @@ var GamePlayScene = function(game, stage)
     clearBoard();
     populateBoard();
     scoreBoard();
+    tickBoard();
+
+    tickDeltas();
   };
 
   self.draw = function()
@@ -739,6 +843,8 @@ var GamePlayScene = function(game, stage)
 
     ctx.fillStyle = "#000000";
     ctx.fillText("Score: "+score,bounds.x+bounds.w-100,bounds.y-20);
+
+    drawDeltas();
   };
 
   self.cleanup = function()
