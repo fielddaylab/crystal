@@ -15,6 +15,7 @@ var GamePlayScene = function(game, stage)
   var bounds = {wx:2, wy:0, ww:12, wh:6, x:0,y:0,w:0,h:0 };
   var shadow_dist = 8;
 
+  //start at top, CW
   var no_charge  = [ 0, 0, 0, 0];
   var top_pos    = [ 1, 0, 0, 0];
   var bottom_pos = [ 0, 0, 1, 0];
@@ -129,6 +130,94 @@ var GamePlayScene = function(game, stage)
         }
       }
       ctx.restore();
+    }
+  }
+
+  var score = 0;
+  var board = [];
+  var boardi = function(x,y) { return (y*bounds.ww)+x; }
+  var createBoard = function()
+  {
+    var w = bounds.ww;
+    var h = bounds.wh;
+    for(var i = 0; i < h; i++)
+      for(var j = 0; j < w; j++)
+        for(var k = 0; k < 5; k++)
+          board[boardi(j,i)] = {cx:j,cy:i,c:[0,0,0,0],present:0,score:0};
+  }
+  var clearBoard = function()
+  {
+    var w = bounds.ww;
+    var h = bounds.wh;
+    var cell;
+    for(var i = 0; i < h; i++)
+    {
+      for(var j = 0; j < w; j++)
+      {
+        cell = board[boardi(j,i)];
+        for(var k = 0; k < 4; k++)
+          cell.c[k] = 0;
+        cell.present = 0;
+        cell.score = 0;
+      }
+    }
+  }
+  var populateBoard = function()
+  {
+    var shape;
+    var block;
+    var cell;
+    var cx;
+    var cy;
+    for(var i = 0; i < shapes.length; i++)
+    {
+      shape = shapes[i];
+      if(!shape.up)
+      {
+        for(var j = 0; j < shape.blocks.length; j++)
+        {
+          block = shape.blocks[j];
+          cx = shape.cx+block.cx-bounds.wx+bounds.ww/2-1;
+          cy = shape.cy+block.cy-bounds.wy+bounds.wh/2-1;
+          cell = board[boardi(cx,cy)];
+          for(var k = 0; k < 4; k++)
+            cell.c[k] = block.c[k];
+          cell.present = 1;
+        }
+      }
+    }
+  }
+  var scoreBoard = function()
+  {
+    var shape;
+    var block;
+    var cell;
+    score = 0;
+    var neighbor;
+    var bi;
+    for(var i = 0; i < bounds.wh; i++)
+    {
+      for(var j = 0; j < bounds.ww; j++)
+      {
+        bi = boardi(j,i);
+        cell = board[boardi(j,i)];
+        if(cell.present)
+        {
+          score++;
+          if(j != bounds.ww-1) //check right
+          {
+            neighbor = board[boardi(j+1,i)];
+            if(neighbor.present)
+              score += cell.c[1]*neighbor.c[3]*-1;
+          }
+          if(i != bounds.wh-1) //check up
+          {
+            neighbor = board[boardi(j,i+1)];
+            if(neighbor.present)
+              score += cell.c[0]*neighbor.c[2]*-1;
+          }
+        }
+      }
     }
   }
 
@@ -557,6 +646,8 @@ var GamePlayScene = function(game, stage)
     scroll.scroll_wy_min -= 0.2;
     scroll.scroll_wy_max += 0.2;
 
+    createBoard();
+
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
   };
@@ -591,6 +682,10 @@ var GamePlayScene = function(game, stage)
     for(var i = 0; i < shapes.length; i++)
       shapes[i].tick();
     scroll.tick();
+
+    clearBoard();
+    populateBoard();
+    scoreBoard();
   };
 
   self.draw = function()
@@ -641,6 +736,9 @@ var GamePlayScene = function(game, stage)
 
     ctx.strokeStyle = bounds_fill;
     ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
+
+    ctx.fillStyle = "#000000";
+    ctx.fillText("Score: "+score,bounds.x+bounds.w-100,bounds.y-20);
   };
 
   self.cleanup = function()
