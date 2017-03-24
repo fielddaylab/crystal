@@ -222,7 +222,7 @@ var GamePlayScene = function(game, stage)
             neighbor = board[boardi(j+1,i)];
             if(neighbor.present)
             {
-              cell_score = cell.c[1]*neighbor.c[3]*-1;
+              cell_score = (cell.c[1]*neighbor.c[3]*-1)*5;
               score      += cell_score;
               cell.score += cell_score;
             }
@@ -232,7 +232,7 @@ var GamePlayScene = function(game, stage)
             neighbor = board[boardi(j,i+1)];
             if(neighbor.present)
             {
-              cell_score = cell.c[0]*neighbor.c[2]*-1;
+              cell_score = (cell.c[0]*neighbor.c[2]*-1)*5;
               score      += cell_score;
               cell.score += cell_score;
             }
@@ -263,8 +263,8 @@ var GamePlayScene = function(game, stage)
           cell.present_t++;
           if(cell.present_t >= score_patience)
           {
-            x = screenSpaceX(cam,canv,cell.cx);
-            y = screenSpaceY(cam,canv,cell.cy);
+            x = screenSpaceX(cam,canv,cell.cx)-40;
+            y = screenSpaceY(cam,canv,cell.cy)+40;
             popDelta(x,y,cell.present-cell.old_present)
             cell.old_present = cell.present;
             cell.present_t = 0;
@@ -286,8 +286,8 @@ var GamePlayScene = function(game, stage)
           cell.score_t++;
           if(cell.score_t >= score_patience)
           {
-            x = screenSpaceX(cam,canv,cell.cx);
-            y = screenSpaceY(cam,canv,cell.cy);
+            x = screenSpaceX(cam,canv,cell.cx)-20;
+            y = screenSpaceY(cam,canv,cell.cy)-40;
             popDelta(x,y,cell.score-cell.old_score)
             cell.old_score = cell.score;
             cell.score_t = 0;
@@ -810,6 +810,7 @@ var GamePlayScene = function(game, stage)
 
   self.draw = function()
   {
+    ctx.font = "20px Arial";
     var x  = 0;
     var wx = 0;
     var min_wx = worldSpaceX(cam,canv,0);
