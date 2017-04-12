@@ -9,10 +9,11 @@ var GamePlayScene = function(game, stage)
   var clicker;
   var dragger;
 
-  var dragging_shape = 0;
-  var coord = {x:0,y:0};
-  var cam = { wx:0, wy:0, ww:12, wh:6 };
-  var bounds = {wx:2, wy:0, ww:6, wh:4, x:0,y:0,w:0,h:0 };
+  var dragging_molecule = 0;
+  var cam;
+  var game_cam;
+  var menu_cam;
+  var bounds;
   var shadow_dist = 8;
 
   //start at top, CW
@@ -26,38 +27,120 @@ var GamePlayScene = function(game, stage)
   var left_neg   = [ 0, 0, 0,-1];
   var right_neg  = [ 0,-1, 0, 0];
 
-  var template_blocks = [];
-  var i = 0;
-  var url_args = jsonFromURL();
-  var lvl = 0;
-  if(url_args["lvl"]) lvl = parseInt(url_args["lvl"]);
-  if(!lvl) lvl = 0;
-  switch(lvl)
+  var levels;
+  var cur_level;
+
+  var url_args;
+  var lvl;
+
+  var score = 0;
+  var board;
+
+  var score_patience = 10;
+
+  var deltas = [];
+  var delta_max_t = 100;;
+
+  var scroll;
+  var templates;
+  var molecules;
+
+  //block drawing
+  var tx;
+  var ty;
+  var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
+  var bounds_fill  = "rgba(0,0,0,.6)";
+  var shadow_fill  = "rgba(0,0,0,.1)";
+  var border_fill  = "#FFFFFF";
+  var block_fill   = "#A77777";
+  var block_stroke = "#822222";
+
+  var n_ticks = 0;
+
+  var mode;
+  var ENUM = 0;
+  MODE_MENU = ENUM; ENUM++;
+  MODE_GAME = ENUM; ENUM++;
+
+  var level = function(id)
   {
-    case 0:
-        //1-no
-      template_blocks[i++] = [{cx:0,cy:0,c:top_pos   }];
-        //2-no
-      template_blocks[i++] = [{cx:0,cy:0,c:left_neg  },{cx:0,cy:1,c:no_charge }];
-        //3-no
-      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:left_neg  },{cx:0,cy:-1,c:right_pos }]; //line
-      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:right_pos },{cx:1,cy: 0,c:top_neg   }]; //crook
-        //4-no
-      template_blocks[i++] = [{cx:0,cy:0,c:left_pos  },{cx: 0,cy:-1,c:left_pos  },{cx: 0,cy:1,c:right_neg },{cx: 0,cy:2,c:no_charge }]; //line
-      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:right_neg },{cx: 1,cy:0,c:top_neg   }]; //L
-      template_blocks[i++] = [{cx:0,cy:0,c:bottom_neg},{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:no_charge },{cx:-1,cy:0,c:bottom_pos}]; //J
-      template_blocks[i++] = [{cx:0,cy:0,c:bottom_pos},{cx:-1,cy: 1,c:left_pos  },{cx: 0,cy:1,c:no_charge },{cx: 1,cy:0,c:no_charge }]; //Z
-      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx:-1,cy: 0,c:bottom_neg},{cx: 0,cy:1,c:no_charge },{cx: 1,cy:1,c:bottom_pos}]; //S
-      template_blocks[i++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx:-1,cy:0,c:top_pos   },{cx: 1,cy:0,c:right_neg }]; //T
-      template_blocks[i++] = [{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]; //box
-      break;
-    case 1:
-      template_blocks[i++] = [{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}];
-      break;
-    case 2:
-      template_blocks[i++] = [{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]; //L
-      break;
+    var self = this;
+    self.id = id;
+    self.available_templates = [];
+    self.scale = 1;
+    self.x_repeat = 10;
+    self.y_repeat = 10;
+    self.stars = 0;
+    self.star_req_score = [];
+    for(var i = 0; i < 3; i++)
+      self.star_req_score.push(0);
   }
+
+  var init_levels = function()
+  {
+    levels = [];
+    for(var i = 0; i < 3; i++)
+    {
+      levels.push(new level(i));
+      var j = 0;
+      switch(i)
+      {
+        case 0:
+          levels[i].scale = 2;
+            //1-no
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:top_pos   }];
+            //2-no
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:left_neg  },{cx:0,cy:1,c:no_charge }];
+            //3-no
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:left_neg  },{cx:0,cy:-1,c:right_pos }]; //line
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:right_pos },{cx:1,cy: 0,c:top_neg   }]; //crook
+            //4-no
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:left_pos  },{cx: 0,cy:-1,c:left_pos  },{cx: 0,cy:1,c:right_neg },{cx: 0,cy:2,c:no_charge }]; //line
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:right_neg },{cx: 1,cy:0,c:top_neg   }]; //L
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:bottom_neg},{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:no_charge },{cx:-1,cy:0,c:bottom_pos}]; //J
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:bottom_pos},{cx:-1,cy: 1,c:left_pos  },{cx: 0,cy:1,c:no_charge },{cx: 1,cy:0,c:no_charge }]; //Z
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:no_charge },{cx:-1,cy: 0,c:bottom_neg},{cx: 0,cy:1,c:no_charge },{cx: 1,cy:1,c:bottom_pos}]; //S
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx:-1,cy:0,c:top_pos   },{cx: 1,cy:0,c:right_neg }]; //T
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]; //box
+          break;
+        case 1:
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}];
+          break;
+        case 2:
+          levels[i].available_templates[j++] = [{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]; //L
+          break;
+      }
+    }
+  }
+
+  var set_level = function(i)
+  {
+    cur_level = levels[i];
+
+    templates = [];
+    molecules = [];
+    dragging_molecule = 0;
+
+    game_cam = { wx:10, wy:0, ww:12*cur_level.scale, wh:6*cur_level.scale };
+    bounds = {wx:game_cam.wx+2, wy:game_cam.wy, ww:game_cam.ww-4-2, wh:game_cam.wh-2, x:0,y:0,w:0,h:0 };
+
+    scroll = new scroller();
+    scroll.scroll_wy_min -= 0.2;
+    scroll.scroll_wy_max += 0.2;
+
+    for(var i = 0; i < cur_level.available_templates.length; i++)
+    {
+      templates[i] = new template();
+      templates[i].wx = game_cam.wx-game_cam.ww/2+2.;
+      templates[i].wy = game_cam.wy+game_cam.wh/2-2.-4*i;
+      if(templates[i].wy < scroll.scroll_wy_min) scroll.scroll_wy_min = templates[i].wy;
+      if(templates[i].wy > scroll.scroll_wy_max) scroll.scroll_wy_max = templates[i].wy;
+      copy_blocks(cur_level.available_templates[i],templates[i].blocks);
+    }
+
+    create_board();
+  }
+
   var copy_blocks = function(template,blocks)
   {
     for(var i = 0; i < template.length; i++)
@@ -80,14 +163,6 @@ var GamePlayScene = function(game, stage)
       blocks[i].c[0] = last;
     }
   }
-  var tx;
-  var ty;
-  var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
-  var bounds_fill  = "rgba(0,0,0,.6)";
-  var shadow_fill  = "rgba(0,0,0,.1)";
-  var border_fill  = "#FFFFFF";
-  var block_fill   = "#A77777";
-  var block_stroke = "#822222";
   var draw_blocks = function(wx,wy,rot,shadow,b,blocks)
   {
     dblock.wx = wx;
@@ -208,11 +283,10 @@ var GamePlayScene = function(game, stage)
     ctx.restore();
   }
 
-  var score = 0;
-  var board = [];
   var boardi = function(x,y) { return (y*bounds.ww)+x; }
-  var createBoard = function()
+  var create_board = function()
   {
+    board = [];
     var w = bounds.ww;
     var h = bounds.wh;
     for(var i = 0; i < h; i++)
@@ -252,21 +326,21 @@ var GamePlayScene = function(game, stage)
   }
   var populateBoard = function()
   {
-    var shape;
+    var molecule;
     var block;
     var cell;
     var x;
     var y;
-    for(var i = 0; i < shapes.length; i++)
+    for(var i = 0; i < molecules.length; i++)
     {
-      shape = shapes[i];
-      if(!shape.up)
+      molecule = molecules[i];
+      if(!molecule.up)
       {
-        for(var j = 0; j < shape.blocks.length; j++)
+        for(var j = 0; j < molecule.blocks.length; j++)
         {
-          block = shape.blocks[j];
-          x = shape.cx+block.cx-bounds.wx+bounds.ww/2-1;
-          y = shape.cy+block.cy-bounds.wy+bounds.wh/2-1;
+          block = molecule.blocks[j];
+          x = molecule.cx+block.cx-bounds.wx+bounds.ww/2-1;
+          y = molecule.cy+block.cy-bounds.wy+bounds.wh/2-1;
           if(x == clamp(0,bounds.ww-1,x) && y == clamp(0,bounds.wh-1,y))
           {
             cell = board[boardi(x,y)];
@@ -316,7 +390,7 @@ var GamePlayScene = function(game, stage)
       }
     }
   }
-  var score_patience = 10;
+
   var tickBoard = function()
   {
     var cell;
@@ -377,8 +451,6 @@ var GamePlayScene = function(game, stage)
     }
   }
 
-  var deltas = [];
-  var delta_max_t = 100;;
   var popDelta = function(x,y,delta)
   {
     var txt;
@@ -416,51 +488,48 @@ var GamePlayScene = function(game, stage)
     }
   }
 
-  var scroll;
-  var templates = [];
-  var shapes = [];
-  var bring_to_top = function(shape)
+  var bring_to_top = function(molecule)
   {
     var found = false;
-    for(var i = 0; !found && i < shapes.length; i++)
+    for(var i = 0; !found && i < molecules.length; i++)
     {
-      if(shapes[i] == shape)
+      if(molecules[i] == molecule)
       {
         for(var j = i-1; j >= 0; j--)
-          shapes[j+1] = shapes[j];
-        shapes[0] = shape;
+          molecules[j+1] = molecules[j];
+        molecules[0] = molecule;
         found = true;
-        for(var j = 1; j < shapes.length; j++)
-          shapes[j].snap();
+        for(var j = 1; j < molecules.length; j++)
+          molecules[j].snap();
       }
     }
   }
-  var bring_to_bottom = function(shape)
+  var bring_to_bottom = function(molecule)
   {
     var found = false;
-    for(var i = 0; !found && i < shapes.length; i++)
+    for(var i = 0; !found && i < molecules.length; i++)
     {
-      if(shapes[i] == shape)
+      if(molecules[i] == molecule)
       {
         var j = i;
-        while(j < shapes.length-1 && shapes[j+1].up)
+        while(j < molecules.length-1 && molecules[j+1].up)
         {
-          shapes[j] = shapes[j+1];
+          molecules[j] = molecules[j+1];
           j++;
         }
-        shapes[j] = shape;
+        molecules[j] = molecule;
         found = true;
       }
     }
   }
-  var remove_shape = function(shape)
+  var remove_molecule = function(molecule)
   {
     var found = false;
-    for(var i = 0; !found && i < shapes.length; i++)
+    for(var i = 0; !found && i < molecules.length; i++)
     {
-      if(shapes[i] == shape)
+      if(molecules[i] == molecule)
       {
-        shapes.splice(i,1);
+        molecules.splice(i,1);
         found = true;
       }
     }
@@ -470,9 +539,9 @@ var GamePlayScene = function(game, stage)
   {
     var self = this;
     self.ww = 4;
-    self.wh = cam.wh;
-    self.wx = cam.wx-cam.ww/2+self.ww/2;
-    self.wy = cam.wy-cam.wh/2+self.wh/2;
+    self.wh = game_cam.wh;
+    self.wx = game_cam.wx-game_cam.ww/2+self.ww/2;
+    self.wy = game_cam.wy-game_cam.wh/2+self.wh/2;
     self.x = 0;
     self.y = 0;
     self.w = 0;
@@ -487,7 +556,7 @@ var GamePlayScene = function(game, stage)
     var worldevt = {wx:0,wy:0};
     self.shouldDrag = function(evt)
     {
-      if(dragging_shape || evt.hitUI) return false;
+      if(dragging_molecule || evt.hitUI) return false;
       worldevt.wx = worldSpaceX(cam,canv,evt.doX);
       worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       var hit = worldPtWithin(self.wx,self.wy,self.ww,self.wh,worldevt.wx,worldevt.wy);
@@ -524,13 +593,13 @@ var GamePlayScene = function(game, stage)
       )
       {
         self.dragging = false;
-        var s = new shape();
+        var s = new molecule();
         s.wx = template_hit.wx;
         s.wy = template_hit.wy-self.scroll_wy;
         copy_blocks(template_hit.blocks,s.blocks);
         s.dragging = true;
-        dragging_shape = s;
-        shapes[shapes.length] = s;
+        dragging_molecule = s;
+        molecules[molecules.length] = s;
         bring_to_top(s);
       }
       else
@@ -558,7 +627,7 @@ var GamePlayScene = function(game, stage)
     }
   }
 
-  var shape = function()
+  var molecule = function()
   {
     var self = this;
 
@@ -615,7 +684,7 @@ var GamePlayScene = function(game, stage)
 
     self.shouldDrag = function(evt)
     {
-      if(dragging_shape || evt.hitUI) return false;
+      if(dragging_molecule || evt.hitUI) return false;
       if(self.up)
       {
         worldevt.wx = worldSpaceX(cam,canv,evt.doX-shadow_dist);
@@ -634,7 +703,7 @@ var GamePlayScene = function(game, stage)
         evt.hitUI = true;
         self.up = true;
         bring_to_top(self);
-        dragging_shape = self;
+        dragging_molecule = self;
       }
       return hit;
     }
@@ -656,25 +725,25 @@ var GamePlayScene = function(game, stage)
     self.dragFinish = function(evt)
     {
       if(self.wx < scroll.wx+scroll.ww/2)
-        remove_shape(self);
+        remove_molecule(self);
       self.snap();
-      if(dragging_shape == self) dragging_shape = 0;
+      if(dragging_molecule == self) dragging_molecule = 0;
     }
 
     self.snap = function()
     {
       var was_up = self.up; //not much, was up with you?
-      var shape;
+      var molecule;
       var cx = round(self.wx+0.5);
       var cy = round(self.wy+0.5);
       self.up = false;
-      for(var i = 0; !self.up && i < shapes.length; i++)
+      for(var i = 0; !self.up && i < molecules.length; i++)
       {
-        shape = shapes[i];
-        if(shape == self || shape.up) continue;
+        molecule = molecules[i];
+        if(molecule == self || molecule.up) continue;
         for(var j = 0; !self.up && j < self.blocks.length; j++)
-          for(var k = 0; !self.up && k < shape.blocks.length; k++)
-            if(cx+self.blocks[j].cx == shape.cx+shape.blocks[k].cx && cy+self.blocks[j].cy == shape.cy+shape.blocks[k].cy)
+          for(var k = 0; !self.up && k < molecule.blocks.length; k++)
+            if(cx+self.blocks[j].cx == molecule.cx+molecule.blocks[k].cx && cy+self.blocks[j].cy == molecule.cy+molecule.blocks[k].cy)
               self.up = true;
       }
       if(was_up && !self.up)
@@ -827,55 +896,69 @@ var GamePlayScene = function(game, stage)
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
 
-    scroll = new scroller();
-    for(var i = 0; i < template_blocks.length; i++)
-    {
-      templates[i] = new template();
-      templates[i].wx = -cam.ww/2+2.;
-      templates[i].wy =  cam.wh/2-2.-4*i;
-      if(templates[i].wy < scroll.scroll_wy_min) scroll.scroll_wy_min = templates[i].wy;
-      if(templates[i].wy > scroll.scroll_wy_max) scroll.scroll_wy_max = templates[i].wy;
-      copy_blocks(template_blocks[i],templates[i].blocks);
-    }
+    menu_cam = { wx:-20, wy:0, ww:12, wh:6 };
+    cam = { wx:menu_cam.wx, wy:menu_cam.wy, ww:menu_cam.ww, wh:menu_cam.wh };
+    mode = MODE_MENU;
 
-    scroll.scroll_wy_min -= 0.2;
-    scroll.scroll_wy_max += 0.2;
-
-    createBoard();
+    url_args = jsonFromURL()
+    if(url_args["lvl"]) lvl = parseInt(url_args["lvl"]);
+    if(!lvl) lvl = 0;
+    init_levels();
+    set_level(lvl);
 
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
-  };
+  }
 
   self.tick = function()
   {
-    for(var i = 0; i < shapes.length; i++)
-      clicker.filter(shapes[i]);
+    n_ticks++;
+    //cam.wx = cos(n_ticks/50)*50;
+    //cam.wy = sin(n_ticks/50)*50;
+
+    if(mode == MODE_MENU)
+    {
+      cam.wx = lerp(cam.wx,menu_cam.wx,0.1);
+      cam.wy = lerp(cam.wy,menu_cam.wy,0.1);
+      cam.ww = lerp(cam.ww,menu_cam.ww,0.1);
+      cam.wh = lerp(cam.wh,menu_cam.wh,0.1);
+    }
+    if(mode == MODE_GAME)
+    {
+      cam.wx = lerp(cam.wx,game_cam.wx,0.1);
+      cam.wy = lerp(cam.wy,game_cam.wy,0.1);
+      cam.ww = lerp(cam.ww,game_cam.ww,0.1);
+      cam.wh = lerp(cam.wh,game_cam.wh,0.1);
+    }
+
+    screenSpace(cam,canv,bounds);
+    screenSpace(cam,canv,scroll);
+
+    for(var i = 0; i < molecules.length; i++)
+      clicker.filter(molecules[i]);
     clicker.flush();
-    for(var i = 0; i < shapes.length; i++)
-      dragger.filter(shapes[i]);
+    for(var i = 0; i < molecules.length; i++)
+      dragger.filter(molecules[i]);
     dragger.filter(scroll);
-    //for(var i = 0; i < templates.length; i++)
-      //dragger.filter(templates[i]);
     dragger.flush();
 
     var happy = 0;
-    for(var i = 0; i < shapes.length; i++)
-      shapes[i].happy = 0;
-    for(var i = 0; i < shapes.length; i++)
+    for(var i = 0; i < molecules.length; i++)
+      molecules[i].happy = 0;
+    for(var i = 0; i < molecules.length; i++)
     {
-      if(shapes[i].up) continue;
-      for(var j = i+1; j < shapes.length; j++)
+      if(molecules[i].up) continue;
+      for(var j = i+1; j < molecules.length; j++)
       {
-        if(shapes[j].up) continue;
-        happy = block_happiness(shapes[i],shapes[j]);
-        shapes[i].happy += happy;
-        shapes[j].happy += happy;
+        if(molecules[j].up) continue;
+        happy = block_happiness(molecules[i],molecules[j]);
+        molecules[i].happy += happy;
+        molecules[j].happy += happy;
       }
     }
 
-    for(var i = 0; i < shapes.length; i++)
-      shapes[i].tick();
+    for(var i = 0; i < molecules.length; i++)
+      molecules[i].tick();
     scroll.tick();
 
     clearBoard();
@@ -930,8 +1013,8 @@ var GamePlayScene = function(game, stage)
     ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
     for(var i = 0; i < templates.length; i++)
       templates[i].draw();
-    for(var i = shapes.length-1; i >= 0; i--)
-      shapes[i].draw();
+    for(var i = molecules.length-1; i >= 0; i--)
+      molecules[i].draw();
 
     ctx.strokeStyle = bounds_fill;
     ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
