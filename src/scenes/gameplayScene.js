@@ -96,6 +96,9 @@ var GamePlayScene = function(game, stage)
     tx = dblock.x+dblock.w/2;
     ty = dblock.y+dblock.h/2;
 
+    ctx.save();
+    ctx.translate(tx,ty);
+    ctx.rotate(rot);
     for(var i = 0; i < blocks.length; i++)
     {
       dblock.wx = wx+blocks[i].cx;
@@ -108,9 +111,6 @@ var GamePlayScene = function(game, stage)
         ctx.fillStyle = block_fill;
         ctx.strokeStyle = block_stroke;
       }
-      ctx.save();
-      ctx.translate(tx,ty);
-      ctx.rotate(rot);
       ctx.fillRect(  dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
       if(!shadow)
       {
@@ -129,8 +129,83 @@ var GamePlayScene = function(game, stage)
           }
         }
       }
-      ctx.restore();
     }
+
+    if(!shadow)
+    {
+      //outline block shape
+      ctx.strokeStyle = "#FFFFFF";
+      for(var i = 0; i < blocks.length; i++)
+      {
+        var neighbor;
+        dblock.wx = wx+blocks[i].cx;
+        dblock.wy = wy+blocks[i].cy;
+        screenSpace(cam,canv,dblock);
+
+        //above
+        neighbor = false;
+        for(var j = 0; !neighbor && j < blocks.length; j++)
+        {
+          if(blocks[i].cx == blocks[j].cx && blocks[i].cy == blocks[j].cy-1)
+            neighbor = true;
+        }
+        if(!neighbor)
+        {
+          ctx.beginPath();
+          ctx.moveTo(dblock.x-tx,dblock.y-ty);
+          ctx.lineTo(dblock.x+dblock.w-tx,dblock.y-ty);
+          ctx.stroke();
+        }
+
+        //below
+        neighbor = false;
+        for(var j = 0; !neighbor && j < blocks.length; j++)
+        {
+          if(blocks[i].cx == blocks[j].cx && blocks[i].cy == blocks[j].cy+1)
+            neighbor = true;
+        }
+        if(!neighbor)
+        {
+          ctx.beginPath();
+          ctx.moveTo(dblock.x-tx,dblock.y+dblock.h-ty);
+          ctx.lineTo(dblock.x+dblock.w-tx,dblock.y+dblock.h-ty);
+          ctx.stroke();
+        }
+
+        //left
+        neighbor = false;
+        for(var j = 0; !neighbor && j < blocks.length; j++)
+        {
+          if(blocks[i].cy == blocks[j].cy && blocks[i].cx == blocks[j].cx+1)
+            neighbor = true;
+        }
+        if(!neighbor)
+        {
+          ctx.beginPath();
+          ctx.moveTo(dblock.x-tx,dblock.y-ty);
+          ctx.lineTo(dblock.x-tx,dblock.y+dblock.h-ty);
+          ctx.stroke();
+        }
+
+        //right
+        neighbor = false;
+        for(var j = 0; !neighbor && j < blocks.length; j++)
+        {
+          if(blocks[i].cy == blocks[j].cy && blocks[i].cx == blocks[j].cx-1)
+            neighbor = true;
+        }
+        if(!neighbor)
+        {
+          ctx.beginPath();
+          ctx.moveTo(dblock.x+dblock.w-tx,dblock.y-ty);
+          ctx.lineTo(dblock.x+dblock.w-tx,dblock.y+dblock.h-ty);
+          ctx.stroke();
+        }
+
+      }
+    }
+
+    ctx.restore();
   }
 
   var score = 0;
@@ -307,9 +382,12 @@ var GamePlayScene = function(game, stage)
   var popDelta = function(x,y,delta)
   {
     var txt;
-    if(delta < 0) txt = ""+delta;
-    if(delta > 0) txt = "+"+delta;
-    deltas.push({x:x,y:y,delta:delta,txt:txt,t:0});
+    if(delta < 0) txt = "-";//""+delta;
+    if(delta > 0) txt = "+";//"+"+delta;
+    for(var i = 0; i < abs(delta); i++)
+    {
+      deltas.push({x:x+rand0()*10,y:y+rand0()*10,delta:delta,txt:txt,t:rand()*20});
+    }
   }
   var tickDeltas = function()
   {
