@@ -55,6 +55,56 @@ var GamePlayScene = function(game, stage)
   var block_fill   = "#A77777";
   var block_stroke = "#822222";
 
+  var w = 100;
+  var h = 100;
+  var in_r = w/4;
+  var out_r = w/2-5;
+  var theta;
+
+  var star = GenIcon(w,h)
+  theta = 0-halfpi;
+  star.context.strokeStyle = "#000000";
+  star.context.fillStyle = "#FFFFFF";
+  star.context.lineWidth = 2;
+  star.context.beginPath();
+  star.context.moveTo(w/2+cos(theta)*out_r,h/2+sin(theta)*out_r);
+  for(var i = 0; i < 5; i++)
+  {
+    theta = (i/5+1/10)*twopi-halfpi;
+    star.context.lineTo(w/2+cos(theta)*in_r,h/2+sin(theta)*in_r);
+    if(i != 4)
+    {
+      theta = (i/5+1/5)*twopi-halfpi;
+      star.context.lineTo(w/2+cos(theta)*out_r,h/2+sin(theta)*out_r);
+    }
+  }
+  star.context.closePath();
+  star.context.fill();
+  star.context.stroke();
+
+  var star_full = GenIcon(w,h)
+  theta = 0-halfpi;
+  star_full.context.strokeStyle = "#000000";
+  star_full.context.fillStyle = "#FFFF00";
+  star_full.context.lineWidth = 2;
+  star_full.context.beginPath();
+  star_full.context.moveTo(w/2+cos(theta)*out_r,h/2+sin(theta)*out_r);
+  for(var i = 0; i < 5; i++)
+  {
+    theta = (i/5+1/10)*twopi-halfpi;
+    star_full.context.lineTo(w/2+cos(theta)*in_r,h/2+sin(theta)*in_r);
+    if(i != 4)
+    {
+      theta = (i/5+1/5)*twopi-halfpi;
+      star_full.context.lineTo(w/2+cos(theta)*out_r,h/2+sin(theta)*out_r);
+    }
+  }
+  star_full.context.closePath();
+  star_full.context.fill();
+  star_full.context.stroke();
+
+
+
   var n_ticks = 0;
 
   var mode;
@@ -70,7 +120,7 @@ var GamePlayScene = function(game, stage)
     self.scale = 1;
     self.x_repeat = 10;
     self.y_repeat = 10;
-    self.stars = 0;
+    self.stars = 1;
     self.star_req_score = [];
     for(var i = 0; i < 3; i++)
       self.star_req_score.push(0);
@@ -95,16 +145,42 @@ var GamePlayScene = function(game, stage)
     self.draw = function()
     {
       ctx.beginPath();
-      ctx.arc(self.x+self.w/2,self.y+self.h/2,self.w/2,0,2*Math.PI);
+      ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
       draw_blocks(self.wx,self.wy,level.available_templates[0].cx,level.available_templates[0].cy,self.rotoff+n_ticks/100,0.5,false,0,level.available_templates[0].blocks);
+
+      var x = self.x+self.w/2;
+      var y = self.y+self.h/2;
+      var s = self.w/3;
+      var theta;
+      var offx;
+      var offy;
+      for(var i = 0; i < 3; i++)
+      {
+        theta = quarterpi+(i/2)*halfpi;
+        offx = cos(theta)*self.w/3;
+        offy = sin(theta)*self.h/3;
+        if(self.level.stars > 2-i)
+          ctx.drawImage(star_full,x+offx-s/2,y+offy-s/2,s,s);
+        else
+          ctx.drawImage(star,x+offx-s/2,y+offy-s/2,s,s);
+      }
+    }
+
+    self.click = function(evt)
+    {
+      set_level(self.level.id);
+      mode = MODE_GAME;
     }
   }
 
   var init_levels = function()
   {
     levels = [];
-    for(var i = 0; i < 3; i++)
+    var n = 3;
+    var n_cols = n;
+    var n_rows = 1;
+    for(var i = 0; i < n; i++)
     {
       levels.push(new level(i));
       var j = 0;
@@ -136,7 +212,7 @@ var GamePlayScene = function(game, stage)
           break;
       }
 
-      levels[i].button = new level_button(menu_cam.wx-menu_cam.ww/2+(i+1)/5*menu_cam.ww,menu_cam.wy-menu_cam.wh/2+1/5*menu_cam.wh,menu_cam.ww/5,menu_cam.wh/5,levels[i]);
+      levels[i].button = new level_button(menu_cam.wx-menu_cam.ww/2+(i+1.5)/(n_cols+2)*menu_cam.ww,menu_cam.wy+menu_cam.wh/2-1.5/(n_rows+2)*menu_cam.wh/2,menu_cam.ww/(n_cols+2),menu_cam.wh/(n_cols+2)*2,levels[i]);
     }
   }
 
@@ -978,13 +1054,21 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
 
-    for(var i = 0; i < molecules.length; i++)
-      clicker.filter(molecules[i]);
-    clicker.flush();
-    for(var i = 0; i < molecules.length; i++)
-      dragger.filter(molecules[i]);
-    dragger.filter(scroll);
-    dragger.flush();
+    if(mode == MODE_GAME)
+    {
+      for(var i = 0; i < molecules.length; i++)
+        clicker.filter(molecules[i]);
+      clicker.flush();
+      for(var i = 0; i < molecules.length; i++)
+        dragger.filter(molecules[i]);
+      dragger.filter(scroll);
+      dragger.flush();
+    }
+    else if(mode == MODE_MENU)
+    {
+      for(var i = 0; i < levels.length; i++)
+        clicker.filter(levels[i].button);
+    }
 
     var happy = 0;
     for(var i = 0; i < molecules.length; i++)

@@ -77,6 +77,7 @@ var atan2 = Math.atan2;
 var pi = Math.PI;
 var twopi = 2*pi;
 var halfpi = pi/2;
+var quarterpi = pi/4;
 
 var fdisp = function(f,n) //formats float for display (from 8.124512 to 8.12)
 {
