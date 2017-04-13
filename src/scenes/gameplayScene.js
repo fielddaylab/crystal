@@ -52,7 +52,7 @@ var GamePlayScene = function(game, stage)
   var tx;
   var ty;
   var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
-  var bounds_fill  = "rgba(0,0,0,.6)";
+  var bounds_stroke  = "rgba(0,0,0,.6)";
   var shadow_fill  = "rgba(0,0,0,.1)";
   var border_fill  = "#FFFFFF";
   var block_fill   = "#A77777";
@@ -447,11 +447,21 @@ var GamePlayScene = function(game, stage)
       }
     }
   }
+  var stampBoard = function(block,x,y)
+  {
+    var cell;
+    if(x == clamp(0,bounds.ww-1,x) && y == clamp(0,bounds.wh-1,y))
+    {
+      cell = board[boardi(x,y)];
+      for(var k = 0; k < 4; k++)
+        cell.c[k] = block.c[k];
+      cell.present = 1;
+    }
+  }
   var populateBoard = function()
   {
     var molecule;
     var block;
-    var cell;
     var x;
     var y;
     for(var i = 0; i < molecules.length; i++)
@@ -464,13 +474,15 @@ var GamePlayScene = function(game, stage)
           block = molecule.template.blocks[j];
           x = molecule.cx+block.cx-bounds.wx+bounds.ww/2-1;
           y = molecule.cy+block.cy-bounds.wy+bounds.wh/2-1;
-          if(x == clamp(0,bounds.ww-1,x) && y == clamp(0,bounds.wh-1,y))
-          {
-            cell = board[boardi(x,y)];
-            for(var k = 0; k < 4; k++)
-              cell.c[k] = block.c[k];
-            cell.present = 1;
-          }
+          stampBoard(block,x          ,y          );
+          stampBoard(block,x+bounds.ww,y          );
+          stampBoard(block,x-bounds.ww,y          );
+          stampBoard(block,x          ,y+bounds.wh);
+          stampBoard(block,x          ,y-bounds.wh);
+          stampBoard(block,x+bounds.ww,y+bounds.wh);
+          stampBoard(block,x+bounds.ww,y-bounds.wh);
+          stampBoard(block,x-bounds.ww,y+bounds.wh);
+          stampBoard(block,x-bounds.ww,y-bounds.wh);
         }
       }
     }
@@ -1169,9 +1181,9 @@ var GamePlayScene = function(game, stage)
       clicker.filter(back_btn);
       clicker.filter(submit_btn);
       clicker.flush();
+      dragger.filter(scroll);
       for(var i = 0; i < molecules.length; i++)
         dragger.filter(molecules[i]);
-      dragger.filter(scroll);
       dragger.flush();
     }
     else if(mode == MODE_MENU)
@@ -1257,8 +1269,13 @@ var GamePlayScene = function(game, stage)
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front();
 
-    ctx.strokeStyle = bounds_fill;
+    ctx.strokeStyle = bounds_stroke;
+    ctx.lineWidth = 2;
     ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
+    ctx.lineWidth = 8;
+    ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
+
+    ctx.lineWidth = 2;
 
     ctx.fillStyle = "#000000";
     ctx.fillText("Score: "+score,bounds.x+bounds.w-200,bounds.y-10);
