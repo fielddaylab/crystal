@@ -39,7 +39,7 @@ var GamePlayScene = function(game, stage)
   var score_patience = 10;
 
   var deltas = [];
-  var delta_max_t = 100;;
+  var delta_max_t = 100;
 
   var scroll;
   var stamps;
@@ -121,8 +121,8 @@ var GamePlayScene = function(game, stage)
     self.id = id;
     self.available_templates = [];
     self.scale = 1;
-    self.x_repeat = 10;
-    self.y_repeat = 10;
+    self.repeat_x = 10;
+    self.repeat_y = 10;
     self.stars = 0;
     self.star_req_score = [];
     for(var i = 0; i < 3; i++)
@@ -205,6 +205,8 @@ var GamePlayScene = function(game, stage)
       {
         case 0:
           levels[i].scale = 2;
+          levels[i].repeat_x = 18;
+          levels[i].repeat_y = 10;
             //1-no
           levels[i].available_templates[j++] = new template(0,0,[{cx:0,cy:0,c:top_pos   }]);
             //2-no
@@ -222,9 +224,17 @@ var GamePlayScene = function(game, stage)
           levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
           break;
         case 1:
+          levels[i].scale = 1;
+          levels[i].repeat_x = 6;
+          levels[i].repeat_y = 4;
+
           levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}]);
           break;
         case 2:
+          levels[i].scale = 1;
+          levels[i].repeat_x = 8;
+          levels[i].repeat_y = 4;
+
           levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
           break;
       }
@@ -408,29 +418,31 @@ var GamePlayScene = function(game, stage)
     ctx.restore();
   }
 
-  var boardi = function(x,y) { return (y*bounds.ww)+x; }
+  var boardi = function(x,y) { return ((1+y)*(bounds.ww+2))+(x+1); }
   var create_board = function()
   {
     board = [];
     var w = bounds.ww;
     var h = bounds.wh;
-    for(var i = 0; i < h; i++)
-      for(var j = 0; j < w; j++)
-        for(var k = 0; k < 5; k++)
-          board[boardi(j,i)] =
-          {
-            cx:j+1+bounds.wx-bounds.ww/2,
-            cy:i+1+bounds.wy-bounds.wh/2,
-            c:[0,0,0,0],
-            present:0,
-            old_present:0,
-            tentative_present:0,
-            present_t:0,
-            score:0,
-            old_score:0,
-            tentative_score:0,
-            score_t:0
-          };
+    for(var i = -1; i < h+1; i++)
+      for(var j = -1; j < w+1; j++)
+        board[boardi(j,i)] =
+        {
+          cx:j+1+bounds.wx-bounds.ww/2,
+          cy:i+1+bounds.wy-bounds.wh/2,
+          c:[0,0,0,0],
+          present:0,
+          old_present:0,
+          tentative_present:0,
+          present_t:0,
+          score_up:0,
+          old_score_up:0,
+          tentative_score_up:0,
+          score_right:0,
+          old_score_right:0,
+          tentative_score_right:0,
+          score_t:0
+        };
   }
   var clearBoard = function()
   {
@@ -445,7 +457,8 @@ var GamePlayScene = function(game, stage)
         for(var k = 0; k < 4; k++)
           cell.c[k] = 0;
         cell.present = 0;
-        cell.score = 0;
+        cell.score_up = 0;
+        cell.score_right = 0;
       }
     }
   }
@@ -476,15 +489,15 @@ var GamePlayScene = function(game, stage)
           block = molecule.template.blocks[j];
           x = molecule.cx+block.cx-bounds.wx+bounds.ww/2-1;
           y = molecule.cy+block.cy-bounds.wy+bounds.wh/2-1;
-          stampBoard(block,x          ,y          );
-          stampBoard(block,x+bounds.ww,y          );
-          stampBoard(block,x-bounds.ww,y          );
-          stampBoard(block,x          ,y+bounds.wh);
-          stampBoard(block,x          ,y-bounds.wh);
-          stampBoard(block,x+bounds.ww,y+bounds.wh);
-          stampBoard(block,x+bounds.ww,y-bounds.wh);
-          stampBoard(block,x-bounds.ww,y+bounds.wh);
-          stampBoard(block,x-bounds.ww,y-bounds.wh);
+          stampBoard(block,x                   ,y                   );
+          stampBoard(block,x+cur_level.repeat_x,y                   );
+          stampBoard(block,x-cur_level.repeat_x,y                   );
+          stampBoard(block,x                   ,y+cur_level.repeat_y);
+          stampBoard(block,x                   ,y-cur_level.repeat_y);
+          stampBoard(block,x+cur_level.repeat_x,y+cur_level.repeat_y);
+          stampBoard(block,x+cur_level.repeat_x,y-cur_level.repeat_y);
+          stampBoard(block,x-cur_level.repeat_x,y+cur_level.repeat_y);
+          stampBoard(block,x-cur_level.repeat_x,y-cur_level.repeat_y);
         }
       }
     }
@@ -509,8 +522,8 @@ var GamePlayScene = function(game, stage)
             if(neighbor.present)
             {
               cell_score = (cell.c[1]*neighbor.c[3]*-1)*5;
-              score      += cell_score;
-              cell.score += cell_score;
+              score            += cell_score;
+              cell.score_right += cell_score;
             }
           }
           if(i != bounds.wh-1) //check up
@@ -519,8 +532,8 @@ var GamePlayScene = function(game, stage)
             if(neighbor.present)
             {
               cell_score = (cell.c[0]*neighbor.c[2]*-1)*5;
-              score      += cell_score;
-              cell.score += cell_score;
+              score         += cell_score;
+              cell.score_up += cell_score;
             }
           }
         }
@@ -549,8 +562,8 @@ var GamePlayScene = function(game, stage)
           cell.present_t++;
           if(cell.present_t >= score_patience)
           {
-            x = screenSpaceX(cam,canv,cell.cx)-40;
-            y = screenSpaceY(cam,canv,cell.cy)+40;
+            x = screenSpaceX(cam,canv,cell.cx-0.5);
+            y = screenSpaceY(cam,canv,cell.cy-0.5);
             popDelta(x,y,cell.present-cell.old_present)
             cell.old_present = cell.present;
             cell.present_t = 0;
@@ -562,28 +575,41 @@ var GamePlayScene = function(game, stage)
           cell.present_t = 0;
         }
 
-        if(cell.score != cell.old_score)
+        if(
+          cell.score_up    != cell.old_score_up ||
+          cell.score_right != cell.old_score_right)
         {
-          if(cell.score != cell.tentative_score)
+          if(cell.score_up != cell.tentative_score_up)
           {
             cell.score_t = 0;
-            cell.tentative_score = cell.score;
+            cell.tentative_score_up = cell.score_up;
+          }
+          if(cell.score_right != cell.tentative_score_right)
+          {
+            cell.score_t = 0;
+            cell.tentative_score_right = cell.score_right;
           }
           cell.score_t++;
           if(cell.score_t >= score_patience)
           {
-            x = screenSpaceX(cam,canv,cell.cx)-20;
-            y = screenSpaceY(cam,canv,cell.cy)-40;
-            popDelta(x,y,cell.score-cell.old_score)
-            cell.old_score = cell.score;
+            x = screenSpaceX(cam,canv,cell.cx-0.5);
+            y = screenSpaceY(cam,canv,cell.cy-0.5);
+            if(cell.old_score_up != cell.score_up)
+              popDelta(x,y-10,cell.score_up-cell.old_score_up);
+            else if(cell.score_right-cell.old_score_right)
+              popDelta(x+10,y,cell.score_right-cell.old_score_right);
+            cell.old_score_up    = cell.score_up;
+            cell.old_score_right = cell.score_right;
             cell.score_t = 0;
           }
         }
         else
         {
-          cell.tentative_score = cell.score;
+          cell.tentative_score_up = cell.score_up;
+          cell.tentative_score_right = cell.score_right;
           cell.score_t = 0;
         }
+
       }
     }
   }
@@ -594,16 +620,18 @@ var GamePlayScene = function(game, stage)
     if(delta < 0) txt = "-";//""+delta;
     if(delta > 0) txt = "+";//"+"+delta;
     for(var i = 0; i < abs(delta); i++)
-    {
-      deltas.push({x:x+rand0()*10,y:y+rand0()*10,delta:delta,txt:txt,t:rand()*20});
-    }
+      deltas.push({x:x,y:y,xvel:rand0()*0.1,yvel:rand0()*0.1,delta:delta,txt:txt,t:delta_max_t-(rand()*20)});
   }
   var tickDeltas = function()
   {
     for(var i = 0; i < deltas.length; i++)
     {
-      deltas[i].t++;
-      if(deltas[i].t >= delta_max_t)
+      deltas[i].t--;
+      deltas[i].x += deltas[i].xvel;
+      deltas[i].y += deltas[i].yvel;
+      deltas[i].xvel *= 0.99;
+      deltas[i].yvel *= 0.99;
+      if(deltas[i].t <= 0)
       {
         deltas.splice(i,1);
         i--;
@@ -618,10 +646,11 @@ var GamePlayScene = function(game, stage)
     {
       d = deltas[i];
       t = d.t/delta_max_t;
-      if(d.delta > 0) ctx.fillStyle = "rgba(0,255,0,"+(1-t)+")";
-      if(d.delta < 0) ctx.fillStyle = "rgba(255,0,0,"+(1-t)+")";
+      if(d.delta > 0) ctx.fillStyle = "rgba(0,255,0,"+t+")";
+      if(d.delta < 0) ctx.fillStyle = "rgba(255,0,0,"+t+")";
 
-      ctx.fillText(d.txt,d.x+sin(t*pi*5)*5,d.y-t*100);
+      //ctx.fillRect(d.x-5,d.y-5,10,10);
+      ctx.fillText(d.txt,d.x-5,d.y+5);
     }
   }
 
@@ -812,15 +841,15 @@ var GamePlayScene = function(game, stage)
         worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       }
       return (
-        self.shouldClickOff(evt,         0,         0) ||
-        self.shouldClickOff(evt, bounds.ww,         0) ||
-        self.shouldClickOff(evt,-bounds.ww,         0) ||
-        self.shouldClickOff(evt,         0, bounds.wh) ||
-        self.shouldClickOff(evt,         0,-bounds.wh) ||
-        self.shouldClickOff(evt, bounds.ww, bounds.wh) ||
-        self.shouldClickOff(evt, bounds.ww,-bounds.wh) ||
-        self.shouldClickOff(evt,-bounds.ww, bounds.wh) ||
-        self.shouldClickOff(evt,-bounds.ww,-bounds.wh)
+        self.shouldClickOff(evt,                  0,                  0) ||
+        self.shouldClickOff(evt, cur_level.repeat_x,                  0) ||
+        self.shouldClickOff(evt,-cur_level.repeat_x,                  0) ||
+        self.shouldClickOff(evt,                  0, cur_level.repeat_y) ||
+        self.shouldClickOff(evt,                  0,-cur_level.repeat_y) ||
+        self.shouldClickOff(evt, cur_level.repeat_x, cur_level.repeat_y) ||
+        self.shouldClickOff(evt, cur_level.repeat_x,-cur_level.repeat_y) ||
+        self.shouldClickOff(evt,-cur_level.repeat_x, cur_level.repeat_y) ||
+        self.shouldClickOff(evt,-cur_level.repeat_x,-cur_level.repeat_y)
       );
     }
     self.click = function(evt)
@@ -862,15 +891,15 @@ var GamePlayScene = function(game, stage)
         worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       }
       var hit = (
-        self.shouldDragOff(evt,         0,         0) ||
-        self.shouldDragOff(evt, bounds.ww,         0) ||
-        self.shouldDragOff(evt,-bounds.ww,         0) ||
-        self.shouldDragOff(evt,         0, bounds.wh) ||
-        self.shouldDragOff(evt,         0,-bounds.wh) ||
-        self.shouldDragOff(evt, bounds.ww, bounds.wh) ||
-        self.shouldDragOff(evt, bounds.ww,-bounds.wh) ||
-        self.shouldDragOff(evt,-bounds.ww, bounds.wh) ||
-        self.shouldDragOff(evt,-bounds.ww,-bounds.wh)
+        self.shouldDragOff(evt,                  0,                  0) ||
+        self.shouldDragOff(evt, cur_level.repeat_x,                  0) ||
+        self.shouldDragOff(evt,-cur_level.repeat_x,                  0) ||
+        self.shouldDragOff(evt,                  0, cur_level.repeat_y) ||
+        self.shouldDragOff(evt,                  0,-cur_level.repeat_y) ||
+        self.shouldDragOff(evt, cur_level.repeat_x, cur_level.repeat_y) ||
+        self.shouldDragOff(evt, cur_level.repeat_x,-cur_level.repeat_y) ||
+        self.shouldDragOff(evt,-cur_level.repeat_x, cur_level.repeat_y) ||
+        self.shouldDragOff(evt,-cur_level.repeat_x,-cur_level.repeat_y)
       );
       if(hit)
       {
@@ -923,15 +952,15 @@ var GamePlayScene = function(game, stage)
           for(var k = 0; !self.up && k < molecule.template.blocks.length; k++)
           {
             if(
-              blocks_collide(cx+self.template.blocks[j].cx,           cy+self.template.blocks[j].cy,           molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
-              blocks_collide(cx+self.template.blocks[j].cx+bounds.ww, cy+self.template.blocks[j].cy,           molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
-              blocks_collide(cx+self.template.blocks[j].cx-bounds.ww, cy+self.template.blocks[j].cy,           molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
-              blocks_collide(cx+self.template.blocks[j].cx,           cy+self.template.blocks[j].cy+bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
-              blocks_collide(cx+self.template.blocks[j].cx,           cy+self.template.blocks[j].cy-bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
-              blocks_collide(cx+self.template.blocks[j].cx+bounds.ww, cy+self.template.blocks[j].cy+bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
-              blocks_collide(cx+self.template.blocks[j].cx+bounds.ww, cy+self.template.blocks[j].cy-bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
-              blocks_collide(cx+self.template.blocks[j].cx-bounds.ww, cy+self.template.blocks[j].cy+bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
-              blocks_collide(cx+self.template.blocks[j].cx-bounds.ww, cy+self.template.blocks[j].cy-bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy)
+              blocks_collide(cx+self.template.blocks[j].cx,                    cy+self.template.blocks[j].cy,                    molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx+cur_level.repeat_x, cy+self.template.blocks[j].cy,                    molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy,                    molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx,                    cy+self.template.blocks[j].cy+cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx,                    cy+self.template.blocks[j].cy-cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx+cur_level.repeat_x, cy+self.template.blocks[j].cy+cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx+cur_level.repeat_x, cy+self.template.blocks[j].cy-cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy+cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy-cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy)
             )
               self.up = true;
           }
@@ -1019,7 +1048,7 @@ var GamePlayScene = function(game, stage)
     }
     self.draw_off_down = function(woffx,woffy)
     {
-      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.rot,1,false,0,self.template.blocks);
+      draw_blocks(self.wx+self.shake_x+woffx,self.wy+self.shake_y+woffy,0,0,self.rot,1,false,0,self.template.blocks);
     }
     self.draw_front_up = function()
     {
@@ -1033,54 +1062,76 @@ var GamePlayScene = function(game, stage)
     {
       if(self.up)
       {
-        self.draw_off_up( bounds.ww,         0);
-        self.draw_off_up(-bounds.ww,         0);
-        self.draw_off_up(         0, bounds.wh);
-        self.draw_off_up(         0,-bounds.wh);
-        self.draw_off_up( bounds.ww, bounds.wh);
-        self.draw_off_up( bounds.ww,-bounds.wh);
-        self.draw_off_up(-bounds.ww, bounds.wh);
-        self.draw_off_up(-bounds.ww,-bounds.wh);
+        self.draw_off_up( cur_level.repeat_x,                  0);
+        self.draw_off_up(-cur_level.repeat_x,                  0);
+        self.draw_off_up(                  0, cur_level.repeat_y);
+        self.draw_off_up(                  0,-cur_level.repeat_y);
+        self.draw_off_up( cur_level.repeat_x, cur_level.repeat_y);
+        self.draw_off_up( cur_level.repeat_x,-cur_level.repeat_y);
+        self.draw_off_up(-cur_level.repeat_x, cur_level.repeat_y);
+        self.draw_off_up(-cur_level.repeat_x,-cur_level.repeat_y);
       }
     }
     self.draw_behind_down = function()
     {
       if(!self.up)
       {
-        self.draw_off_down( bounds.ww,         0);
-        self.draw_off_down(-bounds.ww,         0);
-        self.draw_off_down(         0, bounds.wh);
-        self.draw_off_down(         0,-bounds.wh);
-        self.draw_off_down( bounds.ww, bounds.wh);
-        self.draw_off_down( bounds.ww,-bounds.wh);
-        self.draw_off_down(-bounds.ww, bounds.wh);
-        self.draw_off_down(-bounds.ww,-bounds.wh);
+        self.draw_off_down( cur_level.repeat_x,                  0);
+        self.draw_off_down(-cur_level.repeat_x,                  0);
+        self.draw_off_down(                  0, cur_level.repeat_y);
+        self.draw_off_down(                  0,-cur_level.repeat_y);
+        self.draw_off_down( cur_level.repeat_x, cur_level.repeat_y);
+        self.draw_off_down( cur_level.repeat_x,-cur_level.repeat_y);
+        self.draw_off_down(-cur_level.repeat_x, cur_level.repeat_y);
+        self.draw_off_down(-cur_level.repeat_x,-cur_level.repeat_y);
       }
     }
   }
-  var block_happiness = function(a,b)
+  var block_happiness_off = function(a,b,offx,offy)
   {
     var happy = 0;
     for(var i = 0; i < a.template.blocks.length; i++)
     {
       for(var j = 0; j < b.template.blocks.length; j++)
       {
-        if(a.wx+a.template.blocks[i].cx == b.wx+b.template.blocks[j].cx) //vert aligned
+        if(a.wx+a.template.blocks[i].cx+offx == b.wx+b.template.blocks[j].cx) //vert aligned
         {
-          if((a.wy+a.template.blocks[i].cy) - (b.wy+b.template.blocks[j].cy) ==  1) //a above b
+          if((a.wy+a.template.blocks[i].cy+offy) - (b.wy+b.template.blocks[j].cy) ==  1) //a above b
             happy -= (a.template.blocks[i].c[2] * b.template.blocks[j].c[0]);
-          if((a.wy+a.template.blocks[i].cy) - (b.wy+b.template.blocks[j].cy) == -1) //a below b
+          if((a.wy+a.template.blocks[i].cy+offy) - (b.wy+b.template.blocks[j].cy) == -1) //a below b
             happy -= (a.template.blocks[i].c[0] * b.template.blocks[j].c[2]);
         }
-        if(a.wy+a.template.blocks[i].cy == b.wy+b.template.blocks[j].cy) //horiz aligned
+        if(a.wy+a.template.blocks[i].cy+offy == b.wy+b.template.blocks[j].cy) //horiz aligned
         {
-          if((a.wx+a.template.blocks[i].cx) - (b.wx+b.template.blocks[j].cx) ==  1) //a right of b
+          if((a.wx+a.template.blocks[i].cx+offx) - (b.wx+b.template.blocks[j].cx) ==  1) //a right of b
             happy -= (a.template.blocks[i].c[3] * b.template.blocks[j].c[1]);
-          if((a.wx+a.template.blocks[i].cx) - (b.wx+b.template.blocks[j].cx) == -1) //a left of b
+          if((a.wx+a.template.blocks[i].cx+offx) - (b.wx+b.template.blocks[j].cx) == -1) //a left of b
             happy -= (a.template.blocks[i].c[1] * b.template.blocks[j].c[3]);
         }
       }
     }
+    return happy;
+  }
+  var block_happiness = function(a,b)
+  {
+    var happy = 0;
+    happy += block_happiness_off(a,b,0,0);
+    happy += block_happiness_off(a,b, cur_level.repeat_x,                  0);
+    happy += block_happiness_off(a,b,-cur_level.repeat_x,                  0);
+    happy += block_happiness_off(a,b,                  0, cur_level.repeat_y);
+    happy += block_happiness_off(a,b,                  0,-cur_level.repeat_y);
+    happy += block_happiness_off(a,b, cur_level.repeat_x, cur_level.repeat_y);
+    happy += block_happiness_off(a,b, cur_level.repeat_x,-cur_level.repeat_y);
+    happy += block_happiness_off(a,b,-cur_level.repeat_x, cur_level.repeat_y);
+    happy += block_happiness_off(a,b,-cur_level.repeat_x,-cur_level.repeat_y);
+    happy += block_happiness_off(a,b,2* cur_level.repeat_x,2*                  0);
+    happy += block_happiness_off(a,b,2*-cur_level.repeat_x,2*                  0);
+    happy += block_happiness_off(a,b,2*                  0,2* cur_level.repeat_y);
+    happy += block_happiness_off(a,b,2*                  0,2*-cur_level.repeat_y);
+    happy += block_happiness_off(a,b,2* cur_level.repeat_x,2* cur_level.repeat_y);
+    happy += block_happiness_off(a,b,2* cur_level.repeat_x,2*-cur_level.repeat_y);
+    happy += block_happiness_off(a,b,2*-cur_level.repeat_x,2* cur_level.repeat_y);
+    happy += block_happiness_off(a,b,2*-cur_level.repeat_x,2*-cur_level.repeat_y);
     return happy;
   }
 
