@@ -1178,7 +1178,7 @@ var GamePlayScene = function(game, stage)
     menu_cam = { wx:-20, wy:0, ww:12, wh:6 };
     cam = { wx:menu_cam.wx, wy:menu_cam.wy, ww:menu_cam.ww, wh:menu_cam.wh };
     mode = MODE_MENU;
-    submitting_t = 0;
+    submitting_t = -1;
 
     url_args = jsonFromURL()
     if(url_args["lvl"]) lvl = parseInt(url_args["lvl"]);
@@ -1187,7 +1187,7 @@ var GamePlayScene = function(game, stage)
     set_level(lvl);
 
     back_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    back_btn.click = function(evt) { mode = MODE_MENU; }
+    back_btn.click = function(evt) { mode = MODE_MENU; evt.hitUI = true; }
     back_btn.ww = game_cam.ww/10;
     back_btn.wh = game_cam.wh/10;
     back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww/2;
@@ -1195,7 +1195,7 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,back_btn);
 
     submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    submit_btn.click = function(evt) { }
+    submit_btn.click = function(evt) { submitting_t = bounds.ww*bounds.wh; evt.hitUI = true; }
     submit_btn.ww = game_cam.ww/5;
     submit_btn.wh = game_cam.wh/10;
     submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
@@ -1246,27 +1246,27 @@ var GamePlayScene = function(game, stage)
     submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
     screenSpace(cam,canv,submit_btn);
 
-    if(!submitting_t)
+    if(submitting_t == -1)
     {
       if(mode == MODE_GAME)
       {
-        for(var i = 0; i < molecules.length; i++)
-          clicker.filter(molecules[i]);
         clicker.filter(back_btn);
         clicker.filter(submit_btn);
-        clicker.flush();
+        for(var i = 0; i < molecules.length; i++)
+          clicker.filter(molecules[i]);
         dragger.filter(scroll);
         for(var i = 0; i < molecules.length; i++)
           dragger.filter(molecules[i]);
-        dragger.flush();
       }
       else if(mode == MODE_MENU)
       {
         for(var i = 0; i < levels.length; i++)
           clicker.filter(levels[i].button);
-        clicker.flush();
       }
     }
+
+    clicker.flush();
+    dragger.flush();
 
     var happy = 0;
     for(var i = 0; i < molecules.length; i++)
@@ -1292,6 +1292,16 @@ var GamePlayScene = function(game, stage)
     scoreBoard();
     tickBoard();
 
+    if(submitting_t != -1)
+    {
+      var x = submitting_t%bounds.ww;
+      var y = floor(submitting_t/bounds.ww);
+      var cell = board[boardi(x,y)];
+      x = screenSpaceX(cam,canv,cell.cx-0.5);
+      y = screenSpaceY(cam,canv,cell.cy-0.5);
+      popDelta(x,y,cell.present+cell.score_up+cell.score_right);
+      submitting_t--;
+    }
     tickDeltas();
   };
 
