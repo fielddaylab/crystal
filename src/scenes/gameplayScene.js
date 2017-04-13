@@ -46,6 +46,7 @@ var GamePlayScene = function(game, stage)
   var molecules;
 
   var back_btn;
+  var submit_btn;
 
   //block drawing
   var tx;
@@ -120,7 +121,7 @@ var GamePlayScene = function(game, stage)
     self.scale = 1;
     self.x_repeat = 10;
     self.y_repeat = 10;
-    self.stars = 1;
+    self.stars = 0;
     self.star_req_score = [];
     for(var i = 0; i < 3; i++)
       self.star_req_score.push(0);
@@ -1044,6 +1045,14 @@ var GamePlayScene = function(game, stage)
     back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh/2;
     screenSpace(cam,canv,back_btn);
 
+    submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
+    submit_btn.click = function(evt) { }
+    submit_btn.ww = game_cam.ww/5;
+    submit_btn.wh = game_cam.wh/10;
+    submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
+    submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
+    screenSpace(cam,canv,submit_btn);
+
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
   }
@@ -1082,11 +1091,18 @@ var GamePlayScene = function(game, stage)
     back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh/2;
     screenSpace(cam,canv,back_btn);
 
+    submit_btn.ww = game_cam.ww/5;
+    submit_btn.wh = game_cam.wh/10;
+    submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
+    submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
+    screenSpace(cam,canv,submit_btn);
+
     if(mode == MODE_GAME)
     {
       for(var i = 0; i < molecules.length; i++)
         clicker.filter(molecules[i]);
       clicker.filter(back_btn);
+      clicker.filter(submit_btn);
       clicker.flush();
       for(var i = 0; i < molecules.length; i++)
         dragger.filter(molecules[i]);
@@ -1178,13 +1194,14 @@ var GamePlayScene = function(game, stage)
     ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
 
     ctx.fillStyle = "#000000";
-    ctx.fillText("Score: "+score,bounds.x+bounds.w-100,bounds.y-20);
+    ctx.fillText("Score: "+score,bounds.x+bounds.w-200,bounds.y-10);
+    ctx.fillText("< Menu",back_btn.x,back_btn.y+back_btn.h/2);
+    ctx.fillText("[Submit]",submit_btn.x,submit_btn.y+submit_btn.h/2);
 
     drawDeltas();
 
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
-    ctx.fillRect(back_btn.x,back_btn.y,back_btn.w,back_btn.h);
   };
 
   self.cleanup = function()
