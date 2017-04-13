@@ -113,6 +113,8 @@ var GamePlayScene = function(game, stage)
   MODE_MENU = ENUM; ENUM++;
   MODE_GAME = ENUM; ENUM++;
 
+  var submitting_t;
+
   var level = function(id)
   {
     var self = this;
@@ -1007,35 +1009,53 @@ var GamePlayScene = function(game, stage)
       self.shake_y = rand0()*s;
     }
 
-    self.draw_off = function(woffx,woffy)
+    self.draw_off_up = function(woffx,woffy)
+    {
+      //shadow
+      draw_blocks(self.wx+self.shake_x+woffx,self.wy+self.shake_y+woffy,0,0,self.rot,1,shadow_fill,0,self.template.blocks);
+      //real
+      var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
+      draw_blocks(self.wx+self.shake_x+t+woffx,self.wy+self.shake_y-t+woffy,0,0,self.rot,1,false,0,self.template.blocks);
+    }
+    self.draw_off_down = function(woffx,woffy)
+    {
+      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.rot,1,false,0,self.template.blocks);
+    }
+    self.draw_front_up = function()
+    {
+      if(self.up) self.draw_off_up(0,0);
+    }
+    self.draw_front_down = function()
+    {
+      if(!self.up) self.draw_off_down(0,0);
+    }
+    self.draw_behind_up = function()
     {
       if(self.up)
       {
-        //shadow
-        draw_blocks(self.wx+self.shake_x+woffx,self.wy+self.shake_y+woffy,0,0,self.rot,1,shadow_fill,0,self.template.blocks);
-        //real
-        var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
-        draw_blocks(self.wx+self.shake_x+t+woffx,self.wy+self.shake_y-t+woffy,0,0,self.rot,1,false,0,self.template.blocks);
+        self.draw_off_up( bounds.ww,         0);
+        self.draw_off_up(-bounds.ww,         0);
+        self.draw_off_up(         0, bounds.wh);
+        self.draw_off_up(         0,-bounds.wh);
+        self.draw_off_up( bounds.ww, bounds.wh);
+        self.draw_off_up( bounds.ww,-bounds.wh);
+        self.draw_off_up(-bounds.ww, bounds.wh);
+        self.draw_off_up(-bounds.ww,-bounds.wh);
       }
-      else
+    }
+    self.draw_behind_down = function()
+    {
+      if(!self.up)
       {
-        draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.rot,1,false,0,self.template.blocks);
+        self.draw_off_down( bounds.ww,         0);
+        self.draw_off_down(-bounds.ww,         0);
+        self.draw_off_down(         0, bounds.wh);
+        self.draw_off_down(         0,-bounds.wh);
+        self.draw_off_down( bounds.ww, bounds.wh);
+        self.draw_off_down( bounds.ww,-bounds.wh);
+        self.draw_off_down(-bounds.ww, bounds.wh);
+        self.draw_off_down(-bounds.ww,-bounds.wh);
       }
-    }
-    self.draw_front = function()
-    {
-      self.draw_off(         0,         0);
-    }
-    self.draw_behind = function()
-    {
-      self.draw_off( bounds.ww,         0);
-      self.draw_off(-bounds.ww,         0);
-      self.draw_off(         0, bounds.wh);
-      self.draw_off(         0,-bounds.wh);
-      self.draw_off( bounds.ww, bounds.wh);
-      self.draw_off( bounds.ww,-bounds.wh);
-      self.draw_off(-bounds.ww, bounds.wh);
-      self.draw_off(-bounds.ww,-bounds.wh);
     }
   }
   var block_happiness = function(a,b)
@@ -1107,6 +1127,7 @@ var GamePlayScene = function(game, stage)
     menu_cam = { wx:-20, wy:0, ww:12, wh:6 };
     cam = { wx:menu_cam.wx, wy:menu_cam.wy, ww:menu_cam.ww, wh:menu_cam.wh };
     mode = MODE_MENU;
+    submitting_t = 0;
 
     url_args = jsonFromURL()
     if(url_args["lvl"]) lvl = parseInt(url_args["lvl"]);
@@ -1174,23 +1195,26 @@ var GamePlayScene = function(game, stage)
     submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
     screenSpace(cam,canv,submit_btn);
 
-    if(mode == MODE_GAME)
+    if(!submitting_t)
     {
-      for(var i = 0; i < molecules.length; i++)
-        clicker.filter(molecules[i]);
-      clicker.filter(back_btn);
-      clicker.filter(submit_btn);
-      clicker.flush();
-      dragger.filter(scroll);
-      for(var i = 0; i < molecules.length; i++)
-        dragger.filter(molecules[i]);
-      dragger.flush();
-    }
-    else if(mode == MODE_MENU)
-    {
-      for(var i = 0; i < levels.length; i++)
-        clicker.filter(levels[i].button);
-      clicker.flush();
+      if(mode == MODE_GAME)
+      {
+        for(var i = 0; i < molecules.length; i++)
+          clicker.filter(molecules[i]);
+        clicker.filter(back_btn);
+        clicker.filter(submit_btn);
+        clicker.flush();
+        dragger.filter(scroll);
+        for(var i = 0; i < molecules.length; i++)
+          dragger.filter(molecules[i]);
+        dragger.flush();
+      }
+      else if(mode == MODE_MENU)
+      {
+        for(var i = 0; i < levels.length; i++)
+          clicker.filter(levels[i].button);
+        clicker.flush();
+      }
     }
 
     var happy = 0;
@@ -1262,12 +1286,16 @@ var GamePlayScene = function(game, stage)
 
     ctx.fillStyle = "rgba(66,66,66,0.5)";
     for(var i = molecules.length-1; i >= 0; i--)
-      molecules[i].draw_behind();
+      molecules[i].draw_behind_down();
+    for(var i = molecules.length-1; i >= 0; i--)
+      molecules[i].draw_front_down();
+    for(var i = molecules.length-1; i >= 0; i--)
+      molecules[i].draw_behind_up();
     ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
     for(var i = 0; i < stamps.length; i++)
       stamps[i].draw();
     for(var i = molecules.length-1; i >= 0; i--)
-      molecules[i].draw_front();
+      molecules[i].draw_front_up();
 
     ctx.strokeStyle = bounds_stroke;
     ctx.lineWidth = 2;
