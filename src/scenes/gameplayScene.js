@@ -45,6 +45,8 @@ var GamePlayScene = function(game, stage)
   var stamps;
   var molecules;
 
+  var back_btn;
+
   //block drawing
   var tx;
   var ty;
@@ -103,8 +105,6 @@ var GamePlayScene = function(game, stage)
   star_full.context.fill();
   star_full.context.stroke();
 
-
-
   var n_ticks = 0;
 
   var mode;
@@ -130,6 +130,9 @@ var GamePlayScene = function(game, stage)
   {
     var self = this;
     self.level = level;
+    self.bounces = [];
+    for(var i = 0; i < 3; i++)
+      self.bounces[i] = new bounce();
     self.wx = wx;
     self.wy = wy;
     self.ww = ww;
@@ -155,15 +158,26 @@ var GamePlayScene = function(game, stage)
       var theta;
       var offx;
       var offy;
+      var t = n_ticks%200;
+      var p;
       for(var i = 0; i < 3; i++)
       {
         theta = quarterpi+(i/2)*halfpi;
         offx = cos(theta)*self.w/3;
         offy = sin(theta)*self.h/3;
+        switch(i)
+        {
+          case 0: if(t == 90) self.bounces[i].vel = 2; break;
+          case 1: if(t == 60) self.bounces[i].vel = 2; break;
+          case 2: if(t == 30) self.bounces[i].vel = 2; break;
+        }
+        var bs = s;
+        self.bounces[i].tick();
+        bs += self.bounces[i].v;
         if(self.level.stars > 2-i)
-          ctx.drawImage(star_full,x+offx-s/2,y+offy-s/2,s,s);
+          ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
         else
-          ctx.drawImage(star,x+offx-s/2,y+offy-s/2,s,s);
+          ctx.drawImage(star,x+offx-bs/2,y+offy-bs/2,bs,bs);
       }
     }
 
@@ -1022,6 +1036,14 @@ var GamePlayScene = function(game, stage)
     init_levels();
     set_level(lvl);
 
+    back_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
+    back_btn.click = function(evt) { mode = MODE_MENU; }
+    back_btn.ww = game_cam.ww/10;
+    back_btn.wh = game_cam.wh/10;
+    back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww/2;
+    back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh/2;
+    screenSpace(cam,canv,back_btn);
+
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
   }
@@ -1054,10 +1076,17 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
 
+    back_btn.ww = game_cam.ww/10;
+    back_btn.wh = game_cam.wh/10;
+    back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww/2;
+    back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh/2;
+    screenSpace(cam,canv,back_btn);
+
     if(mode == MODE_GAME)
     {
       for(var i = 0; i < molecules.length; i++)
         clicker.filter(molecules[i]);
+      clicker.filter(back_btn);
       clicker.flush();
       for(var i = 0; i < molecules.length; i++)
         dragger.filter(molecules[i]);
@@ -1068,6 +1097,7 @@ var GamePlayScene = function(game, stage)
     {
       for(var i = 0; i < levels.length; i++)
         clicker.filter(levels[i].button);
+      clicker.flush();
     }
 
     var happy = 0;
@@ -1154,6 +1184,7 @@ var GamePlayScene = function(game, stage)
 
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
+    ctx.fillRect(back_btn.x,back_btn.y,back_btn.w,back_btn.h);
   };
 
   self.cleanup = function()

@@ -407,3 +407,18 @@ var textToLines = function(canv, font, width, text)
   return lines;
 }
 
+var bounce = function(target=0,v=0,vel=0,pull=0.1,drag=0.1)
+{
+  var self = this;
+  self.target = target;
+  self.v = v;
+  self.vel = vel;
+  self.pull = pull;
+  self.drag = drag;
+  self.tick = function()
+  {
+    self.vel = (self.vel+(self.target-self.v)*self.pull)*(1-self.drag);
+    self.v += self.vel;
+  }
+}
+
