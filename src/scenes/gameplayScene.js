@@ -56,7 +56,7 @@ var GamePlayScene = function(game, stage)
   var shadow_fill  = "rgba(0,0,0,.1)";
   var border_fill  = "#FFFFFF";
   var block_fill   = "#A77777";
-  var block_stroke = "#822222";
+  var block_stroke = "#966666";
 
   var w = 100;
   var h = 100;
@@ -772,8 +772,18 @@ var GamePlayScene = function(game, stage)
     self.cx = 0;
     self.cy = 0;
 
+    self.shake_x = 0;
+    self.shake_y = 0;
+
     var worldevt = {wx:0,wy:0};
     var worldoff = {wx:0,wy:0};
+    self.shouldClickOff = function(evt,woffx,woffy)
+    {
+      var hit = false
+      for(var i = 0; !hit && i < self.template.blocks.length; i++)
+        hit = worldPtWithin(self.wx+self.template.blocks[i].cx,self.wy+self.template.blocks[i].cy,1.,1.,worldevt.wx+woffx,worldevt.wy+woffy);
+      return hit;
+    }
     self.shouldClick = function(evt)
     {
       if(evt.hitUI) return false;
@@ -787,10 +797,17 @@ var GamePlayScene = function(game, stage)
         worldevt.wx = worldSpaceX(cam,canv,evt.doX);
         worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       }
-      var hit = false
-      for(var i = 0; !hit && i < self.template.blocks.length; i++)
-        hit = worldPtWithin(self.wx+self.template.blocks[i].cx,self.wy+self.template.blocks[i].cy,1.,1.,worldevt.wx,worldevt.wy);
-      return hit;
+      return (
+        self.shouldClickOff(evt,         0,         0) ||
+        self.shouldClickOff(evt, bounds.ww,         0) ||
+        self.shouldClickOff(evt,-bounds.ww,         0) ||
+        self.shouldClickOff(evt,         0, bounds.wh) ||
+        self.shouldClickOff(evt,         0,-bounds.wh) ||
+        self.shouldClickOff(evt, bounds.ww, bounds.wh) ||
+        self.shouldClickOff(evt, bounds.ww,-bounds.wh) ||
+        self.shouldClickOff(evt,-bounds.ww, bounds.wh) ||
+        self.shouldClickOff(evt,-bounds.ww,-bounds.wh)
+      );
     }
     self.click = function(evt)
     {
@@ -805,6 +822,18 @@ var GamePlayScene = function(game, stage)
       self.click_ticks = 0;
     }
 
+    self.shouldDragOff = function(evt, woffx, woffy)
+    {
+      var hit = false
+      for(var i = 0; !hit && i < self.template.blocks.length; i++)
+        hit = worldPtWithin(self.wx+self.template.blocks[i].cx,self.wy+self.template.blocks[i].cy,1.,1.,worldevt.wx+woffx,worldevt.wy+woffy);
+      if(hit)
+      {
+        self.wx -= woffx;
+        self.wy -= woffy;
+      }
+      return hit;
+    }
     self.shouldDrag = function(evt)
     {
       if(dragging_molecule || evt.hitUI) return false;
@@ -818,9 +847,17 @@ var GamePlayScene = function(game, stage)
         worldevt.wx = worldSpaceX(cam,canv,evt.doX);
         worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       }
-      var hit = false
-      for(var i = 0; !hit && i < self.template.blocks.length; i++)
-        hit = worldPtWithin(self.wx+self.template.blocks[i].cx,self.wy+self.template.blocks[i].cy,1.,1.,worldevt.wx,worldevt.wy);
+      var hit = (
+        self.shouldDragOff(evt,         0,         0) ||
+        self.shouldDragOff(evt, bounds.ww,         0) ||
+        self.shouldDragOff(evt,-bounds.ww,         0) ||
+        self.shouldDragOff(evt,         0, bounds.wh) ||
+        self.shouldDragOff(evt,         0,-bounds.wh) ||
+        self.shouldDragOff(evt, bounds.ww, bounds.wh) ||
+        self.shouldDragOff(evt, bounds.ww,-bounds.wh) ||
+        self.shouldDragOff(evt,-bounds.ww, bounds.wh) ||
+        self.shouldDragOff(evt,-bounds.ww,-bounds.wh)
+      );
       if(hit)
       {
         evt.hitUI = true;
@@ -853,6 +890,10 @@ var GamePlayScene = function(game, stage)
       if(dragging_molecule == self) dragging_molecule = 0;
     }
 
+    var blocks_collide = function(x0,y0,x1,y1)
+    {
+      return (x0 == x1 && y0 == y1);
+    }
     self.snap = function()
     {
       var was_up = self.up; //not much, was up with you?
@@ -866,8 +907,20 @@ var GamePlayScene = function(game, stage)
         if(molecule == self || molecule.up) continue;
         for(var j = 0; !self.up && j < self.template.blocks.length; j++)
           for(var k = 0; !self.up && k < molecule.template.blocks.length; k++)
-            if(cx+self.template.blocks[j].cx == molecule.cx+molecule.template.blocks[k].cx && cy+self.template.blocks[j].cy == molecule.cy+molecule.template.blocks[k].cy)
+          {
+            if(
+              blocks_collide(cx+self.template.blocks[j].cx,           cy+self.template.blocks[j].cy,           molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx+bounds.ww, cy+self.template.blocks[j].cy,           molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx-bounds.ww, cy+self.template.blocks[j].cy,           molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx,           cy+self.template.blocks[j].cy+bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx,           cy+self.template.blocks[j].cy-bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx+bounds.ww, cy+self.template.blocks[j].cy+bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx+bounds.ww, cy+self.template.blocks[j].cy-bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx-bounds.ww, cy+self.template.blocks[j].cy+bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx-bounds.ww, cy+self.template.blocks[j].cy-bounds.wh, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy)
+            )
               self.up = true;
+          }
       }
       if(was_up && !self.up)
       {
@@ -925,10 +978,7 @@ var GamePlayScene = function(game, stage)
         self.target_rot     = 0;
         self.snap();
       }
-    }
 
-    self.draw = function()
-    {
       var s = 0;
       switch(self.happy)
       {
@@ -941,24 +991,39 @@ var GamePlayScene = function(game, stage)
       }
       if(self.happy >  2) s = 0;
       if(self.happy < -3) s = self.happy/10;
-      var shake_x = rand0()*s;
-      var shake_y = rand0()*s;
+      self.shake_x = rand0()*s;
+      self.shake_y = rand0()*s;
+    }
+
+    self.draw_off = function(woffx,woffy)
+    {
       if(self.up)
       {
         //shadow
-        draw_blocks(self.wx+shake_x,self.wy+shake_y,0,0,self.rot,1,shadow_fill,0,self.template.blocks);
+        draw_blocks(self.wx+self.shake_x+woffx,self.wy+self.shake_y+woffy,0,0,self.rot,1,shadow_fill,0,self.template.blocks);
         //real
         var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
-        draw_blocks(self.wx+t+shake_x,self.wy-t+shake_y,0,0,self.rot,1,false,0,self.template.blocks);
+        draw_blocks(self.wx+self.shake_x+t+woffx,self.wy+self.shake_y-t+woffy,0,0,self.rot,1,false,0,self.template.blocks);
       }
       else
       {
-        draw_blocks(self.wx+shake_x,self.wy+shake_y,0,0,self.rot,1,false,0,self.template.blocks);
+        draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.rot,1,false,0,self.template.blocks);
       }
-      ctx.fillStyle = "#000000";
-      var x = screenSpaceX(cam,canv,self.wx);
-      var y = screenSpaceY(cam,canv,self.wy);
-      //ctx.fillText(self.happy,x,y);
+    }
+    self.draw_front = function()
+    {
+      self.draw_off(         0,         0);
+    }
+    self.draw_behind = function()
+    {
+      self.draw_off( bounds.ww,         0);
+      self.draw_off(-bounds.ww,         0);
+      self.draw_off(         0, bounds.wh);
+      self.draw_off(         0,-bounds.wh);
+      self.draw_off( bounds.ww, bounds.wh);
+      self.draw_off( bounds.ww,-bounds.wh);
+      self.draw_off(-bounds.ww, bounds.wh);
+      self.draw_off(-bounds.ww,-bounds.wh);
     }
   }
   var block_happiness = function(a,b)
@@ -1184,11 +1249,13 @@ var GamePlayScene = function(game, stage)
     }
 
     ctx.fillStyle = "rgba(66,66,66,0.5)";
+    for(var i = molecules.length-1; i >= 0; i--)
+      molecules[i].draw_behind();
     ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
     for(var i = 0; i < stamps.length; i++)
       stamps[i].draw();
     for(var i = molecules.length-1; i >= 0; i--)
-      molecules[i].draw();
+      molecules[i].draw_front();
 
     ctx.strokeStyle = bounds_fill;
     ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
