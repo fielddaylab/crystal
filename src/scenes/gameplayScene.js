@@ -110,10 +110,14 @@ var GamePlayScene = function(game, stage)
 
   var mode;
   var ENUM = 0;
-  MODE_MENU = ENUM; ENUM++;
-  MODE_GAME = ENUM; ENUM++;
+  MODE_MENU   = ENUM; ENUM++;
+  MODE_GAME   = ENUM; ENUM++;
+  MODE_SUBMIT = ENUM; ENUM++;
 
   var submitting_t;
+  var star_outro_sub_slide = 40;
+  var star_outro_sub_star = 100;
+  var outro;
 
   var level = function(id)
   {
@@ -123,7 +127,7 @@ var GamePlayScene = function(game, stage)
     self.scale = 1;
     self.repeat_x = 10;
     self.repeat_y = 10;
-    self.stars = 0;
+    self.stars = 1;
     self.star_req_score = [];
     for(var i = 0; i < 3; i++)
       self.star_req_score.push(0);
@@ -153,7 +157,7 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
-      draw_blocks(self.wx,self.wy,level.available_templates[0].cx,level.available_templates[0].cy,self.rotoff+n_ticks/100,0.5,false,0,level.available_templates[0].blocks);
+      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,self.rotoff+n_ticks/100,0.5,false,0,self.level.available_templates[0].blocks);
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -188,6 +192,68 @@ var GamePlayScene = function(game, stage)
     {
       set_level(self.level.id);
       mode = MODE_GAME;
+    }
+  }
+
+  var star_outro = function(wx,wy,ww,wh)
+  {
+    var self = this;
+
+    self.wx = wx;
+    self.wy = wy;
+    self.ww = ww;
+    self.wh = wh;
+
+    self.x = 0;
+    self.y = 0;
+    self.w = 0;
+    self.h = 0;
+
+    self.start_ticks = 0;
+
+    self.bounces = [];
+    for(var i = 0; i < 3; i++)
+      self.bounces[i] = new bounce();
+
+    self.click = function(evt)
+    {
+      mode = MODE_MENU;
+    }
+
+    self.draw = function()
+    {
+      ctx.beginPath();
+      ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
+      ctx.stroke();
+      draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,n_ticks/100,1,false,0,cur_level.available_templates[0].blocks);
+
+      var x = self.x+self.w/2;
+      var y = self.y+self.h/2;
+      var s = self.w/3;
+      var theta;
+      var offx;
+      var offy;
+      var t = (n_ticks-self.start_ticks)%200;
+      var p;
+      for(var i = 0; i < 3; i++)
+      {
+        theta = quarterpi+(i/2)*halfpi;
+        offx = cos(theta)*self.w/3;
+        offy = sin(theta)*self.h/3;
+        switch(i)
+        {
+          case 0: if(t == 90) self.bounces[i].vel = 2; break;
+          case 1: if(t == 60) self.bounces[i].vel = 2; break;
+          case 2: if(t == 30) self.bounces[i].vel = 2; break;
+        }
+        var bs = s;
+        self.bounces[i].tick();
+        bs += self.bounces[i].v;
+        if(cur_level.stars > 2-i && n_ticks-self.start_ticks > 30*(3-i))
+          ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
+        else
+          ctx.drawImage(star,x+offx-bs/2,y+offy-bs/2,bs,bs);
+      }
     }
   }
 
@@ -1195,12 +1261,14 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,back_btn);
 
     submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    submit_btn.click = function(evt) { submitting_t = bounds.ww*bounds.wh; evt.hitUI = true; }
+    submit_btn.click = function(evt) { mode = MODE_SUBMIT; submitting_t = 0; evt.hitUI = true; }
     submit_btn.ww = game_cam.ww/5;
     submit_btn.wh = game_cam.wh/10;
     submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
     submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
     screenSpace(cam,canv,submit_btn);
+
+    outro = new star_outro();
 
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
@@ -1209,8 +1277,6 @@ var GamePlayScene = function(game, stage)
   self.tick = function()
   {
     n_ticks++;
-    //cam.wx = cos(n_ticks/50)*50;
-    //cam.wy = sin(n_ticks/50)*50;
 
     if(mode == MODE_MENU)
     {
@@ -1219,7 +1285,7 @@ var GamePlayScene = function(game, stage)
       cam.ww = lerp(cam.ww,menu_cam.ww,0.1);
       cam.wh = lerp(cam.wh,menu_cam.wh,0.1);
     }
-    if(mode == MODE_GAME)
+    if(mode == MODE_GAME || mode == MODE_SUBMIT)
     {
       cam.wx = lerp(cam.wx,game_cam.wx,0.1);
       cam.wy = lerp(cam.wy,game_cam.wy,0.1);
@@ -1246,23 +1312,25 @@ var GamePlayScene = function(game, stage)
     submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
     screenSpace(cam,canv,submit_btn);
 
-    if(submitting_t == -1)
+    if(mode == MODE_GAME)
     {
-      if(mode == MODE_GAME)
-      {
-        clicker.filter(back_btn);
-        clicker.filter(submit_btn);
-        for(var i = 0; i < molecules.length; i++)
-          clicker.filter(molecules[i]);
-        dragger.filter(scroll);
-        for(var i = 0; i < molecules.length; i++)
-          dragger.filter(molecules[i]);
-      }
-      else if(mode == MODE_MENU)
-      {
-        for(var i = 0; i < levels.length; i++)
-          clicker.filter(levels[i].button);
-      }
+      clicker.filter(back_btn);
+      clicker.filter(submit_btn);
+      for(var i = 0; i < molecules.length; i++)
+        clicker.filter(molecules[i]);
+      dragger.filter(scroll);
+      for(var i = 0; i < molecules.length; i++)
+        dragger.filter(molecules[i]);
+    }
+    else if(mode == MODE_MENU)
+    {
+      for(var i = 0; i < levels.length; i++)
+        clicker.filter(levels[i].button);
+    }
+    else if(mode == MODE_SUBMIT)
+    {
+      if(submitting_t > bounds.ww*bounds.wh+star_outro_sub_slide+star_outro_sub_star)
+        clicker.filter(outro);
     }
 
     clicker.flush();
@@ -1294,13 +1362,30 @@ var GamePlayScene = function(game, stage)
 
     if(submitting_t != -1)
     {
-      var x = submitting_t%bounds.ww;
-      var y = floor(submitting_t/bounds.ww);
-      var cell = board[boardi(x,y)];
-      x = screenSpaceX(cam,canv,cell.cx-0.5);
-      y = screenSpaceY(cam,canv,cell.cy-0.5);
-      popDelta(x,y,cell.present+cell.score_up+cell.score_right);
-      submitting_t--;
+      submitting_t++;
+      var bounds_t = bounds.ww*bounds.wh;
+      if(submitting_t < bounds_t)
+      {
+        var x = submitting_t%bounds.ww;
+        var y = floor(submitting_t/bounds.ww);
+        var cell = board[boardi(x,y)];
+        x = screenSpaceX(cam,canv,cell.cx-0.5);
+        y = screenSpaceY(cam,canv,cell.cy-0.5);
+        popDelta(x,y,cell.present+cell.score_up+cell.score_right);
+      }
+      else if(submitting_t >= bounds_t)
+      {
+        if(submitting_t == bounds_t) outro.start_ticks = n_ticks+40;
+        var t_into_outro = submitting_t-bounds_t;
+        if(t_into_outro < star_outro_sub_slide)
+          outro.wx = lerp(bounds.wx-bounds.ww/2-5-5,bounds.wx,t_into_outro/star_outro_sub_slide);
+        else
+          outro.wx = bounds.wx;
+        outro.wy = 0;
+        outro.ww = cam.ww/4;
+        outro.wh = cam.wh/2;
+        screenSpace(cam,canv,outro);
+      }
     }
     tickDeltas();
   };
@@ -1375,6 +1460,11 @@ var GamePlayScene = function(game, stage)
 
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
+
+    if(mode == MODE_SUBMIT && submitting_t > bounds.ww*bounds.wh)
+    {
+      outro.draw();
+    }
   };
 
   self.cleanup = function()
