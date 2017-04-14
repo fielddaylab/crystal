@@ -127,7 +127,8 @@ var GamePlayScene = function(game, stage)
     self.scale = 1;
     self.repeat_x = 10;
     self.repeat_y = 10;
-    self.stars = 1;
+    self.stars = 0;
+    self.best = -99999;
     self.star_req_score = [];
     for(var i = 0; i < 3; i++)
       self.star_req_score.push(0);
@@ -273,6 +274,10 @@ var GamePlayScene = function(game, stage)
           levels[i].scale = 2;
           levels[i].repeat_x = 18;
           levels[i].repeat_y = 10;
+          levels[i].star_req_score[0] =  0;
+          levels[i].star_req_score[1] = 10;
+          levels[i].star_req_score[2] = 20;
+
             //1-no
           levels[i].available_templates[j++] = new template(0,0,[{cx:0,cy:0,c:top_pos   }]);
             //2-no
@@ -293,6 +298,9 @@ var GamePlayScene = function(game, stage)
           levels[i].scale = 1;
           levels[i].repeat_x = 6;
           levels[i].repeat_y = 4;
+          levels[i].star_req_score[0] =  0;
+          levels[i].star_req_score[1] = 10;
+          levels[i].star_req_score[2] = 20;
 
           levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}]);
           break;
@@ -300,6 +308,9 @@ var GamePlayScene = function(game, stage)
           levels[i].scale = 1;
           levels[i].repeat_x = 8;
           levels[i].repeat_y = 4;
+          levels[i].star_req_score[0] =  0;
+          levels[i].star_req_score[1] = 10;
+          levels[i].star_req_score[2] = 20;
 
           levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
           break;
@@ -1261,7 +1272,17 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,back_btn);
 
     submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    submit_btn.click = function(evt) { mode = MODE_SUBMIT; submitting_t = 0; evt.hitUI = true; }
+    submit_btn.click = function(evt) {
+      mode = MODE_SUBMIT;
+      submitting_t = 0;
+      cur_level.stars = 0;
+      if(score > cur_level.best) cur_level.best = score;
+      for(var i = 0; i < 3; i++)
+      {
+        if(score >= cur_level.star_req_score[i]) cur_level.stars = i+1;
+      }
+      evt.hitUI = true;
+    }
     submit_btn.ww = game_cam.ww/5;
     submit_btn.wh = game_cam.wh/10;
     submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
@@ -1362,7 +1383,6 @@ var GamePlayScene = function(game, stage)
 
     if(submitting_t != -1)
     {
-      submitting_t++;
       var bounds_t = bounds.ww*bounds.wh;
       if(submitting_t < bounds_t)
       {
@@ -1386,6 +1406,7 @@ var GamePlayScene = function(game, stage)
         outro.wh = cam.wh/2;
         screenSpace(cam,canv,outro);
       }
+      submitting_t++;
     }
     tickDeltas();
   };
