@@ -1275,12 +1275,6 @@ var GamePlayScene = function(game, stage)
     submit_btn.click = function(evt) {
       mode = MODE_SUBMIT;
       submitting_t = 0;
-      cur_level.stars = 0;
-      if(score > cur_level.best) cur_level.best = score;
-      for(var i = 0; i < 3; i++)
-      {
-        if(score >= cur_level.star_req_score[i]) cur_level.stars = i+1;
-      }
       evt.hitUI = true;
     }
     submit_btn.ww = game_cam.ww/5;
@@ -1476,6 +1470,19 @@ var GamePlayScene = function(game, stage)
     ctx.fillText("Score: "+score,bounds.x+bounds.w-200,bounds.y-10);
     ctx.fillText("< Menu",back_btn.x,back_btn.y+back_btn.h/2);
     ctx.fillText("[Submit]",submit_btn.x,submit_btn.y+submit_btn.h/2);
+
+    cur_level.stars = 0;
+    if(score > cur_level.best) cur_level.best = score;
+    for(var i = 0; i < 3; i++)
+      if(score >= cur_level.star_req_score[i]) cur_level.stars = i+1;
+
+    for(var i = 0; i < 3; i++)
+    {
+      if(cur_level.stars > i)
+        ctx.drawImage(star_full,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
+      else
+        ctx.drawImage(star     ,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
+    }
 
     drawDeltas();
 
