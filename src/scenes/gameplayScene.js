@@ -261,63 +261,122 @@ var GamePlayScene = function(game, stage)
   var init_levels = function()
   {
     levels = [];
-    var n = 3;
-    var n_cols = n;
-    var n_rows = 1;
-    for(var i = 0; i < n; i++)
+    var n_rows = 2;
+    var n_cols = 3;
+    var i = 0;
+    var j;
+
+    function lvlx(i)
     {
-      levels.push(new level(i));
-      var j = 0;
-      switch(i)
-      {
-        case 0:
-          levels[i].scale = 2;
-          levels[i].repeat_x = 18;
-          levels[i].repeat_y = 10;
-          levels[i].star_req_score[0] =  0;
-          levels[i].star_req_score[1] = 10;
-          levels[i].star_req_score[2] = 20;
-
-            //1-no
-          levels[i].available_templates[j++] = new template(0,0,[{cx:0,cy:0,c:top_pos   }]);
-            //2-no
-          levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:left_neg  },{cx:0,cy:1,c:no_charge }]);
-            //3-no
-          levels[i].available_templates[j++] = new template(0,0,[{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:left_neg  },{cx:0,cy:-1,c:right_pos }]); //line
-          levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:right_pos },{cx:1,cy: 0,c:top_neg   }]); //crook
-            //4-no
-          levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:left_pos  },{cx: 0,cy:-1,c:left_pos  },{cx: 0,cy:1,c:right_neg },{cx: 0,cy:2,c:no_charge }]); //line
-          levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:right_neg },{cx: 1,cy:0,c:top_neg   }]); //L
-          levels[i].available_templates[j++] = new template(-0.5,1,[{cx:0,cy:0,c:bottom_neg},{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:no_charge },{cx:-1,cy:0,c:bottom_pos}]); //J
-          levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:bottom_pos},{cx:-1,cy: 1,c:left_pos  },{cx: 0,cy:1,c:no_charge },{cx: 1,cy:0,c:no_charge }]); //Z
-          levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:no_charge },{cx:-1,cy: 0,c:bottom_neg},{cx: 0,cy:1,c:no_charge },{cx: 1,cy:1,c:bottom_pos}]); //S
-          levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx:-1,cy:0,c:top_pos   },{cx: 1,cy:0,c:right_neg }]); //T
-          levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
-          break;
-        case 1:
-          levels[i].scale = 1;
-          levels[i].repeat_x = 6;
-          levels[i].repeat_y = 4;
-          levels[i].star_req_score[0] =  0;
-          levels[i].star_req_score[1] = 10;
-          levels[i].star_req_score[2] = 20;
-
-          levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}]);
-          break;
-        case 2:
-          levels[i].scale = 1;
-          levels[i].repeat_x = 8;
-          levels[i].repeat_y = 4;
-          levels[i].star_req_score[0] =  0;
-          levels[i].star_req_score[1] = 10;
-          levels[i].star_req_score[2] = 20;
-
-          levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
-          break;
-      }
-
-      levels[i].button = new level_button(menu_cam.wx-menu_cam.ww/2+(i+1.5)/(n_cols+2)*menu_cam.ww,menu_cam.wy+menu_cam.wh/2-1.5/(n_rows+2)*menu_cam.wh/2,menu_cam.ww/(n_cols+2),menu_cam.wh/(n_cols+2)*2,levels[i]);
+      var x = i%n_cols;
+      return menu_cam.wx-menu_cam.ww/2+(x+1.5)/(n_cols+2)*menu_cam.ww;
     }
+    function lvly(i)
+    {
+      var y = floor(i/n_cols);
+      return menu_cam.wy+menu_cam.wh/2-(y+.5)/(n_rows)*menu_cam.wh;
+    }
+    function lvlw(i)
+    {
+      return menu_cam.ww/(n_cols+2);
+    }
+    function lvlh(i)
+    {
+      return menu_cam.wh/(n_cols+2)*2;
+    }
+
+    //domino- no charge
+    levels.push(new level(i));
+    levels[i].scale = 1;
+    levels[i].repeat_x = 6;
+    levels[i].repeat_y = 4;
+    levels[i].star_req_score[0] = 10;
+    levels[i].star_req_score[1] = 22;
+    levels[i].star_req_score[2] = 24;
+    j = 0;
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]}]);
+    levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    i++;
+
+    //tetris s- no charge
+    levels.push(new level(i));
+    levels[i].scale = 1;
+    levels[i].repeat_x = 6;
+    levels[i].repeat_y = 4;
+    levels[i].star_req_score[0] = 16;
+    levels[i].star_req_score[1] = 20;
+    levels[i].star_req_score[2] = 24;
+    j = 0;
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:1,cy:1,c:[0,0,0,0]}]);
+    levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    i++;
+
+    //tetris T- no charge
+    levels.push(new level(i));
+    levels[i].scale = 1;
+    levels[i].repeat_x = 6;
+    levels[i].repeat_y = 4;
+    levels[i].star_req_score[0] = 16;
+    levels[i].star_req_score[1] = 20;
+    levels[i].star_req_score[2] = 24;
+    j = 0;
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:1,cy:0,c:[0,0,0,0]}]);
+    levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    i++;
+
+    //domino- flip charge
+    levels.push(new level(i));
+    levels[i].scale = 1;
+    levels[i].repeat_x = 6;
+    levels[i].repeat_y = 4;
+    levels[i].star_req_score[0] = 24;
+    levels[i].star_req_score[1] = 32;
+    levels[i].star_req_score[2] = 74;
+    j = 0;
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}]);
+    levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    i++;
+
+    //L- hard charge
+    levels.push(new level(i));
+    levels[i].scale = 1;
+    levels[i].repeat_x = 8;
+    levels[i].repeat_y = 4;
+    levels[i].star_req_score[0] = 34;
+    levels[i].star_req_score[1] = 74;
+    levels[i].star_req_score[2] = 84;
+    j = 0;
+    levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
+    levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    i++;
+
+    //free play
+    levels.push(new level(i));
+    levels[i].scale = 2;
+    levels[i].repeat_x = 18;
+    levels[i].repeat_y = 10;
+    levels[i].star_req_score[0] = 0;
+    levels[i].star_req_score[1] = 0;
+    levels[i].star_req_score[2] = 0;
+    j = 0;
+      //1-no
+    levels[i].available_templates[j++] = new template(0,0,[{cx:0,cy:0,c:top_pos   }]);
+      //2-no
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:left_neg  },{cx:0,cy:1,c:no_charge }]);
+      //3-no
+    levels[i].available_templates[j++] = new template(0,0,[{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:left_neg  },{cx:0,cy:-1,c:right_pos }]); //line
+    levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:no_charge },{cx:0,cy:1,c:right_pos },{cx:1,cy: 0,c:top_neg   }]); //crook
+      //4-no
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:left_pos  },{cx: 0,cy:-1,c:left_pos  },{cx: 0,cy:1,c:right_neg },{cx: 0,cy:2,c:no_charge }]); //line
+    levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:right_neg },{cx: 1,cy:0,c:top_neg   }]); //L
+    levels[i].available_templates[j++] = new template(-0.5,1,[{cx:0,cy:0,c:bottom_neg},{cx: 0,cy: 1,c:no_charge },{cx: 0,cy:2,c:no_charge },{cx:-1,cy:0,c:bottom_pos}]); //J
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:bottom_pos},{cx:-1,cy: 1,c:left_pos  },{cx: 0,cy:1,c:no_charge },{cx: 1,cy:0,c:no_charge }]); //Z
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:no_charge },{cx:-1,cy: 0,c:bottom_neg},{cx: 0,cy:1,c:no_charge },{cx: 1,cy:1,c:bottom_pos}]); //S
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:no_charge },{cx: 0,cy: 1,c:no_charge },{cx:-1,cy:0,c:top_pos   },{cx: 1,cy:0,c:right_neg }]); //T
+    levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
+    levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    i++;
+
   }
 
   var set_level = function(i)
