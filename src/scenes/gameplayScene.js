@@ -109,7 +109,7 @@ var GamePlayScene = function(game, stage)
 
   var atom = GenIcon(w,h)
   atom.context.strokeStyle = "#FFFFFF";
-  atom.context.fillStyle = "rgba(0,0,0,0.8)";
+  atom.context.fillStyle = "rgba(0,0,0,0.1)";
   atom.context.lineWidth = 4;
   atom.context.beginPath();
   atom.context.arc(w/2,h/2,2*w/7,0,2*Math.PI);
@@ -446,11 +446,13 @@ var GamePlayScene = function(game, stage)
   }
   var draw_blocks = function(wx,wy,offx,offy,bounces,rot,scale,shadow,blocks)
   {
-    dblock.wx = wx;
-    dblock.wy = wy;
+    tx = screenSpaceX(cam,canv,wx);
+    ty = screenSpaceY(cam,canv,wy);
+    //dblock.wx = wx;
+    //dblock.wy = wy;
     screenSpace(cam,canv,dblock);
-    tx = dblock.x+dblock.w/2;
-    ty = dblock.y+dblock.h/2;
+    //tx = dblock.x+dblock.w/2;
+    //ty = dblock.y+dblock.h/2;
 
     ctx.save();
     ctx.translate(tx,ty);
@@ -632,6 +634,7 @@ var GamePlayScene = function(game, stage)
         dblock.wy = wy+blocks[i].cy;
         screenSpace(cam,canv,dblock);
 
+        var d = dblock.w/8;
         ctx.strokeStyle = block_stroke;
         for(var j = 0; j < 4; j++)
         {
@@ -640,20 +643,53 @@ var GamePlayScene = function(game, stage)
           else continue;
           switch(j)
           {
-            case 0: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.stroke(); break;
-            case 1: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
-            case 2: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
-            case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
+            case 0: ctx.beginPath(); ctx.moveTo(dblock.x         +d-tx,dblock.y         +d-ty); ctx.lineTo(dblock.x+dblock.w-d-tx,dblock.y         +d-ty); ctx.stroke(); break;
+            case 1: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-d-tx,dblock.y         +d-ty); ctx.lineTo(dblock.x+dblock.w-d-tx,dblock.y+dblock.h-d-ty); ctx.stroke(); break;
+            case 2: ctx.beginPath(); ctx.moveTo(dblock.x         +d-tx,dblock.y+dblock.h-d-ty); ctx.lineTo(dblock.x+dblock.w-d-tx,dblock.y+dblock.h-d-ty); ctx.stroke(); break;
+            case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +d-tx,dblock.y         +d-ty); ctx.lineTo(dblock.x         +d-tx,dblock.y+dblock.h-d-ty); ctx.stroke(); break;
           }
         }
+      }
+    }
+    ctx.restore();
+
+    if(!shadow)
+    {
+      var c = cos(-rot);
+      var s = sin(-rot);
+      var rx;
+      var ry;
+      var oldww;
+      var oldwh;
+      for(var i = 0; i < blocks.length; i++)
+      {
+        rx = blocks[i].cx-offx;
+        ry = blocks[i].cy-offy;
+
+        dblock.wx = rx*c - ry*s;
+        dblock.wy = rx*s + ry*c;
+
+        dblock.wx *= scale;
+        dblock.wy *= scale;
+
+        dblock.wx += wx;
+        dblock.wy += wy;
+
+        oldww = dblock.ww;
+        oldwh = dblock.wh;
+        dblock.ww *= scale;
+        dblock.wh *= scale;
+        screenSpace(cam,canv,dblock);
+        dblock.ww = oldww;
+        dblock.wh = oldwh;
+
         if(bounces)
-          ctx.drawImage(atom, dblock.x-tx+rand0()*bounces[i].vx, dblock.y-ty+rand0()*bounces[i].vy, dblock.w, dblock.h);
+          ctx.drawImage(atom, dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
         else
-          ctx.drawImage(atom, dblock.x-tx, dblock.y-ty, dblock.w, dblock.h);
+          ctx.drawImage(atom, dblock.x, dblock.y, dblock.w, dblock.h);
       }
     }
 
-    ctx.restore();
   }
 
   var boardi = function(x,y) { return ((1+y)*(bounds.ww+2))+(x+1); }
