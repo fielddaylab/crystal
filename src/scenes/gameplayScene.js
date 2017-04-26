@@ -46,6 +46,7 @@ var GamePlayScene = function(game, stage)
   var molecules;
 
   var back_btn;
+  var clear_btn;
   var submit_btn;
 
   //block drawing
@@ -128,6 +129,7 @@ var GamePlayScene = function(game, stage)
     self.repeat_x = 10;
     self.repeat_y = 10;
     self.stars = 0;
+    self.cur_stars = 0;
     self.best = -99999;
     self.star_req_score = [];
     for(var i = 0; i < 3; i++)
@@ -1330,6 +1332,14 @@ var GamePlayScene = function(game, stage)
     back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh/2;
     screenSpace(cam,canv,back_btn);
 
+    clear_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
+    clear_btn.click = function(evt) { molecules = []; dragging_molecule = 0; }
+    clear_btn.ww = game_cam.ww/10;
+    clear_btn.wh = game_cam.wh/10;
+    clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww/2;
+    clear_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh-clear_btn.wh/2;
+    screenSpace(cam,canv,clear_btn);
+
     submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     submit_btn.click = function(evt) {
       mode = MODE_SUBMIT;
@@ -1380,6 +1390,12 @@ var GamePlayScene = function(game, stage)
     back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh/2;
     screenSpace(cam,canv,back_btn);
 
+    clear_btn.ww = game_cam.ww/10;
+    clear_btn.wh = game_cam.wh/10;
+    clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww/2;
+    clear_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh-clear_btn.wh/2;
+    screenSpace(cam,canv,clear_btn);
+
     submit_btn.ww = game_cam.ww/5;
     submit_btn.wh = game_cam.wh/10;
     submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
@@ -1389,6 +1405,7 @@ var GamePlayScene = function(game, stage)
     if(mode == MODE_GAME)
     {
       clicker.filter(back_btn);
+      clicker.filter(clear_btn);
       clicker.filter(submit_btn);
       for(var i = 0; i < molecules.length; i++)
         clicker.filter(molecules[i]);
@@ -1462,6 +1479,12 @@ var GamePlayScene = function(game, stage)
       submitting_t++;
     }
     tickDeltas();
+
+    cur_level.cur_stars = 0;
+    if(score > cur_level.best) cur_level.best = score;
+    for(var i = 0; i < 3; i++)
+      if(score >= cur_level.star_req_score[i]) cur_level.cur_stars = i+1;
+    if(cur_level.cur_stars > cur_level.stars) cur_level.stars = cur_level.cur_stars;
   };
 
   self.draw = function()
@@ -1504,13 +1527,13 @@ var GamePlayScene = function(game, stage)
       wx += h_spacing;
     }
 
-    ctx.fillStyle = "rgba(66,66,66,0.5)";
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_down();
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_down();
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_up();
+    ctx.fillStyle = "rgba(66,66,66,0.8)";
     ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
     for(var i = 0; i < stamps.length; i++)
       stamps[i].draw();
@@ -1528,16 +1551,12 @@ var GamePlayScene = function(game, stage)
     ctx.fillStyle = "#000000";
     ctx.fillText("Score: "+score,bounds.x+bounds.w-200,bounds.y-10);
     ctx.fillText("< Menu",back_btn.x,back_btn.y+back_btn.h/2);
+    ctx.fillText("Clear",clear_btn.x,clear_btn.y+clear_btn.h/2);
     ctx.fillText("[Submit]",submit_btn.x,submit_btn.y+submit_btn.h/2);
-
-    cur_level.stars = 0;
-    if(score > cur_level.best) cur_level.best = score;
-    for(var i = 0; i < 3; i++)
-      if(score >= cur_level.star_req_score[i]) cur_level.stars = i+1;
 
     for(var i = 0; i < 3; i++)
     {
-      if(cur_level.stars > i)
+      if(cur_level.cur_stars > i)
         ctx.drawImage(star_full,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
       else
         ctx.drawImage(star     ,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
