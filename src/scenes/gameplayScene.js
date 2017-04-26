@@ -56,8 +56,8 @@ var GamePlayScene = function(game, stage)
   var bounds_stroke  = "rgba(0,0,0,.6)";
   var shadow_fill  = "rgba(0,0,0,.1)";
   var border_fill  = "#FFFFFF";
-  var block_fill   = "#A77777";
-  var block_stroke = "#966666";
+  var block_fill   = shadow_fill;
+  var block_stroke = shadow_fill;
 
   var w = 100;
   var h = 100;
@@ -106,6 +106,16 @@ var GamePlayScene = function(game, stage)
   star_full.context.closePath();
   star_full.context.fill();
   star_full.context.stroke();
+
+  var atom = GenIcon(w,h)
+  atom.context.strokeStyle = "#FFFFFF";
+  atom.context.fillStyle = "rgba(0,0,0,0.8)";
+  atom.context.lineWidth = 4;
+  atom.context.beginPath();
+  atom.context.arc(w/2,h/2,2*w/7,0,2*Math.PI);
+  atom.context.closePath();
+  atom.context.fill();
+  atom.context.stroke();
 
   var n_ticks = 0;
 
@@ -160,7 +170,7 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
-      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,self.rotoff+n_ticks/100,0.5,false,0,self.level.available_templates[0].blocks);
+      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,self.rotoff+n_ticks/100,0.5,self.level.available_templates[0].blocks);
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -228,7 +238,7 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
-      draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,n_ticks/100,1,false,0,cur_level.available_templates[0].blocks);
+      draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,n_ticks/100,1,cur_level.available_templates[0].blocks);
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -434,7 +444,7 @@ var GamePlayScene = function(game, stage)
       blocks[i].c[0] = last;
     }
   }
-  var draw_blocks = function(wx,wy,offx,offy,rot,scale,shadow,b,blocks)
+  var draw_blocks = function(wx,wy,offx,offy,shake,rot,scale,blocks)
   {
     dblock.wx = wx;
     dblock.wy = wy;
@@ -447,110 +457,187 @@ var GamePlayScene = function(game, stage)
     ctx.rotate(rot);
     ctx.translate(-offx*dblock.w*scale,offy*dblock.h*scale);
     ctx.scale(scale,scale);
+
+    var top_left;
+    var cur;
+    var leftmost = 100;
+    var topmost = -100;
+    for(var i = 0; i < blocks.length; i++)
+      if(blocks[i].cx < leftmost) leftmost = blocks[i].cx;
+    for(var i = 0; i < blocks.length; i++)
+      if(blocks[i].cx == leftmost && blocks[i].cy > topmost)
+      {
+        topmost = blocks[i].cy;
+        top_left = i;
+      }
+
+    var start = 0;
+    var done = 0;
+    var found = 1;
+    cur = top_left;
+
+    ctx.fillStyle = block_fill;
+    ctx.strokeStyle = block_stroke;
+    ctx.beginPath();
+
+    dblock.wx = wx+blocks[cur].cx-dblock.ww/4;
+    dblock.wy = wy+blocks[cur].cy+dblock.wh/4;
+    screenSpace(cam,canv,dblock);
+    ctx.moveTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
+
+    while(!done)
+    {
+      found = false;
+      for(var i = 0; !found && !done && i < 4; i++) //start at top, CW
+      {
+        switch((i+start)%4)
+        {
+          case 0: //check top
+          {
+            for(var j = 0; !found && j < blocks.length; j++)
+            {
+              if(cur != j &&
+                blocks[j].cx == blocks[cur].cx   &&
+                blocks[j].cy == blocks[cur].cy+1)
+              {
+                found = true;
+                cur = j;
+
+                dblock.wx = wx+blocks[cur].cx-dblock.ww/4;
+                dblock.wy = wy+blocks[cur].cy-dblock.ww/4;
+                screenSpace(cam,canv,dblock);
+                ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
+
+                start = 3;
+              }
+            }
+            if(!found)
+            {
+              dblock.wx = wx+blocks[cur].cx+dblock.ww/4;
+              dblock.wy = wy+blocks[cur].cy+dblock.ww/4;
+              screenSpace(cam,canv,dblock);
+              ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
+            }
+          }
+          break;
+          case 1: //check right
+          {
+            for(var j = 0; !found && j < blocks.length; j++)
+            {
+              if(cur != j &&
+                blocks[j].cx == blocks[cur].cx+1 &&
+                blocks[j].cy == blocks[cur].cy)
+              {
+                found = true;
+                cur = j;
+
+                dblock.wx = wx+blocks[cur].cx-dblock.ww/4;
+                dblock.wy = wy+blocks[cur].cy+dblock.ww/4;
+                screenSpace(cam,canv,dblock);
+                ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
+
+                start = 0;
+              }
+            }
+            if(!found)
+            {
+              dblock.wx = wx+blocks[cur].cx+dblock.ww/4;
+              dblock.wy = wy+blocks[cur].cy-dblock.ww/4;
+              screenSpace(cam,canv,dblock);
+              ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
+            }
+          }
+          break;
+          case 2: //check bottom
+          {
+            for(var j = 0; !found && j < blocks.length; j++)
+            {
+              if(cur != j &&
+                blocks[j].cx == blocks[cur].cx   &&
+                blocks[j].cy == blocks[cur].cy-1)
+              {
+                found = true;
+                cur = j;
+
+                dblock.wx = wx+blocks[cur].cx+dblock.ww/4;
+                dblock.wy = wy+blocks[cur].cy+dblock.ww/4;
+                screenSpace(cam,canv,dblock);
+                ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
+
+                start = 1;
+              }
+            }
+            if(!found)
+            {
+              dblock.wx = wx+blocks[cur].cx-dblock.ww/4;
+              dblock.wy = wy+blocks[cur].cy-dblock.ww/4;
+              screenSpace(cam,canv,dblock);
+              ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
+            }
+          }
+          break;
+          case 3: //check left
+          {
+            for(var j = 0; !found && j < blocks.length; j++)
+            {
+              if(cur != j &&
+                blocks[j].cx == blocks[cur].cx-1 &&
+                blocks[j].cy == blocks[cur].cy)
+              {
+                found = true;
+                cur = j;
+
+                dblock.wx = wx+blocks[cur].cx+dblock.ww/4;
+                dblock.wy = wy+blocks[cur].cy-dblock.ww/4;
+                screenSpace(cam,canv,dblock);
+                ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
+
+                start = 2;
+              }
+            }
+            if(!found)
+            {
+              dblock.wx = wx+blocks[cur].cx-dblock.ww/4;
+              dblock.wy = wy+blocks[cur].cy+dblock.ww/4;
+              screenSpace(cam,canv,dblock);
+              ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
+            }
+          }
+          break;
+        }
+
+        if(!found && cur == top_left && (i+start)%4 == 3) done = 1;
+      }
+    }
+
+    ctx.fill();
+    ctx.stroke();
+
+
+
+
     for(var i = 0; i < blocks.length; i++)
     {
       dblock.wx = wx+blocks[i].cx;
       dblock.wy = wy+blocks[i].cy;
       screenSpace(cam,canv,dblock);
 
-      if(shadow) ctx.fillStyle = shadow;
-      else
+      ctx.strokeStyle = block_stroke;
+      for(var j = 0; j < 4; j++)
       {
-        ctx.fillStyle = block_fill;
-        ctx.strokeStyle = block_stroke;
-      }
-      ctx.fillRect(  dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
-      if(!shadow)
-      {
-        ctx.strokeRect(dblock.x-tx-b,dblock.y-ty-b,dblock.w+b*2,dblock.h+b*2);
-        for(var j = 0; j < 4; j++)
+             if(blocks[i].c[j] > 0) ctx.strokeStyle = "#00FF00";
+        else if(blocks[i].c[j] < 0) ctx.strokeStyle = "#FF0000";
+        else continue;
+        switch(j)
         {
-               if(blocks[i].c[j] > 0) ctx.strokeStyle = "#00FF00";
-          else if(blocks[i].c[j] < 0) ctx.strokeStyle = "#FF0000";
-          else continue;
-          switch(j)
-          {
-            case 0: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.stroke(); break;
-            case 1: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
-            case 2: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
-            case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
-          }
+          case 0: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.stroke(); break;
+          case 1: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
+          case 2: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.lineTo(dblock.x+dblock.w-5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
+          case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +5-tx,dblock.y         +5-ty); ctx.lineTo(dblock.x         +5-tx,dblock.y+dblock.h-5-ty); ctx.stroke(); break;
         }
       }
-    }
-
-    if(!shadow)
-    {
-      //outline block shape
-      ctx.strokeStyle = "#FFFFFF";
-      for(var i = 0; i < blocks.length; i++)
-      {
-        var neighbor;
-        dblock.wx = wx+blocks[i].cx;
-        dblock.wy = wy+blocks[i].cy;
-        screenSpace(cam,canv,dblock);
-
-        //above
-        neighbor = false;
-        for(var j = 0; !neighbor && j < blocks.length; j++)
-        {
-          if(blocks[i].cx == blocks[j].cx && blocks[i].cy == blocks[j].cy-1)
-            neighbor = true;
-        }
-        if(!neighbor)
-        {
-          ctx.beginPath();
-          ctx.moveTo(dblock.x-tx,dblock.y-ty);
-          ctx.lineTo(dblock.x+dblock.w-tx,dblock.y-ty);
-          ctx.stroke();
-        }
-
-        //below
-        neighbor = false;
-        for(var j = 0; !neighbor && j < blocks.length; j++)
-        {
-          if(blocks[i].cx == blocks[j].cx && blocks[i].cy == blocks[j].cy+1)
-            neighbor = true;
-        }
-        if(!neighbor)
-        {
-          ctx.beginPath();
-          ctx.moveTo(dblock.x-tx,dblock.y+dblock.h-ty);
-          ctx.lineTo(dblock.x+dblock.w-tx,dblock.y+dblock.h-ty);
-          ctx.stroke();
-        }
-
-        //left
-        neighbor = false;
-        for(var j = 0; !neighbor && j < blocks.length; j++)
-        {
-          if(blocks[i].cy == blocks[j].cy && blocks[i].cx == blocks[j].cx+1)
-            neighbor = true;
-        }
-        if(!neighbor)
-        {
-          ctx.beginPath();
-          ctx.moveTo(dblock.x-tx,dblock.y-ty);
-          ctx.lineTo(dblock.x-tx,dblock.y+dblock.h-ty);
-          ctx.stroke();
-        }
-
-        //right
-        neighbor = false;
-        for(var j = 0; !neighbor && j < blocks.length; j++)
-        {
-          if(blocks[i].cy == blocks[j].cy && blocks[i].cx == blocks[j].cx-1)
-            neighbor = true;
-        }
-        if(!neighbor)
-        {
-          ctx.beginPath();
-          ctx.moveTo(dblock.x+dblock.w-tx,dblock.y-ty);
-          ctx.lineTo(dblock.x+dblock.w-tx,dblock.y+dblock.h-ty);
-          ctx.stroke();
-        }
-
-      }
+      var shakemul = 50;
+      ctx.drawImage(atom, dblock.x-tx+rand0()*shake*shakemul, dblock.y-ty+rand0()*shake*shakemul, dblock.w, dblock.h);
     }
 
     ctx.restore();
@@ -953,8 +1040,7 @@ var GamePlayScene = function(game, stage)
     self.cx = 0;
     self.cy = 0;
 
-    self.shake_x = 0;
-    self.shake_y = 0;
+    self.shake = 0;
 
     var worldevt = {wx:0,wy:0};
     var worldoff = {wx:0,wy:0};
@@ -1172,21 +1258,17 @@ var GamePlayScene = function(game, stage)
       }
       if(self.happy >  2) s = 0;
       if(self.happy < -3) s = self.happy/10;
-      self.shake_x = rand0()*s;
-      self.shake_y = rand0()*s;
+      self.shake = s;
     }
 
     self.draw_off_up = function(woffx,woffy)
     {
-      //shadow
-      draw_blocks(self.wx+self.shake_x+woffx,self.wy+self.shake_y+woffy,0,0,self.rot,1,shadow_fill,0,self.template.blocks);
-      //real
       var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
-      draw_blocks(self.wx+self.shake_x+t+woffx,self.wy+self.shake_y-t+woffy,0,0,self.rot,1,false,0,self.template.blocks);
+      draw_blocks(self.wx+t+woffx,self.wy-t+woffy,0,0,self.shake,self.rot,1,self.template.blocks);
     }
     self.draw_off_down = function(woffx,woffy)
     {
-      draw_blocks(self.wx+self.shake_x+woffx,self.wy+self.shake_y+woffy,0,0,self.rot,1,false,0,self.template.blocks);
+      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.shake,self.rot,1,self.template.blocks);
     }
     self.draw_front_up = function()
     {
@@ -1301,10 +1383,7 @@ var GamePlayScene = function(game, stage)
 
     self.draw = function()
     {
-      //border
-      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,1,border_fill,4,self.template.blocks);
-      //real
-      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,1,false,0,self.template.blocks);
+      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,0,1,self.template.blocks);
     }
   }
 
@@ -1533,7 +1612,7 @@ var GamePlayScene = function(game, stage)
       molecules[i].draw_front_down();
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_up();
-    ctx.fillStyle = "rgba(66,66,66,0.8)";
+    ctx.fillStyle = "rgba(255,255,255,0.8)";
     ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
     for(var i = 0; i < stamps.length; i++)
       stamps[i].draw();
