@@ -107,15 +107,27 @@ var GamePlayScene = function(game, stage)
   star_full.context.fill();
   star_full.context.stroke();
 
-  var atom = GenIcon(w,h)
-  atom.context.strokeStyle = "#FFFFFF";
-  atom.context.fillStyle = "rgba(0,0,0,0.1)";
-  atom.context.lineWidth = 4;
-  atom.context.beginPath();
-  atom.context.arc(w/2,h/2,2*w/7,0,2*Math.PI);
-  atom.context.closePath();
-  atom.context.fill();
-  atom.context.stroke();
+  var atoms = [];
+  for(var i = 0; i < 5; i++)
+  {
+    var atom = GenIcon(w,h)
+    atom.context.strokeStyle = "#FFFFFF";
+    switch(i)
+    {
+      case 0: atom.context.fillStyle = "rgba(255,0,0,0.3)"; break;
+      case 1: atom.context.fillStyle = "rgba(100,0,0,0.2)"; break;
+      case 2: atom.context.fillStyle = "rgba(0,0,0,0.1)"; break;
+      case 3: atom.context.fillStyle = "rgba(0,100,0,0.2)"; break;
+      case 4: atom.context.fillStyle = "rgba(0,255,0,0.3)"; break;
+    }
+    atom.context.lineWidth = 4;
+    atom.context.beginPath();
+    atom.context.arc(w/2,h/2,2*w/7,0,2*Math.PI);
+    atom.context.closePath();
+    atom.context.fill();
+    atom.context.stroke();
+    atoms.push(atom);
+  }
 
   var n_ticks = 0;
 
@@ -170,7 +182,7 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
-      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,self.rotoff+n_ticks/100,0.5,0,self.level.available_templates[0].blocks);
+      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,0,self.level.available_templates[0].blocks);
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -238,7 +250,7 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
-      draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,n_ticks/100,1,0,cur_level.available_templates[0].blocks);
+      draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,cur_level.available_templates[0].blocks);
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -444,7 +456,7 @@ var GamePlayScene = function(game, stage)
       blocks[i].c[0] = last;
     }
   }
-  var draw_blocks = function(wx,wy,offx,offy,bounces,rot,scale,shadow,blocks)
+  var draw_blocks = function(wx,wy,offx,offy,bounces,happys,rot,scale,shadow,blocks)
   {
     tx = screenSpaceX(cam,canv,wx);
     ty = screenSpaceY(cam,canv,wy);
@@ -683,10 +695,21 @@ var GamePlayScene = function(game, stage)
         dblock.ww = oldww;
         dblock.wh = oldwh;
 
-        if(bounces)
-          ctx.drawImage(atom, dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
+        if(happys)
+        {
+          var happy = clamp(-2,2,happys[i]);
+          if(bounces)
+            ctx.drawImage(atoms[happy+2], dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
+          else
+            ctx.drawImage(atoms[happy+2], dblock.x, dblock.y, dblock.w, dblock.h);
+        }
         else
-          ctx.drawImage(atom, dblock.x, dblock.y, dblock.w, dblock.h);
+        {
+          if(bounces)
+            ctx.drawImage(atoms[2], dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
+          else
+            ctx.drawImage(atoms[2], dblock.x, dblock.y, dblock.w, dblock.h);
+        }
       }
     }
 
@@ -1036,8 +1059,7 @@ var GamePlayScene = function(game, stage)
         var s = new molecule();
         s.wx = stamp_hit.wx;
         s.wy = stamp_hit.wy-self.scroll_wy;
-        copy_template(stamp_hit.template,s.template);
-        s.genTemplateBounces();
+        s.setTemplate(stamp_hit.template);
         s.dragging = true;
         dragging_molecule = s;
         molecules[molecules.length] = s;
@@ -1074,12 +1096,17 @@ var GamePlayScene = function(game, stage)
 
     self.template = new template();
     self.bounces = [];
+    self.happys = [];
 
-    self.genTemplateBounces = function()
+    self.setTemplate = function(t)
     {
+      copy_template(t,self.template);
       self.bounces = [];
       for(var i = 0; i < self.template.blocks.length; i++)
         self.bounces.push(new bounce2());
+      self.happys = [];
+      for(var i = 0; i < self.template.blocks.length; i++)
+        self.happys.push(0);
     }
 
     self.wx  = 0;
@@ -1093,8 +1120,7 @@ var GamePlayScene = function(game, stage)
     self.click_ticks = 1000000;
     self.up_ticks = 1000000;
     self.up = true;
-    self.happy_ticks = 100000;
-    self.happy = 0;
+    self.total_happy = 0;
     self.cx = 0;
     self.cy = 0;
 
@@ -1265,7 +1291,6 @@ var GamePlayScene = function(game, stage)
       self.click_ticks++;
       self.rot_ticks++;
       if(self.up) self.up_ticks++;
-      if(self.happy != 0) self.happy_ticks++;
       var t;
       var n_min = 0;
       var n_max = 0;
@@ -1303,7 +1328,7 @@ var GamePlayScene = function(game, stage)
       }
 
       var s = 0;
-      switch(self.happy)
+      switch(self.total_happy)
       {
         case -3: s = 0.15; break;
         case -2: s = 0.08; break;
@@ -1312,8 +1337,8 @@ var GamePlayScene = function(game, stage)
         case  1: s = 0.008; break;
         case  2: s = 0.002; break;
       }
-      if(self.happy >  2) s = 0;
-      if(self.happy < -3) s = self.happy/10;
+      if(self.total_happy >  2) s = 0;
+      if(self.total_happy < -3) s = self.total_happy/10;
 
       for(var i = 0; i < self.bounces.length; i++)
       {
@@ -1328,13 +1353,13 @@ var GamePlayScene = function(game, stage)
 
     self.draw_off_up = function(woffx,woffy)
     {
-      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.rot,1,1,self.template.blocks);
+      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,1,self.template.blocks);
       var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
-      draw_blocks(self.wx+t+woffx,self.wy-t+woffy,0,0,self.bounces,self.rot,1,0,self.template.blocks);
+      draw_blocks(self.wx+t+woffx,self.wy-t+woffy,0,0,self.bounces,self.happys,self.rot,1,0,self.template.blocks);
     }
     self.draw_off_down = function(woffx,woffy)
     {
-      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.rot,1,0,self.template.blocks);
+      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,0,self.template.blocks);
     }
     self.draw_front_up = function()
     {
@@ -1376,6 +1401,7 @@ var GamePlayScene = function(game, stage)
   var block_happiness_off = function(a,b,offx,offy)
   {
     var happy = 0;
+    var v;
     for(var i = 0; i < a.template.blocks.length; i++)
     {
       for(var j = 0; j < b.template.blocks.length; j++)
@@ -1383,16 +1409,36 @@ var GamePlayScene = function(game, stage)
         if(a.wx+a.template.blocks[i].cx+offx == b.wx+b.template.blocks[j].cx) //vert aligned
         {
           if((a.wy+a.template.blocks[i].cy+offy) - (b.wy+b.template.blocks[j].cy) ==  1) //a above b
-            happy -= (a.template.blocks[i].c[2] * b.template.blocks[j].c[0]);
+          {
+            v = -(a.template.blocks[i].c[2] * b.template.blocks[j].c[0]);
+            happy += v;
+            a.happys[i] += v;
+            b.happys[j] += v;
+          }
           if((a.wy+a.template.blocks[i].cy+offy) - (b.wy+b.template.blocks[j].cy) == -1) //a below b
-            happy -= (a.template.blocks[i].c[0] * b.template.blocks[j].c[2]);
+          {
+            v = -(a.template.blocks[i].c[0] * b.template.blocks[j].c[2]);
+            happy += v;
+            a.happys[i] += v;
+            b.happys[j] += v;
+          }
         }
         if(a.wy+a.template.blocks[i].cy+offy == b.wy+b.template.blocks[j].cy) //horiz aligned
         {
           if((a.wx+a.template.blocks[i].cx+offx) - (b.wx+b.template.blocks[j].cx) ==  1) //a right of b
-            happy -= (a.template.blocks[i].c[3] * b.template.blocks[j].c[1]);
+          {
+            v = -(a.template.blocks[i].c[3] * b.template.blocks[j].c[1]);
+            happy += v;
+            a.happys[i] += v;
+            b.happys[j] += v;
+          }
           if((a.wx+a.template.blocks[i].cx+offx) - (b.wx+b.template.blocks[j].cx) == -1) //a left of b
-            happy -= (a.template.blocks[i].c[1] * b.template.blocks[j].c[3]);
+          {
+            v = -(a.template.blocks[i].c[1] * b.template.blocks[j].c[3]);
+            happy += v;
+            a.happys[i] += v;
+            b.happys[j] += v;
+          }
         }
       }
     }
@@ -1449,7 +1495,7 @@ var GamePlayScene = function(game, stage)
 
     self.draw = function()
     {
-      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,0,1,0,self.template.blocks);
+      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,0,0,1,0,self.template.blocks);
     }
   }
 
@@ -1574,7 +1620,11 @@ var GamePlayScene = function(game, stage)
 
     var happy = 0;
     for(var i = 0; i < molecules.length; i++)
-      molecules[i].happy = 0;
+    {
+      molecules[i].total_happy = 0;
+      for(var j = 0; j < molecules[i].happys.length; j++)
+        molecules[i].happys[j] = 0;
+    }
     for(var i = 0; i < molecules.length; i++)
     {
       if(molecules[i].up) continue;
@@ -1582,8 +1632,8 @@ var GamePlayScene = function(game, stage)
       {
         if(molecules[j].up) continue;
         happy = block_happiness(molecules[i],molecules[j]);
-        molecules[i].happy += happy;
-        molecules[j].happy += happy;
+        molecules[i].total_happy += happy;
+        molecules[j].total_happy += happy;
       }
     }
 
