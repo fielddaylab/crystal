@@ -421,4 +421,23 @@ var bounce = function(target=0,v=0,vel=0,pull=0.1,drag=0.1)
     self.v += self.vel;
   }
 }
+var bounce2 = function(targetx=0,targety=0,vx=0,vy=0,velx=0,vely=0,pull=0.1,drag=0.1)
+{
+  var self = this;
+  self.targetx = targetx;
+  self.targety = targety;
+  self.vx = vx;
+  self.vy = vy;
+  self.velx = velx;
+  self.vely = vely;
+  self.pull = pull;
+  self.drag = drag;
+  self.tick = function()
+  {
+    self.velx = (self.velx+(self.targetx-self.vx)*self.pull)*(1-self.drag);
+    self.vx += self.velx;
+    self.vely = (self.vely+(self.targety-self.vy)*self.pull)*(1-self.drag);
+    self.vy += self.vely;
+  }
+}
 
