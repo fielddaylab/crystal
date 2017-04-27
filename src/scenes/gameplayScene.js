@@ -39,9 +39,6 @@ var GamePlayScene = function(game, stage)
 
   var score_patience = 10;
 
-  var deltas = [];
-  var delta_max_t = 100;
-
   var scroll;
   var stamps;
   var molecules;
@@ -318,9 +315,9 @@ var GamePlayScene = function(game, stage)
     levels[i].scale = 1;
     levels[i].repeat_x = 6;
     levels[i].repeat_y = 4;
-    levels[i].star_req_score[0] = 10;
-    levels[i].star_req_score[1] = 22;
-    levels[i].star_req_score[2] = 24;
+    levels[i].star_req_score[0] = 22;
+    levels[i].star_req_score[1] = 30;
+    levels[i].star_req_score[2] = 36;
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
@@ -331,9 +328,9 @@ var GamePlayScene = function(game, stage)
     levels[i].scale = 1;
     levels[i].repeat_x = 6;
     levels[i].repeat_y = 4;
-    levels[i].star_req_score[0] = 16;
+    levels[i].star_req_score[0] = 13;
     levels[i].star_req_score[1] = 20;
-    levels[i].star_req_score[2] = 24;
+    levels[i].star_req_score[2] = 30;
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:1,cy:1,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
@@ -344,9 +341,9 @@ var GamePlayScene = function(game, stage)
     levels[i].scale = 1;
     levels[i].repeat_x = 6;
     levels[i].repeat_y = 4;
-    levels[i].star_req_score[0] = 16;
-    levels[i].star_req_score[1] = 20;
-    levels[i].star_req_score[2] = 24;
+    levels[i].star_req_score[0] = 8;
+    levels[i].star_req_score[1] = 17;
+    levels[i].star_req_score[2] = 30;
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:1,cy:0,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
@@ -357,9 +354,9 @@ var GamePlayScene = function(game, stage)
     levels[i].scale = 1;
     levels[i].repeat_x = 6;
     levels[i].repeat_y = 4;
-    levels[i].star_req_score[0] = 24;
-    levels[i].star_req_score[1] = 32;
-    levels[i].star_req_score[2] = 74;
+    levels[i].star_req_score[0] = 36;
+    levels[i].star_req_score[1] = 37;
+    levels[i].star_req_score[2] = 84;
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
@@ -370,9 +367,9 @@ var GamePlayScene = function(game, stage)
     levels[i].scale = 1;
     levels[i].repeat_x = 8;
     levels[i].repeat_y = 4;
-    levels[i].star_req_score[0] = 34;
-    levels[i].star_req_score[1] = 74;
-    levels[i].star_req_score[2] = 84;
+    levels[i].star_req_score[0] = 48;
+    levels[i].star_req_score[1] = 61;
+    levels[i].star_req_score[2] = 90;
     j = 0;
     levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
@@ -383,9 +380,9 @@ var GamePlayScene = function(game, stage)
     levels[i].scale = 2;
     levels[i].repeat_x = 10;
     levels[i].repeat_y = 10;
-    levels[i].star_req_score[0] = 180;
-    levels[i].star_req_score[1] = 360;
-    levels[i].star_req_score[2] = 474;
+    levels[i].star_req_score[0] = 140;
+    levels[i].star_req_score[1] = 280;
+    levels[i].star_req_score[2] = 284;
     j = 0;
     levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
@@ -754,12 +751,7 @@ var GamePlayScene = function(game, stage)
             present:0,
             present_t:0,
             score_up:0,
-            old_score_up:0,
-            tentative_score_up:0,
             score_right:0,
-            old_score_right:0,
-            tentative_score_right:0,
-            score_t:0
           };
     }
 
@@ -846,7 +838,7 @@ var GamePlayScene = function(game, stage)
           cell = self.cells[boardi(j,i)];
           if(cell.present)
           {
-            if(i > -1 && i < bounds.wh && j < bounds.ww) //check right
+            if(i > -1 && i < bounds.wh && j < bounds.ww && j < cur_level.repeat_x-1) //check right
             {
               neighbor = self.cells[boardi(j+1,i)];
               if(neighbor.present && cell.molecule_id != neighbor.molecule_id)
@@ -864,7 +856,7 @@ var GamePlayScene = function(game, stage)
                 }
               }
             }
-            if(j > -1 && j < bounds.ww && i < bounds.wh) //check up
+            if(j > -1 && j < bounds.ww && i < bounds.wh && i < cur_level.repeat_y-1) //check up
             {
               neighbor = self.cells[boardi(j,i+1)];
               if(neighbor.present && cell.molecule_id != neighbor.molecule_id)
@@ -888,97 +880,6 @@ var GamePlayScene = function(game, stage)
       return score;
     }
 
-    self.tick = function()
-    {
-      var cell;
-      var neighbor;
-      var x;
-      var y;
-      for(var i = 0; i < bounds.wh; i++)
-      {
-        for(var j = 0; j < bounds.ww; j++)
-        {
-          cell = self.cells[boardi(j,i)];
-
-          if(
-            cell.score_up    != cell.old_score_up ||
-            cell.score_right != cell.old_score_right)
-          {
-            if(cell.score_up != cell.tentative_score_up)
-            {
-              cell.score_t = 0;
-              cell.tentative_score_up = cell.score_up;
-            }
-            if(cell.score_right != cell.tentative_score_right)
-            {
-              cell.score_t = 0;
-              cell.tentative_score_right = cell.score_right;
-            }
-            cell.score_t++;
-            if(cell.score_t >= score_patience)
-            {
-              x = screenSpaceX(cam,canv,cell.cx-0.5);
-              y = screenSpaceY(cam,canv,cell.cy-0.5);
-              if(cell.old_score_up != cell.score_up)
-                popDelta(x,y-10,cell.score_up-cell.old_score_up);
-              else if(cell.score_right-cell.old_score_right)
-                popDelta(x+10,y,cell.score_right-cell.old_score_right);
-              cell.old_score_up    = cell.score_up;
-              cell.old_score_right = cell.score_right;
-              cell.score_t = 0;
-            }
-          }
-          else
-          {
-            cell.tentative_score_up = cell.score_up;
-            cell.tentative_score_right = cell.score_right;
-            cell.score_t = 0;
-          }
-
-        }
-      }
-    }
-
-  }
-
-  var popDelta = function(x,y,delta)
-  {
-    var txt;
-    if(delta < 0) txt = "-";//""+delta;
-    if(delta > 0) txt = "+";//"+"+delta;
-    for(var i = 0; i < abs(delta); i++)
-      deltas.push({x:x,y:y,xvel:rand0()*0.1,yvel:rand0()*0.1,delta:delta,txt:txt,t:delta_max_t-(rand()*20)});
-  }
-  var tickDeltas = function()
-  {
-    for(var i = 0; i < deltas.length; i++)
-    {
-      deltas[i].t--;
-      deltas[i].x += deltas[i].xvel;
-      deltas[i].y += deltas[i].yvel;
-      deltas[i].xvel *= 0.99;
-      deltas[i].yvel *= 0.99;
-      if(deltas[i].t <= 0)
-      {
-        deltas.splice(i,1);
-        i--;
-      }
-    }
-  }
-  var drawDeltas = function()
-  {
-    var d;
-    var t;
-    for(var i = 0; i < deltas.length; i++)
-    {
-      d = deltas[i];
-      t = d.t/delta_max_t;
-      if(d.delta > 0) ctx.fillStyle = "rgba(0,255,0,"+t+")";
-      if(d.delta < 0) ctx.fillStyle = "rgba(255,0,0,"+t+")";
-
-      //ctx.fillRect(d.x-5,d.y-5,10,10);
-      ctx.fillText(d.txt,d.x-5,d.y+5);
-    }
   }
 
   var bring_to_top = function(molecule)
@@ -1590,38 +1491,6 @@ var GamePlayScene = function(game, stage)
 
     score_board.populate();
     score = score_board.score();
-    score_board.tick();
-
-/*
-    if(submitting_t != -1)
-    {
-      var bounds_t = bounds.ww*bounds.wh;
-      if(submitting_t < bounds_t)
-      {
-        var x = submitting_t%bounds.ww;
-        var y = floor(submitting_t/bounds.ww);
-        var cell = board[boardi(x,y)];
-        x = screenSpaceX(cam,canv,cell.cx-0.5);
-        y = screenSpaceY(cam,canv,cell.cy-0.5);
-        popDelta(x,y,cell.present+cell.score_up+cell.score_right);
-      }
-      else if(submitting_t >= bounds_t)
-      {
-        if(submitting_t == bounds_t) outro.start_ticks = n_ticks+40;
-        var t_into_outro = submitting_t-bounds_t;
-        if(t_into_outro < star_outro_sub_slide)
-          outro.wx = lerp(bounds.wx-bounds.ww/2-5-5,bounds.wx,t_into_outro/star_outro_sub_slide);
-        else
-          outro.wx = bounds.wx;
-        outro.wy = 0;
-        outro.ww = cam.ww/4;
-        outro.wh = cam.wh/2;
-        screenSpace(cam,canv,outro);
-      }
-      submitting_t++;
-    }
-*/
-    tickDeltas();
 
     var old_cur_stars = cur_level.cur_stars;
     cur_level.cur_stars = 0;
@@ -1719,8 +1588,6 @@ var GamePlayScene = function(game, stage)
       else
         ctx.drawImage(star     ,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
     }
-
-    drawDeltas();
 
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
