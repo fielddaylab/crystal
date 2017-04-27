@@ -1,3 +1,7 @@
+var G = [];
+
+G = [0.25, 0.15, 0.2, 0.08, 0.03, 0.01, 0.005, 0.002, 0.0];
+
 var GamePlayScene = function(game, stage)
 {
   var self = this;
@@ -53,9 +57,8 @@ var GamePlayScene = function(game, stage)
   var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
   var bounds_stroke  = "rgba(0,0,0,.6)";
   var shadow_fill  = "rgba(0,0,0,.1)";
-  var border_fill  = "#FFFFFF";
-  var block_fill   = "#EEEEEE";
-  var block_stroke = "#BBBBBB";
+  var block_fill   = "#F6F6F6";
+  var block_stroke = "#E0E0E0";
   var scroll_fill = "rgba(255,255,255,0.5)";
 
   var w = 100;
@@ -113,11 +116,11 @@ var GamePlayScene = function(game, stage)
     atom.context.strokeStyle = "#FFFFFF";
     switch(i)
     {
-      case 0: atom.context.fillStyle = "rgba(255,0,0,0.3)"; break;
-      case 1: atom.context.fillStyle = "rgba(100,0,0,0.2)"; break;
-      case 2: atom.context.fillStyle = "rgba(0,0,0,0.1)"; break;
-      case 3: atom.context.fillStyle = "rgba(0,100,0,0.2)"; break;
-      case 4: atom.context.fillStyle = "rgba(0,255,0,0.3)"; break;
+      case 0: atom.context.fillStyle = "rgba(200,0,0,0.8)"; break;
+      case 1: atom.context.fillStyle = "rgba(100,0,0,0.5)"; break;
+      case 2: atom.context.fillStyle = "rgba(0,0,0,0.3)"; break;
+      case 3: atom.context.fillStyle = "rgba(0,100,0,0.5)"; break;
+      case 4: atom.context.fillStyle = "rgba(0,200,0,0.8)"; break;
     }
     atom.context.lineWidth = 4;
     atom.context.beginPath();
@@ -125,7 +128,7 @@ var GamePlayScene = function(game, stage)
     atom.context.closePath();
     atom.context.fill();
     atom.context.stroke();
-    atom.context.fillText(i,w/2,h/2);
+    //atom.context.fillText(i,w/2,h/2);
     atoms.push(atom);
   }
 
@@ -1260,21 +1263,22 @@ var GamePlayScene = function(game, stage)
       {
         if(rand() < 0.1)
         {
-          var s = 0;
-          switch(self.happys[i])
-          {
-            case -3: s = 0.15; break;
-            case -2: s = 0.08; break;
-            case -1: s = 0.04; break;
-            case  0: s = 0.02; break;
-            case  1: s = 0.008; break;
-            case  2: s = 0.002; break;
-          }
-          if(self.happys[i] >  2) s = 0;
-          if(self.happys[i] < -3) s = self.happys[i]/10;
+          var s = 3;
 
-          self.bounces[i].velx += rand0()*s*50;
-          self.bounces[i].vely += rand0()*s*50;
+               if(self.happys[i] < -5)  s = 0;
+          else if(self.happys[i] < -4)  s = 1;
+          else if(self.happys[i] <  0)  s = 2;
+          else if(self.happys[i] <  1)  s = 3;
+          else if(self.happys[i] <  2)  s = 4;
+          else if(self.happys[i] <  3)  s = 5;
+          else if(self.happys[i] <  6)  s = 6;
+          else if(self.happys[i] <  10) s = 7;
+          else                          s = 8;
+
+          s = G[s];
+
+          self.bounces[i].velx += rand0()*s*10;
+          self.bounces[i].vely += rand0()*s*10;
         }
         self.bounces[i].tick();
       }
@@ -1475,7 +1479,7 @@ var GamePlayScene = function(game, stage)
     }
     else if(mode == MODE_SUBMIT)
     {
-      if(submitting_t > bounds.ww*bounds.wh+star_outro_sub_slide+star_outro_sub_star)
+      if(submitting_t > star_outro_sub_slide+star_outro_sub_star)
         clicker.filter(outro);
     }
 
@@ -1488,6 +1492,21 @@ var GamePlayScene = function(game, stage)
 
     score_board.populate();
     score = score_board.score();
+
+    if(submitting_t != -1)
+    {
+      if(submitting_t == 0) outro.start_ticks = n_ticks+40;
+      var t_into_outro = submitting_t;
+      if(t_into_outro < star_outro_sub_slide)
+        outro.wx = lerp(bounds.wx-bounds.ww/2-5-5,bounds.wx,t_into_outro/star_outro_sub_slide);
+      else
+        outro.wx = bounds.wx;
+      outro.wy = 0;
+      outro.ww = cam.ww/4;
+      outro.wh = cam.wh/2;
+      screenSpace(cam,canv,outro);
+      submitting_t++;
+    }
 
     var old_cur_stars = cur_level.cur_stars;
     cur_level.cur_stars = 0;
@@ -1589,7 +1608,7 @@ var GamePlayScene = function(game, stage)
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
 
-    if(mode == MODE_SUBMIT && submitting_t > bounds.ww*bounds.wh)
+    if(mode == MODE_SUBMIT)
     {
       outro.draw();
     }
