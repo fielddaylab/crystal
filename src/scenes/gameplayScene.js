@@ -59,6 +59,7 @@ var GamePlayScene = function(game, stage)
   var border_fill  = "#FFFFFF";
   var block_fill   = "#EEEEEE";
   var block_stroke = "#BBBBBB";
+  var scroll_fill = "rgba(255,255,255,0.5)";
 
   var w = 100;
   var h = 100;
@@ -127,6 +128,7 @@ var GamePlayScene = function(game, stage)
     atom.context.closePath();
     atom.context.fill();
     atom.context.stroke();
+    atom.context.fillText(i,w/2,h/2);
     atoms.push(atom);
   }
 
@@ -853,7 +855,7 @@ var GamePlayScene = function(game, stage)
                 if(cell_score == 0) cell_score = 1;
                 score            += cell_score;
                 cell.score_right += cell_score;
-                if(j < bounds.ww-1) //otherwise can get counted twice (which is good for score- not for happy)
+                if(j < cur_level.repeat_x-1) //otherwise can get counted twice (which is good for score- not for happy)
                 {
                   molecules[cell.molecule_id].happys[cell.block_id] += cell_score;
                   molecules[cell.molecule_id].total_happy += cell_score;
@@ -871,7 +873,7 @@ var GamePlayScene = function(game, stage)
                 if(cell_score == 0) cell_score = 1;
                 score         += cell_score;
                 cell.score_up += cell_score;
-                if(i < bounds.wh-1) //otherwise can get counted twice (which is good for score- not for happy)
+                if(i < cur_level.repeat_y-1) //otherwise can get counted twice (which is good for score- not for happy)
                 {
                   molecules[cell.molecule_id].happys[cell.block_id] += cell_score;
                   molecules[cell.molecule_id].total_happy += cell_score;
@@ -1680,14 +1682,22 @@ var GamePlayScene = function(game, stage)
       molecules[i].draw_behind_down();
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_down();
+
+    ctx.fillStyle = scroll_fill;
+    ctx.fillRect(0,0,canv.width,bounds.y);
+    ctx.fillRect(0,bounds.y,bounds.x,bounds.h);
+    ctx.fillRect(bounds.x+bounds.w,bounds.y,canv.width-(bounds.x+bounds.w),bounds.h);
+    ctx.fillRect(0,bounds.y+bounds.h,canv.width,bounds.y);
+
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_up();
-    ctx.fillStyle = "rgba(255,255,255,0.8)";
+    ctx.fillStyle = scroll_fill;
     ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
     for(var i = 0; i < stamps.length; i++)
       stamps[i].draw();
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_up();
+
 
     ctx.strokeStyle = bounds_stroke;
     ctx.lineWidth = 2;
