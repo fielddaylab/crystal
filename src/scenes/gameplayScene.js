@@ -59,7 +59,7 @@ var GamePlayScene = function(game, stage)
   var shadow_fill  = "rgba(0,0,0,.1)";
   var block_fill   = "#F6F6F6";
   var block_stroke = "#E0E0E0";
-  var scroll_fill = "rgba(255,255,255,0.5)";
+  var scroll_fill = "rgba(0,0,0,0.1)";
 
   var w = 100;
   var h = 100;
@@ -1569,10 +1569,15 @@ var GamePlayScene = function(game, stage)
       molecules[i].draw_front_down();
 
     ctx.fillStyle = scroll_fill;
-    ctx.fillRect(0,0,canv.width,bounds.y);
-    ctx.fillRect(0,bounds.y,bounds.x,bounds.h);
-    ctx.fillRect(bounds.x+bounds.w,bounds.y,canv.width-(bounds.x+bounds.w),bounds.h);
-    ctx.fillRect(0,bounds.y+bounds.h,canv.width,bounds.y);
+    if(bounds.w)
+    {
+      ctx.fillRect(0,0,canv.width,bounds.y);
+      ctx.fillRect(0,bounds.y,bounds.x,bounds.h);
+      ctx.fillRect(bounds.x+bounds.w,bounds.y,canv.width-(bounds.x+bounds.w),bounds.h);
+      ctx.fillRect(0,bounds.y+bounds.h,canv.width,bounds.y);
+    }
+    else
+      ctx.fillRect(0,0,canv.width,canv.height);
 
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_up();
