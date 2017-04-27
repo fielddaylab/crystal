@@ -29,6 +29,7 @@ var GamePlayScene = function(game, stage)
 
   var levels;
   var cur_level;
+  var cur_stars_bounce;
 
   var url_args;
   var lvl;
@@ -152,6 +153,7 @@ var GamePlayScene = function(game, stage)
     self.repeat_y = 10;
     self.stars = 0;
     self.cur_stars = 0;
+    self.cur_stars_t = 0; //t since new cur_stars rating
     self.best = -99999;
     self.star_req_score = [];
     for(var i = 0; i < 3; i++)
@@ -1527,6 +1529,7 @@ var GamePlayScene = function(game, stage)
     if(!lvl) lvl = 0;
     init_levels();
     set_level(lvl);
+    cur_stars_bounce = new bounce();
 
     back_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     back_btn.click = function(evt) { mode = MODE_MENU; evt.hitUI = true; }
@@ -1688,11 +1691,19 @@ var GamePlayScene = function(game, stage)
     }
     tickDeltas();
 
+    var old_cur_stars = cur_level.cur_stars;
     cur_level.cur_stars = 0;
     if(score > cur_level.best) cur_level.best = score;
     for(var i = 0; i < 3; i++)
       if(score >= cur_level.star_req_score[i]) cur_level.cur_stars = i+1;
     if(cur_level.cur_stars > cur_level.stars) cur_level.stars = cur_level.cur_stars;
+    if(cur_level.cur_stars != old_cur_stars)
+    {
+      cur_level.cur_stars_t = 0;
+      cur_stars_bounce.vel = 1;
+    }
+    cur_stars_bounce.tick();
+    cur_level.cur_stars_t++;
   };
 
   self.draw = function()
@@ -1760,10 +1771,11 @@ var GamePlayScene = function(game, stage)
     ctx.fillText("Clear",clear_btn.x,clear_btn.y+clear_btn.h/2);
     ctx.fillText("[Submit]",submit_btn.x,submit_btn.y+submit_btn.h/2);
 
+    var b = cur_stars_bounce.v*10;
     for(var i = 0; i < 3; i++)
     {
       if(cur_level.cur_stars > i)
-        ctx.drawImage(star_full,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
+        ctx.drawImage(star_full,bounds.x+bounds.w-270+20*i-b/2,bounds.y-26-b/2,20+b,20+b);
       else
         ctx.drawImage(star     ,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
     }
