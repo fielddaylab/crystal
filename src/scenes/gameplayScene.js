@@ -748,6 +748,7 @@ var GamePlayScene = function(game, stage)
             cy:i+1+bounds.wy-bounds.wh/2,
             c:[0,0,0,0],
             molecule_id: 0,
+            block_id: 0,
             present:0,
             present_t:0,
             score_up:0,
@@ -763,30 +764,32 @@ var GamePlayScene = function(game, stage)
     self.clear = function()
     {
       var cell;
-      for(var i = 0; i < bounds.wh; i++)
+      for(var i = -1; i < bounds.wh+1; i++)
       {
-        for(var j = 0; j < bounds.ww; j++)
+        for(var j = -1; j < bounds.ww+1; j++)
         {
           cell = self.cells[boardi(j,i)];
           for(var k = 0; k < 4; k++)
             cell.c[k] = 0;
           cell.present = 0;
           cell.molecule_id = 0;
+          cell.block_id = 0;
           cell.score_up = 0;
           cell.score_right = 0;
         }
       }
     }
 
-    self.stampCell = function(block,x,y,id)
+    self.stampCell = function(block,x,y,molecule_id,block_id)
     {
       var cell;
-      if(x == clamp(0,bounds.ww-1,x) && y == clamp(0,bounds.wh-1,y))
+      if(x == clamp(-1,bounds.ww,x) && y == clamp(-1,bounds.wh,y))
       {
         cell = self.cells[boardi(x,y)];
         for(var k = 0; k < 4; k++) cell.c[k] = block.c[k];
         cell.present = 1;
-        cell.molecule_id = id;
+        cell.molecule_id = molecule_id;
+        cell.block_id = block_id;
       }
     }
 
@@ -800,15 +803,15 @@ var GamePlayScene = function(game, stage)
         block = molecule.template.blocks[i];
         x = molecule.cx+block.cx-bounds.wx+bounds.ww/2-1;
         y = molecule.cy+block.cy-bounds.wy+bounds.wh/2-1;
-        self.stampCell(block,x                   ,y                   , id);
-        self.stampCell(block,x+cur_level.repeat_x,y                   , id);
-        self.stampCell(block,x-cur_level.repeat_x,y                   , id);
-        self.stampCell(block,x                   ,y+cur_level.repeat_y, id);
-        self.stampCell(block,x                   ,y-cur_level.repeat_y, id);
-        self.stampCell(block,x+cur_level.repeat_x,y+cur_level.repeat_y, id);
-        self.stampCell(block,x+cur_level.repeat_x,y-cur_level.repeat_y, id);
-        self.stampCell(block,x-cur_level.repeat_x,y+cur_level.repeat_y, id);
-        self.stampCell(block,x-cur_level.repeat_x,y-cur_level.repeat_y, id);
+        self.stampCell(block,x                   ,y                   , id, i);
+        self.stampCell(block,x+cur_level.repeat_x,y                   , id, i);
+        self.stampCell(block,x-cur_level.repeat_x,y                   , id, i);
+        self.stampCell(block,x                   ,y+cur_level.repeat_y, id, i);
+        self.stampCell(block,x                   ,y-cur_level.repeat_y, id, i);
+        self.stampCell(block,x+cur_level.repeat_x,y+cur_level.repeat_y, id, i);
+        self.stampCell(block,x+cur_level.repeat_x,y-cur_level.repeat_y, id, i);
+        self.stampCell(block,x-cur_level.repeat_x,y+cur_level.repeat_y, id, i);
+        self.stampCell(block,x-cur_level.repeat_x,y-cur_level.repeat_y, id, i);
       }
     }
 
@@ -827,14 +830,14 @@ var GamePlayScene = function(game, stage)
       var neighbor;
       var cell_score;
       var score = 0;
-      for(var i = 0; i < bounds.wh; i++)
+      for(var i = -1; i < bounds.wh+1; i++)
       {
-        for(var j = 0; j < bounds.ww; j++)
+        for(var j = -1; j < bounds.ww+1; j++)
         {
           cell = self.cells[boardi(j,i)];
           if(cell.present)
           {
-            if(j != bounds.ww-1) //check right
+            if(i > -1 && i < bounds.wh && j < bounds.ww) //check right
             {
               neighbor = self.cells[boardi(j+1,i)];
               if(neighbor.present)
@@ -845,7 +848,7 @@ var GamePlayScene = function(game, stage)
                 cell.score_right += cell_score;
               }
             }
-            if(i != bounds.wh-1) //check up
+            if(j > -1 && j < bounds.ww && i < bounds.wh) //check up
             {
               neighbor = self.cells[boardi(j,i+1)];
               if(neighbor.present)
