@@ -35,7 +35,7 @@ var GamePlayScene = function(game, stage)
   var lvl;
 
   var score = 0;
-  var board;
+  var score_board;
 
   var score_patience = 10;
 
@@ -443,7 +443,7 @@ var GamePlayScene = function(game, stage)
       copy_template(cur_level.available_templates[i],stamps[i].template);
     }
 
-    create_board();
+    score_board.reset();
   }
 
   var copy_template = function(from,to)
@@ -730,200 +730,189 @@ var GamePlayScene = function(game, stage)
 
   }
 
-  var boardi = function(x,y) { return ((1+y)*(bounds.ww+2))+(x+1); }
-  var create_board = function()
+  var board = function()
   {
-    board = [];
-    var w = bounds.ww;
-    var h = bounds.wh;
-    for(var i = -1; i < h+1; i++)
-      for(var j = -1; j < w+1; j++)
-        board[boardi(j,i)] =
-        {
-          cx:j+1+bounds.wx-bounds.ww/2,
-          cy:i+1+bounds.wy-bounds.wh/2,
-          c:[0,0,0,0],
-          present:0,
-          old_present:0,
-          tentative_present:0,
-          present_t:0,
-          score_up:0,
-          old_score_up:0,
-          tentative_score_up:0,
-          score_right:0,
-          old_score_right:0,
-          tentative_score_right:0,
-          score_t:0
-        };
-  }
-  var clearBoard = function()
-  {
-    var w = bounds.ww;
-    var h = bounds.wh;
-    var cell;
-    for(var i = 0; i < h; i++)
+    var self = this;
+    self.cells = [];
+
+    var boardi = function(x,y) { return ((1+y)*(bounds.ww+2))+(x+1); }
+
+    self.reset = function()
     {
-      for(var j = 0; j < w; j++)
-      {
-        cell = board[boardi(j,i)];
-        for(var k = 0; k < 4; k++)
-          cell.c[k] = 0;
-        cell.present = 0;
-        cell.score_up = 0;
-        cell.score_right = 0;
-      }
+      self.cells = [];
+      for(var i = -1; i < bounds.wh+1; i++)
+        for(var j = -1; j < bounds.ww+1; j++)
+          self.cells[boardi(j,i)] =
+          {
+            cx:j+1+bounds.wx-bounds.ww/2,
+            cy:i+1+bounds.wy-bounds.wh/2,
+            c:[0,0,0,0],
+            molecule_id: 0,
+            present:0,
+            present_t:0,
+            score_up:0,
+            old_score_up:0,
+            tentative_score_up:0,
+            score_right:0,
+            old_score_right:0,
+            tentative_score_right:0,
+            score_t:0
+          };
     }
-  }
-  var stampBoard = function(block,x,y)
-  {
-    var cell;
-    if(x == clamp(0,bounds.ww-1,x) && y == clamp(0,bounds.wh-1,y))
+
+    self.clear = function()
     {
-      cell = board[boardi(x,y)];
-      for(var k = 0; k < 4; k++)
-        cell.c[k] = block.c[k];
-      cell.present = 1;
-    }
-  }
-  var populateBoard = function()
-  {
-    var molecule;
-    var block;
-    var x;
-    var y;
-    for(var i = 0; i < molecules.length; i++)
-    {
-      molecule = molecules[i];
-      if(!molecule.up)
+      var cell;
+      for(var i = 0; i < bounds.wh; i++)
       {
-        for(var j = 0; j < molecule.template.blocks.length; j++)
+        for(var j = 0; j < bounds.ww; j++)
         {
-          block = molecule.template.blocks[j];
-          x = molecule.cx+block.cx-bounds.wx+bounds.ww/2-1;
-          y = molecule.cy+block.cy-bounds.wy+bounds.wh/2-1;
-          stampBoard(block,x                   ,y                   );
-          stampBoard(block,x+cur_level.repeat_x,y                   );
-          stampBoard(block,x-cur_level.repeat_x,y                   );
-          stampBoard(block,x                   ,y+cur_level.repeat_y);
-          stampBoard(block,x                   ,y-cur_level.repeat_y);
-          stampBoard(block,x+cur_level.repeat_x,y+cur_level.repeat_y);
-          stampBoard(block,x+cur_level.repeat_x,y-cur_level.repeat_y);
-          stampBoard(block,x-cur_level.repeat_x,y+cur_level.repeat_y);
-          stampBoard(block,x-cur_level.repeat_x,y-cur_level.repeat_y);
+          cell = self.cells[boardi(j,i)];
+          for(var k = 0; k < 4; k++)
+            cell.c[k] = 0;
+          cell.present = 0;
+          cell.molecule_id = 0;
+          cell.score_up = 0;
+          cell.score_right = 0;
         }
       }
     }
-  }
-  var scoreBoard = function()
-  {
-    var cell;
-    var neighbor;
-    var cell_score;
-    score = 0;
-    for(var i = 0; i < bounds.wh; i++)
+
+    self.stampCell = function(block,x,y,id)
     {
-      for(var j = 0; j < bounds.ww; j++)
+      var cell;
+      if(x == clamp(0,bounds.ww-1,x) && y == clamp(0,bounds.wh-1,y))
       {
-        cell = board[boardi(j,i)];
-        if(cell.present)
+        cell = self.cells[boardi(x,y)];
+        for(var k = 0; k < 4; k++) cell.c[k] = block.c[k];
+        cell.present = 1;
+        cell.molecule_id = id;
+      }
+    }
+
+    self.stampMolecule = function(molecule,id)
+    {
+      var block;
+      var x;
+      var y;
+      for(var i = 0; i < molecule.template.blocks.length; i++)
+      {
+        block = molecule.template.blocks[i];
+        x = molecule.cx+block.cx-bounds.wx+bounds.ww/2-1;
+        y = molecule.cy+block.cy-bounds.wy+bounds.wh/2-1;
+        self.stampCell(block,x                   ,y                   , id);
+        self.stampCell(block,x+cur_level.repeat_x,y                   , id);
+        self.stampCell(block,x-cur_level.repeat_x,y                   , id);
+        self.stampCell(block,x                   ,y+cur_level.repeat_y, id);
+        self.stampCell(block,x                   ,y-cur_level.repeat_y, id);
+        self.stampCell(block,x+cur_level.repeat_x,y+cur_level.repeat_y, id);
+        self.stampCell(block,x+cur_level.repeat_x,y-cur_level.repeat_y, id);
+        self.stampCell(block,x-cur_level.repeat_x,y+cur_level.repeat_y, id);
+        self.stampCell(block,x-cur_level.repeat_x,y-cur_level.repeat_y, id);
+      }
+    }
+
+    self.populate = function()
+    {
+      for(var i = 0; i < molecules.length; i++)
+      {
+        if(!molecules[i].up)
+          self.stampMolecule(molecules[i],i);
+      }
+    }
+
+    self.score = function()
+    {
+      var cell;
+      var neighbor;
+      var cell_score;
+      var score = 0;
+      for(var i = 0; i < bounds.wh; i++)
+      {
+        for(var j = 0; j < bounds.ww; j++)
         {
-          score++;
-          if(j != bounds.ww-1) //check right
+          cell = self.cells[boardi(j,i)];
+          if(cell.present)
           {
-            neighbor = board[boardi(j+1,i)];
-            if(neighbor.present)
+            if(j != bounds.ww-1) //check right
             {
-              cell_score = (cell.c[1]*neighbor.c[3]*-1)*5;
-              score            += cell_score;
-              cell.score_right += cell_score;
+              neighbor = self.cells[boardi(j+1,i)];
+              if(neighbor.present)
+              {
+                cell_score = (cell.c[1]*neighbor.c[3]*-1)*5;
+                if(cell_score == 0) cell_score = 1;
+                score            += cell_score;
+                cell.score_right += cell_score;
+              }
+            }
+            if(i != bounds.wh-1) //check up
+            {
+              neighbor = self.cells[boardi(j,i+1)];
+              if(neighbor.present)
+              {
+                cell_score = (cell.c[0]*neighbor.c[2]*-1)*5;
+                if(cell_score == 0) cell_score = 1;
+                score         += cell_score;
+                cell.score_up += cell_score;
+              }
             }
           }
-          if(i != bounds.wh-1) //check up
-          {
-            neighbor = board[boardi(j,i+1)];
-            if(neighbor.present)
-            {
-              cell_score = (cell.c[0]*neighbor.c[2]*-1)*5;
-              score         += cell_score;
-              cell.score_up += cell_score;
-            }
-          }
         }
       }
+      return score;
     }
-  }
 
-  var tickBoard = function()
-  {
-    var cell;
-    var neighbor;
-    var x;
-    var y;
-    for(var i = 0; i < bounds.wh; i++)
+    self.tick = function()
     {
-      for(var j = 0; j < bounds.ww; j++)
+      var cell;
+      var neighbor;
+      var x;
+      var y;
+      for(var i = 0; i < bounds.wh; i++)
       {
-        cell = board[boardi(j,i)];
-        if(cell.present != cell.old_present)
+        for(var j = 0; j < bounds.ww; j++)
         {
-          if(cell.present != cell.tentative_present)
-          {
-            cell.present_t = 0;
-            cell.tentative_present = cell.present;
-          }
-          cell.present_t++;
-          if(cell.present_t >= score_patience)
-          {
-            x = screenSpaceX(cam,canv,cell.cx-0.5);
-            y = screenSpaceY(cam,canv,cell.cy-0.5);
-            popDelta(x,y,cell.present-cell.old_present)
-            cell.old_present = cell.present;
-            cell.present_t = 0;
-          }
-        }
-        else
-        {
-          cell.tentative_present = cell.present;
-          cell.present_t = 0;
-        }
+          cell = self.cells[boardi(j,i)];
 
-        if(
-          cell.score_up    != cell.old_score_up ||
-          cell.score_right != cell.old_score_right)
-        {
-          if(cell.score_up != cell.tentative_score_up)
+          if(
+            cell.score_up    != cell.old_score_up ||
+            cell.score_right != cell.old_score_right)
           {
-            cell.score_t = 0;
+            if(cell.score_up != cell.tentative_score_up)
+            {
+              cell.score_t = 0;
+              cell.tentative_score_up = cell.score_up;
+            }
+            if(cell.score_right != cell.tentative_score_right)
+            {
+              cell.score_t = 0;
+              cell.tentative_score_right = cell.score_right;
+            }
+            cell.score_t++;
+            if(cell.score_t >= score_patience)
+            {
+              x = screenSpaceX(cam,canv,cell.cx-0.5);
+              y = screenSpaceY(cam,canv,cell.cy-0.5);
+              if(cell.old_score_up != cell.score_up)
+                popDelta(x,y-10,cell.score_up-cell.old_score_up);
+              else if(cell.score_right-cell.old_score_right)
+                popDelta(x+10,y,cell.score_right-cell.old_score_right);
+              cell.old_score_up    = cell.score_up;
+              cell.old_score_right = cell.score_right;
+              cell.score_t = 0;
+            }
+          }
+          else
+          {
             cell.tentative_score_up = cell.score_up;
-          }
-          if(cell.score_right != cell.tentative_score_right)
-          {
-            cell.score_t = 0;
             cell.tentative_score_right = cell.score_right;
-          }
-          cell.score_t++;
-          if(cell.score_t >= score_patience)
-          {
-            x = screenSpaceX(cam,canv,cell.cx-0.5);
-            y = screenSpaceY(cam,canv,cell.cy-0.5);
-            if(cell.old_score_up != cell.score_up)
-              popDelta(x,y-10,cell.score_up-cell.old_score_up);
-            else if(cell.score_right-cell.old_score_right)
-              popDelta(x+10,y,cell.score_right-cell.old_score_right);
-            cell.old_score_up    = cell.score_up;
-            cell.old_score_right = cell.score_right;
             cell.score_t = 0;
           }
-        }
-        else
-        {
-          cell.tentative_score_up = cell.score_up;
-          cell.tentative_score_right = cell.score_right;
-          cell.score_t = 0;
-        }
 
+        }
       }
     }
+
   }
 
   var popDelta = function(x,y,delta)
@@ -1524,6 +1513,8 @@ var GamePlayScene = function(game, stage)
     mode = MODE_MENU;
     submitting_t = -1;
 
+    score_board = new board();
+
     url_args = jsonFromURL()
     if(url_args["lvl"]) lvl = parseInt(url_args["lvl"]);
     if(!lvl) lvl = 0;
@@ -1657,11 +1648,12 @@ var GamePlayScene = function(game, stage)
       molecules[i].tick();
     scroll.tick();
 
-    clearBoard();
-    populateBoard();
-    scoreBoard();
-    tickBoard();
+    score_board.clear();
+    score_board.populate();
+    score = score_board.score();
+    score_board.tick();
 
+/*
     if(submitting_t != -1)
     {
       var bounds_t = bounds.ww*bounds.wh;
@@ -1689,6 +1681,7 @@ var GamePlayScene = function(game, stage)
       }
       submitting_t++;
     }
+*/
     tickDeltas();
 
     var old_cur_stars = cur_level.cur_stars;
