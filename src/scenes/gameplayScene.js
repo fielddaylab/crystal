@@ -764,6 +764,12 @@ var GamePlayScene = function(game, stage)
     self.clear = function()
     {
       var cell;
+      for(var i = 0; i < molecules.length; i++)
+      {
+        molecules[i].total_happy = 0;
+        for(var j = 0; j < molecules[i].happys.length; j++)
+          molecules[i].happys[j] = 0;
+      }
       for(var i = -1; i < bounds.wh+1; i++)
       {
         for(var j = -1; j < bounds.ww+1; j++)
@@ -817,6 +823,7 @@ var GamePlayScene = function(game, stage)
 
     self.populate = function()
     {
+      self.clear();
       for(var i = 0; i < molecules.length; i++)
       {
         if(!molecules[i].up)
@@ -840,23 +847,37 @@ var GamePlayScene = function(game, stage)
             if(i > -1 && i < bounds.wh && j < bounds.ww) //check right
             {
               neighbor = self.cells[boardi(j+1,i)];
-              if(neighbor.present)
+              if(neighbor.present && cell.molecule_id != neighbor.molecule_id)
               {
                 cell_score = (cell.c[1]*neighbor.c[3]*-1)*5;
                 if(cell_score == 0) cell_score = 1;
                 score            += cell_score;
                 cell.score_right += cell_score;
+                if(j < bounds.ww-1) //otherwise can get counted twice (which is good for score- not for happy)
+                {
+                  molecules[cell.molecule_id].happys[cell.block_id] += cell_score;
+                  molecules[cell.molecule_id].total_happy += cell_score;
+                  molecules[neighbor.molecule_id].happys[neighbor.block_id] += cell_score;
+                  molecules[neighbor.molecule_id].total_happy;
+                }
               }
             }
             if(j > -1 && j < bounds.ww && i < bounds.wh) //check up
             {
               neighbor = self.cells[boardi(j,i+1)];
-              if(neighbor.present)
+              if(neighbor.present && cell.molecule_id != neighbor.molecule_id)
               {
                 cell_score = (cell.c[0]*neighbor.c[2]*-1)*5;
                 if(cell_score == 0) cell_score = 1;
                 score         += cell_score;
                 cell.score_up += cell_score;
+                if(i < bounds.wh-1) //otherwise can get counted twice (which is good for score- not for happy)
+                {
+                  molecules[cell.molecule_id].happys[cell.block_id] += cell_score;
+                  molecules[cell.molecule_id].total_happy += cell_score;
+                  molecules[neighbor.molecule_id].happys[neighbor.block_id] += cell_score;
+                  molecules[neighbor.molecule_id].total_happy;
+                }
               }
             }
           }
@@ -1104,6 +1125,7 @@ var GamePlayScene = function(game, stage)
     self.template = new template();
     self.bounces = [];
     self.happys = [];
+    self.total_happy = 0;
 
     self.setTemplate = function(t)
     {
@@ -1127,7 +1149,6 @@ var GamePlayScene = function(game, stage)
     self.click_ticks = 1000000;
     self.up_ticks = 1000000;
     self.up = true;
-    self.total_happy = 0;
     self.cx = 0;
     self.cy = 0;
 
@@ -1334,23 +1355,24 @@ var GamePlayScene = function(game, stage)
         self.snap();
       }
 
-      var s = 0;
-      switch(self.total_happy)
-      {
-        case -3: s = 0.15; break;
-        case -2: s = 0.08; break;
-        case -1: s = 0.04; break;
-        case  0: s = 0.02; break;
-        case  1: s = 0.008; break;
-        case  2: s = 0.002; break;
-      }
-      if(self.total_happy >  2) s = 0;
-      if(self.total_happy < -3) s = self.total_happy/10;
 
       for(var i = 0; i < self.bounces.length; i++)
       {
         if(rand() < 0.1)
         {
+          var s = 0;
+          switch(self.happys[i])
+          {
+            case -3: s = 0.15; break;
+            case -2: s = 0.08; break;
+            case -1: s = 0.04; break;
+            case  0: s = 0.02; break;
+            case  1: s = 0.008; break;
+            case  2: s = 0.002; break;
+          }
+          if(self.happys[i] >  2) s = 0;
+          if(self.happys[i] < -3) s = self.happys[i]/10;
+
           self.bounces[i].velx += rand0()*s*50;
           self.bounces[i].vely += rand0()*s*50;
         }
@@ -1404,74 +1426,6 @@ var GamePlayScene = function(game, stage)
         self.draw_off_down(-cur_level.repeat_x,-cur_level.repeat_y);
       }
     }
-  }
-  var block_happiness_off = function(a,b,offx,offy)
-  {
-    var happy = 0;
-    var v;
-    for(var i = 0; i < a.template.blocks.length; i++)
-    {
-      for(var j = 0; j < b.template.blocks.length; j++)
-      {
-        if(a.wx+a.template.blocks[i].cx+offx == b.wx+b.template.blocks[j].cx) //vert aligned
-        {
-          if((a.wy+a.template.blocks[i].cy+offy) - (b.wy+b.template.blocks[j].cy) ==  1) //a above b
-          {
-            v = -(a.template.blocks[i].c[2] * b.template.blocks[j].c[0]);
-            happy += v;
-            a.happys[i] += v;
-            b.happys[j] += v;
-          }
-          if((a.wy+a.template.blocks[i].cy+offy) - (b.wy+b.template.blocks[j].cy) == -1) //a below b
-          {
-            v = -(a.template.blocks[i].c[0] * b.template.blocks[j].c[2]);
-            happy += v;
-            a.happys[i] += v;
-            b.happys[j] += v;
-          }
-        }
-        if(a.wy+a.template.blocks[i].cy+offy == b.wy+b.template.blocks[j].cy) //horiz aligned
-        {
-          if((a.wx+a.template.blocks[i].cx+offx) - (b.wx+b.template.blocks[j].cx) ==  1) //a right of b
-          {
-            v = -(a.template.blocks[i].c[3] * b.template.blocks[j].c[1]);
-            happy += v;
-            a.happys[i] += v;
-            b.happys[j] += v;
-          }
-          if((a.wx+a.template.blocks[i].cx+offx) - (b.wx+b.template.blocks[j].cx) == -1) //a left of b
-          {
-            v = -(a.template.blocks[i].c[1] * b.template.blocks[j].c[3]);
-            happy += v;
-            a.happys[i] += v;
-            b.happys[j] += v;
-          }
-        }
-      }
-    }
-    return happy;
-  }
-  var block_happiness = function(a,b)
-  {
-    var happy = 0;
-    happy += block_happiness_off(a,b,0,0);
-    happy += block_happiness_off(a,b, cur_level.repeat_x,                  0);
-    happy += block_happiness_off(a,b,-cur_level.repeat_x,                  0);
-    happy += block_happiness_off(a,b,                  0, cur_level.repeat_y);
-    happy += block_happiness_off(a,b,                  0,-cur_level.repeat_y);
-    happy += block_happiness_off(a,b, cur_level.repeat_x, cur_level.repeat_y);
-    happy += block_happiness_off(a,b, cur_level.repeat_x,-cur_level.repeat_y);
-    happy += block_happiness_off(a,b,-cur_level.repeat_x, cur_level.repeat_y);
-    happy += block_happiness_off(a,b,-cur_level.repeat_x,-cur_level.repeat_y);
-    happy += block_happiness_off(a,b,2* cur_level.repeat_x,2*                  0);
-    happy += block_happiness_off(a,b,2*-cur_level.repeat_x,2*                  0);
-    happy += block_happiness_off(a,b,2*                  0,2* cur_level.repeat_y);
-    happy += block_happiness_off(a,b,2*                  0,2*-cur_level.repeat_y);
-    happy += block_happiness_off(a,b,2* cur_level.repeat_x,2* cur_level.repeat_y);
-    happy += block_happiness_off(a,b,2* cur_level.repeat_x,2*-cur_level.repeat_y);
-    happy += block_happiness_off(a,b,2*-cur_level.repeat_x,2* cur_level.repeat_y);
-    happy += block_happiness_off(a,b,2*-cur_level.repeat_x,2*-cur_level.repeat_y);
-    return happy;
   }
 
   var template = function(cx,cy,blocks)
@@ -1628,30 +1582,10 @@ var GamePlayScene = function(game, stage)
     clicker.flush();
     dragger.flush();
 
-    var happy = 0;
-    for(var i = 0; i < molecules.length; i++)
-    {
-      molecules[i].total_happy = 0;
-      for(var j = 0; j < molecules[i].happys.length; j++)
-        molecules[i].happys[j] = 0;
-    }
-    for(var i = 0; i < molecules.length; i++)
-    {
-      if(molecules[i].up) continue;
-      for(var j = i+1; j < molecules.length; j++)
-      {
-        if(molecules[j].up) continue;
-        happy = block_happiness(molecules[i],molecules[j]);
-        molecules[i].total_happy += happy;
-        molecules[j].total_happy += happy;
-      }
-    }
-
     for(var i = 0; i < molecules.length; i++)
       molecules[i].tick();
     scroll.tick();
 
-    score_board.clear();
     score_board.populate();
     score = score_board.score();
     score_board.tick();
