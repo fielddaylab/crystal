@@ -286,7 +286,7 @@ var GamePlayScene = function(game, stage)
   {
     levels = [];
     var n_rows = 2;
-    var n_cols = 3;
+    var n_cols = 4;
     var i = 0;
     var j;
 
@@ -371,6 +371,19 @@ var GamePlayScene = function(game, stage)
     levels[i].star_req_score[2] = 84;
     j = 0;
     levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
+    levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    i++;
+
+    //square- hard charge
+    levels.push(new level(i));
+    levels[i].scale = 2;
+    levels[i].repeat_x = 10;
+    levels[i].repeat_y = 10;
+    levels[i].star_req_score[0] = 180;
+    levels[i].star_req_score[1] = 360;
+    levels[i].star_req_score[2] = 474;
+    j = 0;
+    levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     i++;
 
