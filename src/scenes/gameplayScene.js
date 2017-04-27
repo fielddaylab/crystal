@@ -377,7 +377,7 @@ var GamePlayScene = function(game, stage)
 
     //square- hard charge
     levels.push(new level(i));
-    levels[i].scale = 2;
+    levels[i].scale = 1;
     levels[i].repeat_x = 10;
     levels[i].repeat_y = 10;
     levels[i].star_req_score[0] = 140;
@@ -734,13 +734,14 @@ var GamePlayScene = function(game, stage)
     var self = this;
     self.cells = [];
 
-    var boardi = function(x,y) { return ((1+y)*(bounds.ww+2))+(x+1); }
+    var boardi = function(x,y) { return ((1+y)*(cur_level.repeat_x+2))+(x+1); }
 
     self.reset = function()
     {
       self.cells = [];
-      for(var i = -1; i < bounds.wh+1; i++)
-        for(var j = -1; j < bounds.ww+1; j++)
+      for(var i = -1; i < cur_level.repeat_y+1; i++)
+        for(var j = -1; j < cur_level.repeat_x+1; j++)
+        {
           self.cells[boardi(j,i)] =
           {
             cx:j+1+bounds.wx-bounds.ww/2,
@@ -753,6 +754,7 @@ var GamePlayScene = function(game, stage)
             score_up:0,
             score_right:0,
           };
+        }
     }
 
     self.clear = function()
@@ -764,9 +766,9 @@ var GamePlayScene = function(game, stage)
         for(var j = 0; j < molecules[i].happys.length; j++)
           molecules[i].happys[j] = 0;
       }
-      for(var i = -1; i < bounds.wh+1; i++)
+      for(var i = -1; i < cur_level.repeat_y+1; i++)
       {
-        for(var j = -1; j < bounds.ww+1; j++)
+        for(var j = -1; j < cur_level.repeat_x+1; j++)
         {
           cell = self.cells[boardi(j,i)];
           for(var k = 0; k < 4; k++)
@@ -783,7 +785,7 @@ var GamePlayScene = function(game, stage)
     self.stampCell = function(block,x,y,molecule_id,block_id)
     {
       var cell;
-      if(x == clamp(-1,bounds.ww,x) && y == clamp(-1,bounds.wh,y))
+      if(x == clamp(-1,cur_level.repeat_x,x) && y == clamp(-1,cur_level.repeat_y,y))
       {
         cell = self.cells[boardi(x,y)];
         for(var k = 0; k < 4; k++) cell.c[k] = block.c[k];
@@ -831,47 +833,42 @@ var GamePlayScene = function(game, stage)
       var neighbor;
       var cell_score;
       var score = 0;
-      for(var i = -1; i < bounds.wh+1; i++)
+      for(var i = -1; i < cur_level.repeat_y-1; i++)
       {
-        for(var j = -1; j < bounds.ww+1; j++)
+        for(var j = -1; j < cur_level.repeat_x-1; j++)
         {
           cell = self.cells[boardi(j,i)];
           if(cell.present)
           {
-            if(i > -1 && i < bounds.wh && j < bounds.ww && j < cur_level.repeat_x-1) //check right
+            neighbor = self.cells[boardi(j+1,i)]; //check right
+            if(neighbor.present && cell.molecule_id != neighbor.molecule_id)
             {
-              neighbor = self.cells[boardi(j+1,i)];
-              if(neighbor.present && cell.molecule_id != neighbor.molecule_id)
+              cell_score = (cell.c[1]*neighbor.c[3]*-1)*5;
+              if(cell_score == 0) cell_score = 1;
+              score            += cell_score;
+              cell.score_right += cell_score;
+              if(j < cur_level.repeat_x-1) //otherwise can get counted twice (which is good for score- not for happy)
               {
-                cell_score = (cell.c[1]*neighbor.c[3]*-1)*5;
-                if(cell_score == 0) cell_score = 1;
-                score            += cell_score;
-                cell.score_right += cell_score;
-                if(j < cur_level.repeat_x-1) //otherwise can get counted twice (which is good for score- not for happy)
-                {
-                  molecules[cell.molecule_id].happys[cell.block_id] += cell_score;
-                  molecules[cell.molecule_id].total_happy += cell_score;
-                  molecules[neighbor.molecule_id].happys[neighbor.block_id] += cell_score;
-                  molecules[neighbor.molecule_id].total_happy;
-                }
+                molecules[cell.molecule_id].happys[cell.block_id] += cell_score;
+                molecules[cell.molecule_id].total_happy += cell_score;
+                molecules[neighbor.molecule_id].happys[neighbor.block_id] += cell_score;
+                molecules[neighbor.molecule_id].total_happy;
               }
             }
-            if(j > -1 && j < bounds.ww && i < bounds.wh && i < cur_level.repeat_y-1) //check up
+
+            neighbor = self.cells[boardi(j,i+1)]; //check up
+            if(neighbor.present && cell.molecule_id != neighbor.molecule_id)
             {
-              neighbor = self.cells[boardi(j,i+1)];
-              if(neighbor.present && cell.molecule_id != neighbor.molecule_id)
+              cell_score = (cell.c[0]*neighbor.c[2]*-1)*5;
+              if(cell_score == 0) cell_score = 1;
+              score         += cell_score;
+              cell.score_up += cell_score;
+              if(i < cur_level.repeat_y-1) //otherwise can get counted twice (which is good for score- not for happy)
               {
-                cell_score = (cell.c[0]*neighbor.c[2]*-1)*5;
-                if(cell_score == 0) cell_score = 1;
-                score         += cell_score;
-                cell.score_up += cell_score;
-                if(i < cur_level.repeat_y-1) //otherwise can get counted twice (which is good for score- not for happy)
-                {
-                  molecules[cell.molecule_id].happys[cell.block_id] += cell_score;
-                  molecules[cell.molecule_id].total_happy += cell_score;
-                  molecules[neighbor.molecule_id].happys[neighbor.block_id] += cell_score;
-                  molecules[neighbor.molecule_id].total_happy;
-                }
+                molecules[cell.molecule_id].happys[cell.block_id] += cell_score;
+                molecules[cell.molecule_id].total_happy += cell_score;
+                molecules[neighbor.molecule_id].happys[neighbor.block_id] += cell_score;
+                molecules[neighbor.molecule_id].total_happy;
               }
             }
           }
