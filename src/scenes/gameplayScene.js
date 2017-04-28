@@ -139,6 +139,7 @@ var GamePlayScene = function(game, stage)
   MODE_MENU   = ENUM; ENUM++;
   MODE_GAME   = ENUM; ENUM++;
   MODE_SUBMIT = ENUM; ENUM++;
+  MODE_INTRO  = ENUM; ENUM++;
 
   var submitting_t;
   var star_outro_sub_slide = 40;
@@ -165,6 +166,14 @@ var GamePlayScene = function(game, stage)
     self.star_req_score = [];
     for(var i = 0; i < 3; i++)
       self.star_req_score.push(0);
+
+    //intro
+    self.has_intro = false;
+    self.intro = true;
+    self.shouldClick = function(evt){ return false; }
+    self.click = function(evt){};
+    self.introtick = function(){ return self.intro; }
+    self.introdraw = function(){}
   }
 
   var level_button = function(wx,wy,ww,wh,level)
@@ -225,7 +234,7 @@ var GamePlayScene = function(game, stage)
     self.click = function(evt)
     {
       set_level(self.level.id);
-      mode = MODE_GAME;
+      mode = MODE_INTRO;
     }
   }
 
@@ -332,6 +341,24 @@ var GamePlayScene = function(game, stage)
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    levels[i].has_intro = true;
+    levels[i].shouldClick = function(evt)
+    {
+      return true;
+    }
+    levels[i].click = function(evt)
+    {
+      cur_level.intro = false;
+    }
+    levels[i].introtick = function()
+    {
+      return cur_level.intro;
+    }
+    levels[i].introdraw = function()
+    {
+      ctx.fillText("<- This is a molecule",bounds.x-110,150);
+      ctx.fillText("Stack 'em here \\/",bounds.x+50,100);
+    }
     i++;
 
     //tetris s- no charge
@@ -449,6 +476,8 @@ var GamePlayScene = function(game, stage)
   var set_level = function(i)
   {
     cur_level = levels[i];
+
+    cur_level.intro = cur_level.has_intro;
 
     stamps = [];
     molecules = [];
@@ -1517,6 +1546,12 @@ var GamePlayScene = function(game, stage)
   {
     n_ticks++;
 
+    if(mode == MODE_INTRO)
+    {
+      clicker.filter(cur_level);
+      if(!cur_level.introtick()) mode = MODE_GAME;
+    }
+
     if(mode == MODE_MENU)
     {
       cam.wx = lerp(cam.wx,menu_cam.wx,0.1);
@@ -1524,7 +1559,7 @@ var GamePlayScene = function(game, stage)
       cam.ww = lerp(cam.ww,menu_cam.ww,0.1);
       cam.wh = lerp(cam.wh,menu_cam.wh,0.1);
     }
-    if(mode == MODE_GAME || mode == MODE_SUBMIT)
+    if(mode == MODE_GAME || mode == MODE_SUBMIT || mode == MODE_INTRO)
     {
       cam.wx = lerp(cam.wx,game_cam.wx,0.1);
       cam.wy = lerp(cam.wy,game_cam.wy,0.1);
@@ -1720,6 +1755,11 @@ var GamePlayScene = function(game, stage)
     if(mode == MODE_SUBMIT)
     {
       outro.draw();
+    }
+
+    if(mode == MODE_INTRO)
+    {
+      cur_level.introdraw();
     }
   };
 
