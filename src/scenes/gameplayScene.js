@@ -36,6 +36,7 @@ var GamePlayScene = function(game, stage)
   var levels;
   var cur_level;
   var cur_stars_bounce;
+  var score_bounce;
 
   var url_args;
   var lvl;
@@ -1596,6 +1597,7 @@ var GamePlayScene = function(game, stage)
     init_levels();
     set_level(lvl);
     cur_stars_bounce = new bounce();
+    score_bounce = new bounce();
 
     back_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     back_btn.click = function(evt) { mode = MODE_MENU; evt.hitUI = true; }
@@ -1715,8 +1717,11 @@ var GamePlayScene = function(game, stage)
       stamps[i].tick();
     scroll.tick();
 
+    var old_score = score;
     score_board.populate();
     score = score_board.score();
+    if(score != old_score)
+      score_bounce.vel = 1;
 
     if(submitting_t != -1)
     {
@@ -1745,6 +1750,7 @@ var GamePlayScene = function(game, stage)
       cur_stars_bounce.vel = 1;
     }
     cur_stars_bounce.tick();
+    score_bounce.tick();
     cur_level.cur_stars_t++;
   };
 
@@ -1821,7 +1827,11 @@ var GamePlayScene = function(game, stage)
     ctx.lineWidth = 2;
 
     ctx.fillStyle = "#000000";
-    ctx.fillText("Score: "+score,bounds.x+bounds.w-200,bounds.y-10);
+    ctx.fillText("Score: "      ,bounds.x+bounds.w-200,   bounds.y-10);
+    var oldfont = ctx.font;
+    ctx.font = (20+10*score_bounce.v)+"px Arial";
+    ctx.fillText(          score,bounds.x+bounds.w-200+60,bounds.y-10);
+    ctx.font = oldfont;
     ctx.fillText("< Menu",back_btn.x,back_btn.y+back_btn.h/2);
     ctx.fillText("Clear",clear_btn.x,clear_btn.y+clear_btn.h/2);
     ctx.fillText("[Submit]",submit_btn.x,submit_btn.y+submit_btn.h/2);
