@@ -1710,6 +1710,10 @@ var GamePlayScene = function(game, stage)
         ctx.drawImage(star     ,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
     }
 
+    ctx.fillText("Crystal Packer 5000!!!",levels[0].button.x,levels[0].button.y);
+    ctx.fillText("Choose a   ^",levels[0].button.x-100,levels[0].button.y+125);
+    ctx.fillText("|",levels[0].button.x+4,levels[0].button.y+135);
+    ctx.fillText("Molecule --",levels[0].button.x-100,levels[0].button.y+150);
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
 
