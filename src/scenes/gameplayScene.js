@@ -486,18 +486,21 @@ var GamePlayScene = function(game, stage)
         to.blocks[i].c[j] = from.blocks[i].c[j];
     }
   }
-  var rotate_blocks = function(blocks)
+  var rotate_template = function(t)
   {
-    for(var i = 0; i < blocks.length; i++)
+    for(var i = 0; i < t.blocks.length; i++)
     {
-      var tmp = blocks[i].cy;
-      blocks[i].cy = -blocks[i].cx;
-      blocks[i].cx = tmp;
-      var last = blocks[i].c[3];
+      var tmp = t.blocks[i].cy;
+      t.blocks[i].cy = -t.blocks[i].cx;
+      t.blocks[i].cx = tmp;
+      var last = t.blocks[i].c[3];
       for(var j = 3; j > 0; j--)
-        blocks[i].c[j] = blocks[i].c[j-1];
-      blocks[i].c[0] = last;
+        t.blocks[i].c[j] = t.blocks[i].c[j-1];
+      t.blocks[i].c[0] = last;
     }
+    var tx = t.cx;
+    t.cx = t.cy;
+    t.cy = -tx;
   }
   var draw_blocks = function(wx,wy,offx,offy,bounces,happys,rot,scale,shadow,blocks)
   {
@@ -1276,7 +1279,7 @@ var GamePlayScene = function(game, stage)
       if(self.rot_ticks == n_max)
       {
         if(abs(self.target_rot-halfpi) < 0.001)
-          rotate_blocks(self.template.blocks);
+          rotate_template(self.template);
         self.base_rot       = 0;
         self.rot            = 0;
         self.tmp_target_rot = 0;
@@ -1375,8 +1378,16 @@ var GamePlayScene = function(game, stage)
     self.wx  = 0;
     self.wy  = 0;
 
+    self.base_rot = 0;
+    self.rot = 0;
+    self.tmp_target_rot = 0;
+    self.target_rot = 0;
+    self.rot_ticks = 10000000;
+    self.click_ticks = 1000000;
+
     self.ptWithin = function(wx,wy)
     {
+      if(self.target_rot != 0) return false;
       var hit = false
       hit = worldPtWithin(self.wx-self.template.cx,self.wy-template.cy-scroll.scroll_wy,1.,1.,wx,wy);
       for(var i = 0; !hit && i < self.template.blocks.length; i++)
@@ -1384,9 +1395,68 @@ var GamePlayScene = function(game, stage)
       return hit;
     }
 
+    var worldevt = {wx:0,wy:0};
+    self.shouldClick = function(evt)
+    {
+      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      return self.ptWithin(worldevt.wx,worldevt.wy);
+    }
+    self.click = function(evt)
+    {
+      if(self.click_ticks < 20 && self.target_rot == 0)
+      {
+        self.base_rot = self.rot;
+        self.target_rot += halfpi;
+        if(self.target_rot >= twopi-0.001) self.target_rot = 0;
+        self.rot_ticks = 0;
+      }
+      self.click_ticks = 0;
+    }
+
+    self.tick = function()
+    {
+      self.click_ticks++;
+      self.rot_ticks++;
+      var t;
+      var n_min = 0;
+      var n_max = 0;
+
+      //windup
+      n_min = n_max+1;
+      n_max = 8;
+      if(self.rot_ticks == n_min) self.tmp_target_rot = self.base_rot - 0.2*(self.target_rot - self.base_rot);
+      if(self.rot_ticks >= n_min && self.rot_ticks < n_max)
+        self.rot = lerp(self.rot,self.tmp_target_rot,0.4);
+
+      //overshoot
+      n_min = n_max+1;
+      n_max = 15;
+      if(self.rot_ticks == n_min) self.tmp_target_rot = self.target_rot + 0.1*(self.target_rot - self.base_rot);
+      if(self.rot_ticks >= n_min && self.rot_ticks < n_max)
+        self.rot = lerp(self.rot,self.tmp_target_rot,0.5);
+
+      //relax
+      n_min = n_max+1;
+      n_max = 20;
+      if(self.rot_ticks == n_min) self.tmp_target_rot = self.target_rot;
+      if(self.rot_ticks >= n_min && self.rot_ticks < n_max)
+        self.rot = lerp(self.rot,self.tmp_target_rot,0.5);
+
+      if(self.rot_ticks == n_max)
+      {
+        if(abs(self.target_rot-halfpi) < 0.001)
+          rotate_template(self.template);
+        self.base_rot       = 0;
+        self.rot            = 0;
+        self.tmp_target_rot = 0;
+        self.target_rot     = 0;
+      }
+    }
+
     self.draw = function()
     {
-      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,0,0,1,0,self.template.blocks);
+      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,0,self.rot,1,0,self.template.blocks);
     }
   }
 
@@ -1494,6 +1564,8 @@ var GamePlayScene = function(game, stage)
       clicker.filter(submit_btn);
       for(var i = 0; i < molecules.length; i++)
         clicker.filter(molecules[i]);
+      for(var i = 0; i < stamps.length; i++)
+        clicker.filter(stamps[i]);
       dragger.filter(scroll);
       for(var i = 0; i < molecules.length; i++)
         dragger.filter(molecules[i]);
@@ -1514,6 +1586,8 @@ var GamePlayScene = function(game, stage)
 
     for(var i = 0; i < molecules.length; i++)
       molecules[i].tick();
+    for(var i = 0; i < stamps.length; i++)
+      stamps[i].tick();
     scroll.tick();
 
     score_board.populate();
