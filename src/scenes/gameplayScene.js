@@ -1,5 +1,6 @@
 
 var TEXT = true;
+var PERFECT = true;
 var G = [];
 
 G = [0.25, 0.15, 0.2, 0.08, 0.03, 0.01, 0.005, 0.002, 0.0];
@@ -62,7 +63,8 @@ var GamePlayScene = function(game, stage)
   var shadow_fill  = "rgba(0,0,0,.1)";
   var block_fill   = "#F6F6F6";
   var block_stroke = "#E0E0E0";
-  var scroll_fill = "rgba(0,0,0,0.1)";
+  var scroll_fill = "rgba(0,0,0,0.2)";
+  var bg_fill     = "rgba(0,0,0,0.05)";
 
   var w = 100;
   var h = 100;
@@ -338,6 +340,8 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_w = 6;
     levels[i].bounds_h = 4;
     levels[i].scroll_w = 2.5;
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].star_req_score[0] = 22;
     levels[i].star_req_score[1] = 30;
     levels[i].star_req_score[2] = 36;
@@ -372,6 +376,8 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_w = 6;
     levels[i].bounds_h = 4;
     levels[i].scroll_w = 3.5;
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].star_req_score[0] = 13;
     levels[i].star_req_score[1] = 20;
     levels[i].star_req_score[2] = 30;
@@ -407,6 +413,8 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_w = 6;
     levels[i].bounds_h = 4;
     levels[i].scroll_w = 3.5;
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].star_req_score[0] = 8;
     levels[i].star_req_score[1] = 17;
     levels[i].star_req_score[2] = 30;
@@ -441,6 +449,8 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_w = 6;
     levels[i].bounds_h = 4;
     levels[i].scroll_w = 2.5;
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].star_req_score[0] = 36;
     levels[i].star_req_score[1] = 37;
     levels[i].star_req_score[2] = 84;
@@ -475,6 +485,8 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_w = 8;
     levels[i].bounds_h = 4;
     levels[i].scroll_w = 3.5;
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].star_req_score[0] = 48;
     levels[i].star_req_score[1] = 61;
     levels[i].star_req_score[2] = 90;
@@ -509,6 +521,8 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_w = 10;
     levels[i].bounds_h = 6;
     levels[i].scroll_w = 2.5;
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].star_req_score[0] = 140;
     levels[i].star_req_score[1] = 280;
     levels[i].star_req_score[2] = 284;
@@ -525,6 +539,8 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_w = 18;
     levels[i].bounds_h = 10;
     levels[i].scroll_w = 3;
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].star_req_score[0] = 0;
     levels[i].star_req_score[1] = 0;
     levels[i].star_req_score[2] = 0;
@@ -1799,7 +1815,7 @@ var GamePlayScene = function(game, stage)
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_down();
 
-    ctx.fillStyle = scroll_fill;
+    ctx.fillStyle = bg_fill;
     if(bounds.w)
     {
       ctx.fillRect(0,0,canv.width,bounds.y);
