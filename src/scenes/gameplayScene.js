@@ -63,8 +63,10 @@ var GamePlayScene = function(game, stage)
   var shadow_fill  = "rgba(0,0,0,.1)";
   var block_fill   = "#F6F6F6";
   var block_stroke = "#E0E0E0";
-  var scroll_fill = "rgba(0,0,0,0.2)";
-  var bg_fill     = "rgba(0,0,0,0.05)";
+  var scroll_fill = "rgba(0,0,0,0.3)";
+  var bg_fill     = "rgba(100,0,0,0.05)";
+  var grid_fill = "#AAAAAA";
+  var grid_stroke = "#999999";
 
   var w = 100;
   var h = 100;
@@ -1785,7 +1787,9 @@ var GamePlayScene = function(game, stage)
     var v_spacing = 1;
     var h_spacing = 1;
 
-    ctx.strokeStyle = "#EEEEEE";
+    ctx.fillStyle = grid_fill;
+    ctx.fillRect(0,0,canv.width,canv.height);
+    ctx.strokeStyle = grid_stroke;
 
     //grid
     wy = floor(min_wy/v_spacing)*v_spacing;
