@@ -1079,6 +1079,20 @@ var GamePlayScene = function(game, stage)
     self.scroll_wyv = 0;
     self.scroll_wy = 0;
 
+    self.shouldClick = function(evt)
+    {
+      if(dragging_molecule || evt.hitUI) return false;
+      worldevt.wx = worldSpaceX(cam,canv,evt.doX);
+      worldevt.wy = worldSpaceY(cam,canv,evt.doY);
+      var hit = worldPtWithin(self.wx,self.wy,self.ww,self.wh,worldevt.wx,worldevt.wy);
+      if(hit)
+      {
+        evt.hitUI = true;
+      }
+      return hit;
+    }
+    self.click = function(evt){}
+
     var last_drag_wevt = {wx:0,wy:0};
     var worldevt = {wx:0,wy:0};
     self.shouldDrag = function(evt)
@@ -1672,11 +1686,12 @@ var GamePlayScene = function(game, stage)
       clicker.filter(back_btn);
       clicker.filter(clear_btn);
       clicker.filter(submit_btn);
-      for(var i = 0; i < molecules.length; i++)
-        clicker.filter(molecules[i]);
       for(var i = 0; i < stamps.length; i++)
         clicker.filter(stamps[i]);
       dragger.filter(scroll);
+      clicker.filter(scroll);
+      for(var i = 0; i < molecules.length; i++)
+        clicker.filter(molecules[i]);
       for(var i = 0; i < molecules.length; i++)
         dragger.filter(molecules[i]);
     }
