@@ -1,3 +1,5 @@
+
+var TEXT = true;
 var G = [];
 
 G = [0.25, 0.15, 0.2, 0.08, 0.03, 0.01, 0.005, 0.002, 0.0];
@@ -341,7 +343,7 @@ var GamePlayScene = function(game, stage)
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
-    levels[i].has_intro = true;
+    levels[i].has_intro = true && TEXT;
     levels[i].shouldClick = function(evt)
     {
       return true;
@@ -375,6 +377,25 @@ var GamePlayScene = function(game, stage)
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:1,cy:1,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    levels[i].has_intro = true && TEXT;
+    levels[i].shouldClick = function(evt)
+    {
+      return true;
+    }
+    levels[i].click = function(evt)
+    {
+      cur_level.intro = false;
+    }
+    levels[i].introtick = function()
+    {
+      return cur_level.intro;
+    }
+    levels[i].introdraw = function()
+    {
+      ctx.fillText("Some patterns can",bounds.x+50,100);
+      ctx.fillText("fill the space completely.",bounds.x+50,130);
+      ctx.fillText("Others don't.",bounds.x+50,200);
+    }
     i++;
 
     //tetris T- no charge
@@ -391,6 +412,24 @@ var GamePlayScene = function(game, stage)
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:1,cy:0,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    levels[i].has_intro = true && TEXT;
+    levels[i].shouldClick = function(evt)
+    {
+      return true;
+    }
+    levels[i].click = function(evt)
+    {
+      cur_level.intro = false;
+    }
+    levels[i].introtick = function()
+    {
+      return cur_level.intro;
+    }
+    levels[i].introdraw = function()
+    {
+      ctx.fillText("Double click",bounds.x+50,100);
+      ctx.fillText("to rotate",bounds.x+50,130);
+    }
     i++;
 
     //domino- flip charge
@@ -407,6 +446,24 @@ var GamePlayScene = function(game, stage)
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    levels[i].has_intro = true && TEXT;
+    levels[i].shouldClick = function(evt)
+    {
+      return true;
+    }
+    levels[i].click = function(evt)
+    {
+      cur_level.intro = false;
+    }
+    levels[i].introtick = function()
+    {
+      return cur_level.intro;
+    }
+    levels[i].introdraw = function()
+    {
+      ctx.fillText("Some molecules have charges.",bounds.x+50,100);
+      ctx.fillText("opposites attract.",bounds.x+50,130);
+    }
     i++;
 
     //L- hard charge
@@ -423,6 +480,24 @@ var GamePlayScene = function(game, stage)
     j = 0;
     levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    levels[i].has_intro = true && TEXT;
+    levels[i].shouldClick = function(evt)
+    {
+      return true;
+    }
+    levels[i].click = function(evt)
+    {
+      cur_level.intro = false;
+    }
+    levels[i].introtick = function()
+    {
+      return cur_level.intro;
+    }
+    levels[i].introdraw = function()
+    {
+      ctx.fillText("Try different patterns",bounds.x+50,100);
+      ctx.fillText("to get 3 stars.",bounds.x+50,130);
+    }
     i++;
 
     //square- hard charge
