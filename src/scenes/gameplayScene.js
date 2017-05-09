@@ -39,6 +39,9 @@ var GamePlayScene = function(game, stage)
   var cur_stars_bounce;
   var score_bounce;
 
+  var total_stars;
+  var total_stars_disp;
+
   var url_args;
   var lvl;
 
@@ -67,12 +70,23 @@ var GamePlayScene = function(game, stage)
   var bg_fill     = "rgba(100,0,0,0.05)";
   var grid_fill = "#AAAAAA";
   var grid_stroke = "#999999";
+  var charge_pos = "#22CC22";
+  var charge_neg = "#CC2222";
 
   var w = 100;
   var h = 100;
   var in_r = w/4;
   var out_r = w/2-5;
   var theta;
+
+  var lock_img = GenIcon(w,h)
+  lock_img.context.strokeStyle = "#999999";
+  lock_img.context.fillStyle = "#999900";
+  lock_img.context.lineWidth = 6;
+  lock_img.context.beginPath();
+  lock_img.context.arc(w/2,h/2,w/3,0,2*Math.PI);
+  lock_img.context.stroke();
+  lock_img.context.fillRect(10,h/2,w-20,h/2-10);
 
   var star = GenIcon(w,h)
   theta = 0-halfpi;
@@ -120,14 +134,20 @@ var GamePlayScene = function(game, stage)
   for(var i = 0; i < 5; i++)
   {
     var atom = GenIcon(w,h)
-    atom.context.strokeStyle = "#FFFFFF";
     switch(i)
     {
+      case 0: atom.context.fillStyle = "#000000"; atom.context.strokeStyle = "#444444"; break;
+      case 1: atom.context.fillStyle = "#444444"; atom.context.strokeStyle = "#888888"; break;
+      case 2: atom.context.fillStyle = "#888888"; atom.context.strokeStyle = "#888888"; break;
+      case 3: atom.context.fillStyle = "#BBBBBB"; atom.context.strokeStyle = "#BBBBBB"; break;
+      case 4: atom.context.fillStyle = "#FFFFFF"; atom.context.strokeStyle = "#EEEEEE"; break;
+      /*
       case 0: atom.context.fillStyle = "rgba(200,0,0,0.8)"; break;
       case 1: atom.context.fillStyle = "rgba(100,0,0,0.5)"; break;
       case 2: atom.context.fillStyle = "rgba(0,0,0,0.3)"; break;
       case 3: atom.context.fillStyle = "rgba(0,100,0,0.5)"; break;
       case 4: atom.context.fillStyle = "rgba(0,200,0,0.8)"; break;
+      */
     }
     atom.context.lineWidth = 4;
     atom.context.beginPath();
@@ -153,6 +173,33 @@ var GamePlayScene = function(game, stage)
   var star_outro_sub_star = 100;
   var outro;
 
+  var countLevelStars = function()
+  {
+    total_stars = 0;
+    for(var i = 0; i < levels.length; i++)
+      total_stars += levels[i].stars;
+  }
+
+  var totalStarsDisplay = function()
+  {
+    var self = this;
+    self.wx = 0;
+    self.wy = 0;
+    self.ww = 0;
+    self.wh = 0;
+    self.x = 0;
+    self.y = 0;
+    self.w = 0;
+    self.h = 0;
+
+    self.draw = function()
+    {
+      ctx.drawImage(star_full,self.x,self.y,40,40);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillText("X"+total_stars,self.x+45,self.y+30);
+    }
+  }
+
   var level = function(id)
   {
     var self = this;
@@ -169,6 +216,7 @@ var GamePlayScene = function(game, stage)
     self.stars = 0;
     self.cur_stars = 0;
     self.cur_stars_t = 0; //t since new cur_stars rating
+    self.lock_stars = 0;
     self.best = -99999;
     self.star_req_score = [];
     for(var i = 0; i < 3; i++)
@@ -236,10 +284,24 @@ var GamePlayScene = function(game, stage)
         else
           ctx.drawImage(star,x+offx-bs/2,y+offy-bs/2,bs,bs);
       }
+
+      if(total_stars < self.level.lock_stars)
+      {
+        ctx.fillStyle = "rgba(0,0,0,0.8)";
+        ctx.beginPath();
+        ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/4,0,2*Math.PI);
+        ctx.fill();
+
+        ctx.drawImage(lock_img,self.x+20,self.y+20,self.w-40,self.h-40);
+        ctx.drawImage(star_full,self.x+10,self.y+self.h/2-10,40,40);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText("X"+self.level.lock_stars,self.x+50,self.y+self.h/2+20);
+      }
     }
 
     self.click = function(evt)
     {
+      if(total_stars < self.level.lock_stars) return;
       set_level(self.level.id);
       mode = MODE_INTRO;
     }
@@ -268,6 +330,7 @@ var GamePlayScene = function(game, stage)
     self.click = function(evt)
     {
       mode = MODE_MENU;
+      countLevelStars();
     }
 
     self.draw = function()
@@ -344,6 +407,7 @@ var GamePlayScene = function(game, stage)
     levels[i].scroll_w = 2.5;
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].lock_stars = 0;
     levels[i].star_req_score[0] = 22;
     levels[i].star_req_score[1] = 30;
     levels[i].star_req_score[2] = 36;
@@ -365,6 +429,7 @@ var GamePlayScene = function(game, stage)
     }
     levels[i].introdraw = function()
     {
+      ctx.fillStyle = "#000000";
       ctx.fillText("<- This is a molecule",bounds.x-110,150);
       ctx.fillText("Stack 'em here \\/",bounds.x+50,100);
     }
@@ -380,6 +445,7 @@ var GamePlayScene = function(game, stage)
     levels[i].scroll_w = 3.5;
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].lock_stars = levels[i-1].lock_stars+3;
     levels[i].star_req_score[0] = 13;
     levels[i].star_req_score[1] = 20;
     levels[i].star_req_score[2] = 30;
@@ -401,6 +467,7 @@ var GamePlayScene = function(game, stage)
     }
     levels[i].introdraw = function()
     {
+      ctx.fillStyle = "#000000";
       ctx.fillText("Some patterns can",bounds.x+50,100);
       ctx.fillText("fill the space completely.",bounds.x+50,130);
       ctx.fillText("Others don't.",bounds.x+50,200);
@@ -417,6 +484,7 @@ var GamePlayScene = function(game, stage)
     levels[i].scroll_w = 3.5;
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].lock_stars = levels[i-1].lock_stars+3;
     levels[i].star_req_score[0] = 8;
     levels[i].star_req_score[1] = 17;
     levels[i].star_req_score[2] = 30;
@@ -438,6 +506,7 @@ var GamePlayScene = function(game, stage)
     }
     levels[i].introdraw = function()
     {
+      ctx.fillStyle = "#000000";
       ctx.fillText("Double click",bounds.x+50,100);
       ctx.fillText("to rotate",bounds.x+50,130);
     }
@@ -453,6 +522,7 @@ var GamePlayScene = function(game, stage)
     levels[i].scroll_w = 2.5;
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 36;
     levels[i].star_req_score[1] = 37;
     levels[i].star_req_score[2] = 84;
@@ -474,6 +544,7 @@ var GamePlayScene = function(game, stage)
     }
     levels[i].introdraw = function()
     {
+      ctx.fillStyle = "#000000";
       ctx.fillText("Some molecules have charges.",bounds.x+50,100);
       ctx.fillText("opposites attract.",bounds.x+50,130);
     }
@@ -489,6 +560,7 @@ var GamePlayScene = function(game, stage)
     levels[i].scroll_w = 3.5;
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 48;
     levels[i].star_req_score[1] = 61;
     levels[i].star_req_score[2] = 90;
@@ -510,6 +582,7 @@ var GamePlayScene = function(game, stage)
     }
     levels[i].introdraw = function()
     {
+      ctx.fillStyle = "#000000";
       ctx.fillText("Try different patterns",bounds.x+50,100);
       ctx.fillText("to get 3 stars.",bounds.x+50,130);
     }
@@ -525,6 +598,7 @@ var GamePlayScene = function(game, stage)
     levels[i].scroll_w = 2.5;
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].lock_stars = levels[i-1].lock_stars+1;
     levels[i].star_req_score[0] = 140;
     levels[i].star_req_score[1] = 280;
     levels[i].star_req_score[2] = 284;
@@ -543,6 +617,7 @@ var GamePlayScene = function(game, stage)
     levels[i].scroll_w = 3;
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].lock_stars = levels[i-1].lock_stars+1;
     levels[i].star_req_score[0] = 0;
     levels[i].star_req_score[1] = 0;
     levels[i].star_req_score[2] = 0;
@@ -819,8 +894,8 @@ var GamePlayScene = function(game, stage)
         ctx.strokeStyle = block_stroke;
         for(var j = 0; j < 4; j++)
         {
-               if(blocks[i].c[j] > 0) ctx.strokeStyle = "#00FF00";
-          else if(blocks[i].c[j] < 0) ctx.strokeStyle = "#FF0000";
+               if(blocks[i].c[j] > 0) ctx.strokeStyle = charge_pos;
+          else if(blocks[i].c[j] < 0) ctx.strokeStyle = charge_neg;
           else continue;
           switch(j)
           {
@@ -1602,6 +1677,8 @@ var GamePlayScene = function(game, stage)
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
 
+    total_stars = 0;
+
     menu_cam = { wx:-20, wy:0, ww:12, wh:6 };
     cam = { wx:menu_cam.wx, wy:menu_cam.wy, ww:menu_cam.ww, wh:menu_cam.wh };
     mode = MODE_MENU;
@@ -1613,12 +1690,20 @@ var GamePlayScene = function(game, stage)
     if(url_args["lvl"]) lvl = parseInt(url_args["lvl"]);
     if(!lvl) lvl = 0;
     init_levels();
+    countLevelStars();
     set_level(lvl);
     cur_stars_bounce = new bounce();
     score_bounce = new bounce();
 
+    total_stars_disp = new totalStarsDisplay();
+    total_stars_disp.wx = -25;
+    total_stars_disp.wy =   2;
+    total_stars_disp.ww = 1;
+    total_stars_disp.wh = 1;
+    screenSpace(cam,canv,total_stars_disp);
+
     back_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    back_btn.click = function(evt) { mode = MODE_MENU; evt.hitUI = true; }
+    back_btn.click = function(evt) { mode = MODE_MENU; countLevelStars(); evt.hitUI = true; }
     back_btn.ww = game_cam.ww/10;
     back_btn.wh = game_cam.wh/10;
     back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww/2;
@@ -1770,6 +1855,8 @@ var GamePlayScene = function(game, stage)
     cur_stars_bounce.tick();
     score_bounce.tick();
     cur_level.cur_stars_t++;
+
+    screenSpace(cam,canv,total_stars_disp);
   };
 
   self.draw = function()
@@ -1881,6 +1968,8 @@ var GamePlayScene = function(game, stage)
     {
       cur_level.introdraw();
     }
+
+    total_stars_disp.draw();
   };
 
   self.cleanup = function()
