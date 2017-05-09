@@ -173,11 +173,24 @@ var GamePlayScene = function(game, stage)
   var star_outro_sub_star = 100;
   var outro;
 
+  var loadLevelStars = function()
+  {
+    for(var i = 0; i < levels.length; i++)
+    {
+      var c = parseInt(getCookie("lvl"+i));
+      if(!isNaN(c)) levels[i].stars = c;
+    }
+    countLevelStars();
+  }
   var countLevelStars = function()
   {
     total_stars = 0;
     for(var i = 0; i < levels.length; i++)
+    {
+      setCookie("lvl"+i,""+levels[i].stars,99);
+      var c = parseInt(getCookie("lvl"+i));
       total_stars += levels[i].stars;
+    }
   }
 
   var totalStarsDisplay = function()
@@ -1690,7 +1703,7 @@ var GamePlayScene = function(game, stage)
     if(url_args["lvl"]) lvl = parseInt(url_args["lvl"]);
     if(!lvl) lvl = 0;
     init_levels();
-    countLevelStars();
+    loadLevelStars();
     set_level(lvl);
     cur_stars_bounce = new bounce();
     score_bounce = new bounce();
