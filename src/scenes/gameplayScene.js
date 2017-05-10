@@ -37,8 +37,12 @@ var GamePlayScene = function(game, stage)
   var charge_pos = "#22CC22";
   var charge_neg = "#CC2222";
 
+  var cache_res = 400;
+  var cache_cam_wres = 5;
+
   var star_outro_sub_slide = 40;
   var star_outro_sub_star = 100;
+  var star_outro_sub_zoom = 200;
 
   //start at top, CW
   var no_charge  = [ 0, 0, 0, 0];
@@ -90,6 +94,7 @@ var GamePlayScene = function(game, stage)
   var tx;
   var ty;
   var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
+  var cblock = {wx:0,wy:0,ww:cache_cam_wres,wh:cache_cam_wres,x:0,y:0,w:0,h:0};
   var w;
   var h;
   var in_r;
@@ -277,7 +282,7 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
-      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,0,self.level.available_templates[0].blocks);
+      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,0,self.level.available_templates[0]);
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -360,7 +365,7 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
-      draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,cur_level.available_templates[0].blocks);
+      //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,cur_level.available_templates[0]);
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -705,6 +710,8 @@ var GamePlayScene = function(game, stage)
       for(var j = 0; j < 4; j++)
         to.blocks[i].c[j] = from.blocks[i].c[j];
     }
+    to.tcache = from.tcache;
+    to.rotation = from.rotation;
   }
   var rotate_template = function(t)
   {
@@ -721,16 +728,229 @@ var GamePlayScene = function(game, stage)
     var tx = t.cx;
     t.cx = t.cy;
     t.cy = -tx;
+    t.rotation = (t.rotation+1)%4;
   }
-  var draw_blocks = function(wx,wy,offx,offy,bounces,happys,rot,scale,shadow,blocks)
+  var draw_blocks = function(wx,wy,offx,offy,bounces,happys,rot,scale,shadow,template)
   {
+    var blocks = template.blocks;
+
+    if(!template.tcache[template.rotation].cached)
+    {
+      template.tcache[template.rotation].cached = true;
+
+      var top_left;
+      var cur;
+      var leftmost = 100;
+      var topmost = -100;
+
+      var tcam = { wx:0, wy:0, ww:cache_cam_wres, wh:cache_cam_wres };
+      var tcanv = template.tcache[template.rotation].cache;
+      var tctx = tcanv.context;
+      var scanv = template.tcache[template.rotation].shadow_cache;
+      var sctx = scanv.context;
+
+      tctx.clearRect(0, 0, cache_res, cache_res);
+      sctx.clearRect(0, 0, cache_res, cache_res);
+
+      screenSpace(tcam,tcanv,dblock);
+
+      for(var i = 0; i < blocks.length; i++)
+        if(blocks[i].cx < leftmost) leftmost = blocks[i].cx;
+      for(var i = 0; i < blocks.length; i++)
+        if(blocks[i].cx == leftmost && blocks[i].cy > topmost)
+        {
+          topmost = blocks[i].cy;
+          top_left = i;
+        }
+
+      var xb = dblock.ww*3/8;
+      var yb = dblock.wh*3/8;
+      var start;
+      var done;
+      var found;
+
+      tctx.fillStyle = block_fill;
+      tctx.strokeStyle = block_stroke;
+      sctx.fillStyle = shadow_fill;
+
+      cur = top_left;
+
+      tctx.beginPath();
+      sctx.beginPath();
+
+      dblock.wx = blocks[cur].cx-xb;
+      dblock.wy = blocks[cur].cy+yb;
+      screenSpace(tcam,tcanv,dblock);
+      tctx.moveTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+      sctx.moveTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+
+      start = 0;
+      done = 0;
+      while(!done)
+      {
+        found = false;
+        for(var i = 0; !found && !done && i < 4; i++) //start at top, CW
+        {
+          switch((i+start)%4)
+          {
+            case 0: //check top
+            {
+              for(var j = 0; !found && j < blocks.length; j++)
+              {
+                if(cur != j &&
+                  blocks[j].cx == blocks[cur].cx   &&
+                  blocks[j].cy == blocks[cur].cy+1)
+                {
+                  found = true;
+                  cur = j;
+
+                  dblock.wx = blocks[cur].cx-xb;
+                  dblock.wy = blocks[cur].cy-yb;
+                  screenSpace(tcam,tcanv,dblock);
+                  tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+                  sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+
+                  start = 3;
+                }
+              }
+              if(!found)
+              {
+                dblock.wx = blocks[cur].cx+xb;
+                dblock.wy = blocks[cur].cy+yb;
+                screenSpace(tcam,tcanv,dblock);
+                tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+                sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+              }
+            }
+            break;
+            case 1: //check right
+            {
+              for(var j = 0; !found && j < blocks.length; j++)
+              {
+                if(cur != j &&
+                  blocks[j].cx == blocks[cur].cx+1 &&
+                  blocks[j].cy == blocks[cur].cy)
+                {
+                  found = true;
+                  cur = j;
+
+                  dblock.wx = blocks[cur].cx-xb;
+                  dblock.wy = blocks[cur].cy+yb;
+                  screenSpace(tcam,tcanv,dblock);
+                  tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+                  sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+
+                  start = 0;
+                }
+              }
+              if(!found)
+              {
+                dblock.wx = blocks[cur].cx+xb;
+                dblock.wy = blocks[cur].cy-yb;
+                screenSpace(tcam,tcanv,dblock);
+                tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+                sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+              }
+            }
+            break;
+            case 2: //check bottom
+            {
+              for(var j = 0; !found && j < blocks.length; j++)
+              {
+                if(cur != j &&
+                  blocks[j].cx == blocks[cur].cx   &&
+                  blocks[j].cy == blocks[cur].cy-1)
+                {
+                  found = true;
+                  cur = j;
+
+                  dblock.wx = blocks[cur].cx+xb;
+                  dblock.wy = blocks[cur].cy+yb;
+                  screenSpace(tcam,tcanv,dblock);
+                  tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+                  sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+
+                  start = 1;
+                }
+              }
+              if(!found)
+              {
+                dblock.wx = blocks[cur].cx-xb;
+                dblock.wy = blocks[cur].cy-yb;
+                screenSpace(tcam,tcanv,dblock);
+                tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+                sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+              }
+            }
+            break;
+            case 3: //check left
+            {
+              for(var j = 0; !found && j < blocks.length; j++)
+              {
+                if(cur != j &&
+                  blocks[j].cx == blocks[cur].cx-1 &&
+                  blocks[j].cy == blocks[cur].cy)
+                {
+                  found = true;
+                  cur = j;
+
+                  dblock.wx = blocks[cur].cx+xb;
+                  dblock.wy = blocks[cur].cy-yb;
+                  screenSpace(tcam,tcanv,dblock);
+                  tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+                  sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+
+                  start = 2;
+                }
+              }
+              if(!found)
+              {
+                dblock.wx = blocks[cur].cx-xb;
+                dblock.wy = blocks[cur].cy+yb;
+                screenSpace(tcam,tcanv,dblock);
+                tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+                sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
+              }
+            }
+            break;
+          }
+
+          if(!found && cur == top_left && (i+start)%4 == 3) done = 1;
+        }
+      }
+      tctx.fill();
+      sctx.fill();
+      tctx.stroke();
+
+      //charges
+      for(var i = 0; i < blocks.length; i++)
+      {
+        dblock.wx = blocks[i].cx;
+        dblock.wy = blocks[i].cy;
+        screenSpace(tcam,tcanv,dblock);
+
+        var d = dblock.w/8;
+        tctx.strokeStyle = block_stroke;
+        for(var j = 0; j < 4; j++)
+        {
+               if(blocks[i].c[j] > 0) tctx.strokeStyle = charge_pos;
+          else if(blocks[i].c[j] < 0) tctx.strokeStyle = charge_neg;
+          else continue;
+          switch(j)
+          {
+            case 0: tctx.beginPath(); tctx.moveTo(dblock.x         +d,dblock.y         +d); tctx.lineTo(dblock.x+dblock.w-d,dblock.y         +d); tctx.stroke(); break;
+            case 1: tctx.beginPath(); tctx.moveTo(dblock.x+dblock.w-d,dblock.y         +d); tctx.lineTo(dblock.x+dblock.w-d,dblock.y+dblock.h-d); tctx.stroke(); break;
+            case 2: tctx.beginPath(); tctx.moveTo(dblock.x         +d,dblock.y+dblock.h-d); tctx.lineTo(dblock.x+dblock.w-d,dblock.y+dblock.h-d); tctx.stroke(); break;
+            case 3: tctx.beginPath(); tctx.moveTo(dblock.x         +d,dblock.y         +d); tctx.lineTo(dblock.x         +d,dblock.y+dblock.h-d); tctx.stroke(); break;
+          }
+        }
+      }
+
+    }
+
     tx = screenSpaceX(cam,canv,wx);
     ty = screenSpaceY(cam,canv,wy);
-    //dblock.wx = wx;
-    //dblock.wy = wy;
     screenSpace(cam,canv,dblock);
-    //tx = dblock.x+dblock.w/2;
-    //ty = dblock.y+dblock.h/2;
 
     ctx.save();
     ctx.translate(tx,ty);
@@ -738,197 +958,12 @@ var GamePlayScene = function(game, stage)
     ctx.translate(-offx*dblock.w*scale,offy*dblock.h*scale);
     ctx.scale(scale,scale);
 
-    var top_left;
-    var cur;
-    var leftmost = 100;
-    var topmost = -100;
-    for(var i = 0; i < blocks.length; i++)
-      if(blocks[i].cx < leftmost) leftmost = blocks[i].cx;
-    for(var i = 0; i < blocks.length; i++)
-      if(blocks[i].cx == leftmost && blocks[i].cy > topmost)
-      {
-        topmost = blocks[i].cy;
-        top_left = i;
-      }
-
-    var xb = dblock.ww*3/8;
-    var yb = dblock.wh*3/8;
-    var start;
-    var done;
-    var found;
-
-
+    screenSpace(cam,canv,cblock);
     if(shadow)
-      ctx.fillStyle = shadow_fill;
+      ctx.drawImage(template.tcache[template.rotation].shadow_cache, -cblock.w/2, -cblock.h/2, cblock.w, cblock.h);
     else
-    {
-      ctx.fillStyle = block_fill;
-      ctx.strokeStyle = block_stroke;
-    }
+      ctx.drawImage(template.tcache[template.rotation].cache, -cblock.w/2, -cblock.h/2, cblock.w, cblock.h);
 
-    cur = top_left;
-
-    ctx.beginPath();
-
-    dblock.wx = wx+blocks[cur].cx-xb;
-    dblock.wy = wy+blocks[cur].cy+yb;
-    screenSpace(cam,canv,dblock);
-    ctx.moveTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
-
-    start = 0;
-    done = 0;
-    while(!done)
-    {
-      found = false;
-      for(var i = 0; !found && !done && i < 4; i++) //start at top, CW
-      {
-        switch((i+start)%4)
-        {
-          case 0: //check top
-          {
-            for(var j = 0; !found && j < blocks.length; j++)
-            {
-              if(cur != j &&
-                blocks[j].cx == blocks[cur].cx   &&
-                blocks[j].cy == blocks[cur].cy+1)
-              {
-                found = true;
-                cur = j;
-
-                dblock.wx = wx+blocks[cur].cx-xb;
-                dblock.wy = wy+blocks[cur].cy-yb;
-                screenSpace(cam,canv,dblock);
-                ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
-
-                start = 3;
-              }
-            }
-            if(!found)
-            {
-              dblock.wx = wx+blocks[cur].cx+xb;
-              dblock.wy = wy+blocks[cur].cy+yb;
-              screenSpace(cam,canv,dblock);
-              ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
-            }
-          }
-          break;
-          case 1: //check right
-          {
-            for(var j = 0; !found && j < blocks.length; j++)
-            {
-              if(cur != j &&
-                blocks[j].cx == blocks[cur].cx+1 &&
-                blocks[j].cy == blocks[cur].cy)
-              {
-                found = true;
-                cur = j;
-
-                dblock.wx = wx+blocks[cur].cx-xb;
-                dblock.wy = wy+blocks[cur].cy+yb;
-                screenSpace(cam,canv,dblock);
-                ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
-
-                start = 0;
-              }
-            }
-            if(!found)
-            {
-              dblock.wx = wx+blocks[cur].cx+xb;
-              dblock.wy = wy+blocks[cur].cy-yb;
-              screenSpace(cam,canv,dblock);
-              ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
-            }
-          }
-          break;
-          case 2: //check bottom
-          {
-            for(var j = 0; !found && j < blocks.length; j++)
-            {
-              if(cur != j &&
-                blocks[j].cx == blocks[cur].cx   &&
-                blocks[j].cy == blocks[cur].cy-1)
-              {
-                found = true;
-                cur = j;
-
-                dblock.wx = wx+blocks[cur].cx+xb;
-                dblock.wy = wy+blocks[cur].cy+yb;
-                screenSpace(cam,canv,dblock);
-                ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
-
-                start = 1;
-              }
-            }
-            if(!found)
-            {
-              dblock.wx = wx+blocks[cur].cx-xb;
-              dblock.wy = wy+blocks[cur].cy-yb;
-              screenSpace(cam,canv,dblock);
-              ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
-            }
-          }
-          break;
-          case 3: //check left
-          {
-            for(var j = 0; !found && j < blocks.length; j++)
-            {
-              if(cur != j &&
-                blocks[j].cx == blocks[cur].cx-1 &&
-                blocks[j].cy == blocks[cur].cy)
-              {
-                found = true;
-                cur = j;
-
-                dblock.wx = wx+blocks[cur].cx+xb;
-                dblock.wy = wy+blocks[cur].cy-yb;
-                screenSpace(cam,canv,dblock);
-                ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
-
-                start = 2;
-              }
-            }
-            if(!found)
-            {
-              dblock.wx = wx+blocks[cur].cx-xb;
-              dblock.wy = wy+blocks[cur].cy+yb;
-              screenSpace(cam,canv,dblock);
-              ctx.lineTo(dblock.x-tx+dblock.w/2,dblock.y-ty+dblock.h/2);
-            }
-          }
-          break;
-        }
-
-        if(!found && cur == top_left && (i+start)%4 == 3) done = 1;
-      }
-    }
-    ctx.fill();
-    if(!shadow) ctx.stroke();
-
-    if(!shadow)
-    {
-      for(var i = 0; i < blocks.length; i++)
-      {
-        dblock.wx = wx+blocks[i].cx;
-        dblock.wy = wy+blocks[i].cy;
-        screenSpace(cam,canv,dblock);
-
-        var d = dblock.w/8;
-        ctx.strokeStyle = block_stroke;
-        for(var j = 0; j < 4; j++)
-        {
-               if(blocks[i].c[j] > 0) ctx.strokeStyle = charge_pos;
-          else if(blocks[i].c[j] < 0) ctx.strokeStyle = charge_neg;
-          else continue;
-          switch(j)
-          {
-            case 0: ctx.beginPath(); ctx.moveTo(dblock.x         +d-tx,dblock.y         +d-ty); ctx.lineTo(dblock.x+dblock.w-d-tx,dblock.y         +d-ty); ctx.stroke(); break;
-            case 1: ctx.beginPath(); ctx.moveTo(dblock.x+dblock.w-d-tx,dblock.y         +d-ty); ctx.lineTo(dblock.x+dblock.w-d-tx,dblock.y+dblock.h-d-ty); ctx.stroke(); break;
-            case 2: ctx.beginPath(); ctx.moveTo(dblock.x         +d-tx,dblock.y+dblock.h-d-ty); ctx.lineTo(dblock.x+dblock.w-d-tx,dblock.y+dblock.h-d-ty); ctx.stroke(); break;
-            case 3: ctx.beginPath(); ctx.moveTo(dblock.x         +d-tx,dblock.y         +d-ty); ctx.lineTo(dblock.x         +d-tx,dblock.y+dblock.h-d-ty); ctx.stroke(); break;
-          }
-        }
-      }
-    }
     ctx.restore();
 
     if(!shadow)
@@ -1549,13 +1584,13 @@ var GamePlayScene = function(game, stage)
 
     self.draw_off_up = function(woffx,woffy)
     {
-      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,1,self.template.blocks);
+      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,1,self.template);
       var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
-      draw_blocks(self.wx+t+woffx,self.wy-t+woffy,0,0,self.bounces,self.happys,self.rot,1,0,self.template.blocks);
+      draw_blocks(self.wx+t+woffx,self.wy-t+woffy,0,0,self.bounces,self.happys,self.rot,1,0,self.template);
     }
     self.draw_off_down = function(woffx,woffy)
     {
-      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,0,self.template.blocks);
+      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,0,self.template);
     }
     self.draw_front_up = function()
     {
@@ -1565,34 +1600,106 @@ var GamePlayScene = function(game, stage)
     {
       if(!self.up) self.draw_off_down(0,0);
     }
-    self.draw_behind_up = function()
+    self.draw_behind_up = function(n)
     {
       if(self.up)
       {
-        self.draw_off_up( cur_level.repeat_x,                  0);
-        self.draw_off_up(-cur_level.repeat_x,                  0);
-        self.draw_off_up(                  0, cur_level.repeat_y);
-        self.draw_off_up(                  0,-cur_level.repeat_y);
-        self.draw_off_up( cur_level.repeat_x, cur_level.repeat_y);
-        self.draw_off_up( cur_level.repeat_x,-cur_level.repeat_y);
-        self.draw_off_up(-cur_level.repeat_x, cur_level.repeat_y);
-        self.draw_off_up(-cur_level.repeat_x,-cur_level.repeat_y);
+        var ox = cur_level.repeat_x;
+        var oy = cur_level.repeat_y;
+        var x;
+        var y;
+
+        //top left
+        for(x = 0; x < n; x++)
+          for(y = 0; y < n; y++)
+            self.draw_off_up((-n+x)*ox,(-n+y)*oy);
+
+        //top
+        for(y = 0; y < n; y++)
+          self.draw_off_up(0,(-n+y)*oy);
+
+        //top right
+        for(x = 0; x < n; x++)
+          for(y = 0; y < n; y++)
+            self.draw_off_up((x+1)*ox,(-n+y)*oy);
+
+        //right
+        for(x = 0; x < n; x++)
+          self.draw_off_up((x+1)*ox,0);
+
+        //bottom right
+        for(x = 0; x < n; x++)
+          for(y = 0; y < n; y++)
+            self.draw_off_up((x+1)*ox,(y+1)*oy);
+
+        //bottom
+        for(y = 0; y < n; y++)
+          self.draw_off_up(0,(y+1)*oy);
+
+        //bottom left
+        for(x = 0; x < n; x++)
+          for(y = 0; y < n; y++)
+            self.draw_off_up((-n+x)*ox,(y+1)*oy);
+
+        //left
+        for(x = 0; x < n; x++)
+          self.draw_off_up((-n+x)*ox,0);
       }
     }
-    self.draw_behind_down = function()
+    self.draw_behind_down = function(n)
     {
       if(!self.up)
       {
-        self.draw_off_down( cur_level.repeat_x,                  0);
-        self.draw_off_down(-cur_level.repeat_x,                  0);
-        self.draw_off_down(                  0, cur_level.repeat_y);
-        self.draw_off_down(                  0,-cur_level.repeat_y);
-        self.draw_off_down( cur_level.repeat_x, cur_level.repeat_y);
-        self.draw_off_down( cur_level.repeat_x,-cur_level.repeat_y);
-        self.draw_off_down(-cur_level.repeat_x, cur_level.repeat_y);
-        self.draw_off_down(-cur_level.repeat_x,-cur_level.repeat_y);
+        var ox = cur_level.repeat_x;
+        var oy = cur_level.repeat_y;
+        var x;
+        var y;
+
+        //top left
+        for(x = 0; x < n; x++)
+          for(y = 0; y < n; y++)
+            self.draw_off_down((-n+x)*ox,(-n+y)*oy);
+
+        //top
+        for(y = 0; y < n; y++)
+          self.draw_off_down(0,(-n+y)*oy);
+
+        //top right
+        for(x = 0; x < n; x++)
+          for(y = 0; y < n; y++)
+            self.draw_off_down((x+1)*ox,(-n+y)*oy);
+
+        //right
+        for(x = 0; x < n; x++)
+          self.draw_off_down((x+1)*ox,0);
+
+        //bottom right
+        for(x = 0; x < n; x++)
+          for(y = 0; y < n; y++)
+            self.draw_off_down((x+1)*ox,(y+1)*oy);
+
+        //bottom
+        for(y = 0; y < n; y++)
+          self.draw_off_down(0,(y+1)*oy);
+
+        //bottom left
+        for(x = 0; x < n; x++)
+          for(y = 0; y < n; y++)
+            self.draw_off_down((-n+x)*ox,(y+1)*oy);
+
+        //left
+        for(x = 0; x < n; x++)
+          self.draw_off_down((-n+x)*ox,0);
       }
     }
+  }
+
+  var tcache = function()
+  {
+    var self = this;
+    self.cache = GenIcon(cache_res,cache_res);
+    self.shadow_cache = GenIcon(cache_res,cache_res);
+    self.cached = false;
   }
 
   var template = function(cx,cy,blocks)
@@ -1601,6 +1708,14 @@ var GamePlayScene = function(game, stage)
     self.cx = cx;
     self.cy = cy;
     self.blocks = blocks;
+    self.rotation = 0;
+
+    self.tcache = [];
+    if(blocks) //else will get copied
+    {
+      for(var i = 0; i < 4; i++)
+      self.tcache[i] = new tcache();
+    }
   }
 
   var stamp = function()
@@ -1690,7 +1805,7 @@ var GamePlayScene = function(game, stage)
 
     self.draw = function()
     {
-      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,0,self.rot,1,0,self.template.blocks);
+      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,0,self.rot,1,0,self.template);
     }
   }
 
@@ -1769,12 +1884,20 @@ var GamePlayScene = function(game, stage)
       cam.ww = lerp(cam.ww,menu_cam.ww,0.1);
       cam.wh = lerp(cam.wh,menu_cam.wh,0.1);
     }
-    if(mode == MODE_GAME || mode == MODE_SUBMIT || mode == MODE_INTRO)
+    if(mode == MODE_GAME || mode == MODE_INTRO)
     {
       cam.wx = lerp(cam.wx,game_cam.wx,0.1);
       cam.wy = lerp(cam.wy,game_cam.wy,0.1);
       cam.ww = lerp(cam.ww,game_cam.ww,0.1);
       cam.wh = lerp(cam.wh,game_cam.wh,0.1);
+    }
+    if(mode == MODE_SUBMIT)
+    {
+      cam.wx = lerp(cam.wx,game_cam.wx,0.1);
+      cam.wy = lerp(cam.wy,game_cam.wy,0.1);
+      var t = min(1,submitting_t/(star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom));
+      cam.ww = lerp(cam.ww,game_cam.ww*(1+t*3),0.1);
+      cam.wh = lerp(cam.wh,game_cam.wh*(1+t*3),0.1);
     }
 
     //screen space based on new cam
@@ -1835,7 +1958,7 @@ var GamePlayScene = function(game, stage)
     }
     else if(mode == MODE_SUBMIT)
     {
-      if(submitting_t > star_outro_sub_slide+star_outro_sub_star)
+      if(submitting_t > star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom)
         clicker.filter(outro);
     }
 
@@ -1890,6 +2013,9 @@ var GamePlayScene = function(game, stage)
   {
     ctx.font = "20px Arial";
 
+    var sub_t = min(1,submitting_t/(star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom));
+    var quick_sub_t = min(1,submitting_t/star_outro_sub_slide);
+
     //grid
     var x  = 0;
     var wx = 0;
@@ -1930,8 +2056,14 @@ var GamePlayScene = function(game, stage)
     }
 
     //molecules back
+    var draw_n = 1;
+    if(mode == MODE_SUBMIT)
+    {
+      draw_n = round(0.5+sub_t*2);
+      if(sub_t == 1) draw_n++;
+    }
     for(var i = molecules.length-1; i >= 0; i--)
-      molecules[i].draw_behind_down();
+      molecules[i].draw_behind_down(draw_n);
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_down();
 
@@ -1953,13 +2085,25 @@ var GamePlayScene = function(game, stage)
 
     //molecules front
     for(var i = molecules.length-1; i >= 0; i--)
-      molecules[i].draw_behind_up();
+      molecules[i].draw_behind_up(draw_n);
+
+    //scroll
+    if(mode == MODE_SUBMIT)
+      ctx.globalAlpha = (1-quick_sub_t);
+
     ctx.fillStyle = scroll_fill;
     ctx.fillRect(scroll.x,scroll.y,scroll.w,scroll.h);
     for(var i = 0; i < stamps.length; i++)
       stamps[i].draw();
+
+    ctx.globalAlpha = 1;
+
+    //the rest of molecules front
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_up();
+
+    if(mode == MODE_SUBMIT)
+      ctx.globalAlpha = (1-quick_sub_t);
 
     //UI
     ctx.fillStyle = "#000000";
@@ -1987,6 +2131,8 @@ var GamePlayScene = function(game, stage)
     ctx.fillText("Molecule --",levels[0].button.x-100,levels[0].button.y+150);
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
+
+    ctx.globalAlpha = 1;
 
     if(mode == MODE_SUBMIT)
       outro.draw();

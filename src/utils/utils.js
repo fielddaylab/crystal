@@ -330,7 +330,6 @@ var GenIcon = function(w,h)
   return icon;
 }
 
-
 var SeededRand = function(s)
 {
   var self = this;
