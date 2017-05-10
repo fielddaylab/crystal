@@ -16,12 +16,29 @@ var GamePlayScene = function(game, stage)
   var clicker;
   var dragger;
 
-  var dragging_molecule = 0;
-  var cam;
-  var game_cam;
-  var menu_cam;
-  var bounds;
+  //enums
+  var ENUM = 0;
+
+  var MODE_MENU   = ENUM; ENUM++;
+  var MODE_GAME   = ENUM; ENUM++;
+  var MODE_SUBMIT = ENUM; ENUM++;
+  var MODE_INTRO  = ENUM; ENUM++;
+
+  //params
   var shadow_dist = 8;
+  var bounds_stroke  = "rgba(0,0,0,.6)";
+  var shadow_fill  = "rgba(0,0,0,.1)";
+  var block_fill   = "#F6F6F6";
+  var block_stroke = "#E0E0E0";
+  var scroll_fill = "rgba(0,0,0,0.3)";
+  var bg_fill     = "rgba(100,0,0,0.05)";
+  var grid_fill = "#AAAAAA";
+  var grid_stroke = "#999999";
+  var charge_pos = "#22CC22";
+  var charge_neg = "#CC2222";
+
+  var star_outro_sub_slide = 40;
+  var star_outro_sub_star = 100;
 
   //start at top, CW
   var no_charge  = [ 0, 0, 0, 0];
@@ -34,50 +51,53 @@ var GamePlayScene = function(game, stage)
   var left_neg   = [ 0, 0, 0,-1];
   var right_neg  = [ 0,-1, 0, 0];
 
-  var levels;
-  var cur_level;
-  var cur_stars_bounce;
-  var score_bounce;
-
+  //simple state
+  var n_ticks;
   var total_stars;
-  var total_stars_disp;
+  var score;
+  var submitting_t;
 
-  var url_args;
-  var lvl;
+  //static state
+  var levels;
 
-  var score = 0;
+  //obj state
   var score_board;
-
-  var score_patience = 10;
-
-  var scroll;
   var stamps;
   var molecules;
+  var game_cam;
+  var menu_cam;
+  var cam;
+  var bounds;
 
+  //indexes
+  var cur_level;
+  var dragging_molecule;
+  var mode;
+
+  //viz obj
+  var total_stars_disp;
+  var outro;
+  var scroll;
   var back_btn;
   var clear_btn;
   var submit_btn;
 
-  //block drawing
+  //viz state
+  var cur_stars_bounce;
+  var score_bounce;
+
+  //tmp state
   var tx;
   var ty;
   var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
-  var bounds_stroke  = "rgba(0,0,0,.6)";
-  var shadow_fill  = "rgba(0,0,0,.1)";
-  var block_fill   = "#F6F6F6";
-  var block_stroke = "#E0E0E0";
-  var scroll_fill = "rgba(0,0,0,0.3)";
-  var bg_fill     = "rgba(100,0,0,0.05)";
-  var grid_fill = "#AAAAAA";
-  var grid_stroke = "#999999";
-  var charge_pos = "#22CC22";
-  var charge_neg = "#CC2222";
-
-  var w = 100;
-  var h = 100;
-  var in_r = w/4;
-  var out_r = w/2-5;
+  var w;
+  var h;
+  var in_r;
+  var out_r;
   var theta;
+
+  w = 100;
+  h = 100;
 
   var lock_img = GenIcon(w,h)
   lock_img.context.strokeStyle = "#999999";
@@ -87,6 +107,9 @@ var GamePlayScene = function(game, stage)
   lock_img.context.arc(w/2,h/2,w/3,0,2*Math.PI);
   lock_img.context.stroke();
   lock_img.context.fillRect(10,h/2,w-20,h/2-10);
+
+  in_r = w/4;
+  out_r = w/2-5;
 
   var star = GenIcon(w,h)
   theta = 0-halfpi;
@@ -158,20 +181,6 @@ var GamePlayScene = function(game, stage)
     //atom.context.fillText(i,w/2,h/2);
     atoms.push(atom);
   }
-
-  var n_ticks = 0;
-
-  var mode;
-  var ENUM = 0;
-  MODE_MENU   = ENUM; ENUM++;
-  MODE_GAME   = ENUM; ENUM++;
-  MODE_SUBMIT = ENUM; ENUM++;
-  MODE_INTRO  = ENUM; ENUM++;
-
-  var submitting_t;
-  var star_outro_sub_slide = 40;
-  var star_outro_sub_star = 100;
-  var outro;
 
   var loadLevelStars = function()
   {
@@ -1690,23 +1699,25 @@ var GamePlayScene = function(game, stage)
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
 
+    n_ticks = 0;
     total_stars = 0;
-
-    menu_cam = { wx:-20, wy:0, ww:12, wh:6 };
-    cam = { wx:menu_cam.wx, wy:menu_cam.wy, ww:menu_cam.ww, wh:menu_cam.wh };
-    mode = MODE_MENU;
+    score = 0;
     submitting_t = -1;
 
     score_board = new board();
+    stamps = [];
+    molecules = [];
 
-    url_args = jsonFromURL()
-    if(url_args["lvl"]) lvl = parseInt(url_args["lvl"]);
-    if(!lvl) lvl = 0;
+    game_cam = { wx:-20, wy:0, ww:12, wh:6 };
+    menu_cam = { wx:-20, wy:0, ww:12, wh:6 };
+    cam = { wx:menu_cam.wx, wy:menu_cam.wy, ww:menu_cam.ww, wh:menu_cam.wh };
+    bounds = {wx:0, wy:0, ww:0, wh:0, x:0,y:0,w:0,h:0 };
+
     init_levels();
     loadLevelStars();
-    set_level(lvl);
-    cur_stars_bounce = new bounce();
-    score_bounce = new bounce();
+    set_level(0);
+
+    mode = MODE_MENU;
 
     total_stars_disp = new totalStarsDisplay();
     total_stars_disp.wx = -25;
@@ -1714,6 +1725,8 @@ var GamePlayScene = function(game, stage)
     total_stars_disp.ww = 1;
     total_stars_disp.wh = 1;
     screenSpace(cam,canv,total_stars_disp);
+
+    outro = new star_outro();
 
     back_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     back_btn.click = function(evt) { mode = MODE_MENU; countLevelStars(); evt.hitUI = true; }
@@ -1732,33 +1745,23 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,clear_btn);
 
     submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    submit_btn.click = function(evt) {
-      mode = MODE_SUBMIT;
-      submitting_t = 0;
-      evt.hitUI = true;
-    }
+    submit_btn.click = function(evt) { mode = MODE_SUBMIT; submitting_t = 0; evt.hitUI = true; }
     submit_btn.ww = game_cam.ww/5;
     submit_btn.wh = game_cam.wh/10;
     submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
     submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
     screenSpace(cam,canv,submit_btn);
 
-    outro = new star_outro();
 
-    screenSpace(cam,canv,bounds);
-    screenSpace(cam,canv,scroll);
+    cur_stars_bounce = new bounce();
+    score_bounce = new bounce();
   }
 
   self.tick = function()
   {
     n_ticks++;
 
-    if(mode == MODE_INTRO)
-    {
-      clicker.filter(cur_level);
-      if(!cur_level.introtick()) mode = MODE_GAME;
-    }
-
+    //lerp cam
     if(mode == MODE_MENU)
     {
       cam.wx = lerp(cam.wx,menu_cam.wx,0.1);
@@ -1773,6 +1776,11 @@ var GamePlayScene = function(game, stage)
       cam.ww = lerp(cam.ww,game_cam.ww,0.1);
       cam.wh = lerp(cam.wh,game_cam.wh,0.1);
     }
+
+    //screen space based on new cam
+    screenSpace(cam,canv,bounds);
+    screenSpace(cam,canv,scroll);
+    screenSpace(cam,canv,total_stars_disp);
 
     for(var i = 0; i < levels.length; i++)
     {
@@ -1798,6 +1806,13 @@ var GamePlayScene = function(game, stage)
     submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
     submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
     screenSpace(cam,canv,submit_btn);
+
+    //resolve input
+    if(mode == MODE_INTRO)
+    {
+      clicker.filter(cur_level);
+      if(!cur_level.introtick()) mode = MODE_GAME;
+    }
 
     if(mode == MODE_GAME)
     {
@@ -1827,6 +1842,7 @@ var GamePlayScene = function(game, stage)
     clicker.flush();
     dragger.flush();
 
+    //tick data
     for(var i = 0; i < molecules.length; i++)
       molecules[i].tick();
     for(var i = 0; i < stamps.length; i++)
@@ -1868,13 +1884,13 @@ var GamePlayScene = function(game, stage)
     cur_stars_bounce.tick();
     score_bounce.tick();
     cur_level.cur_stars_t++;
-
-    screenSpace(cam,canv,total_stars_disp);
   };
 
   self.draw = function()
   {
     ctx.font = "20px Arial";
+
+    //grid
     var x  = 0;
     var wx = 0;
     var min_wx = worldSpaceX(cam,canv,0);
@@ -1891,7 +1907,6 @@ var GamePlayScene = function(game, stage)
     ctx.fillRect(0,0,canv.width,canv.height);
     ctx.strokeStyle = grid_stroke;
 
-    //grid
     wy = floor(min_wy/v_spacing)*v_spacing;
     while(wy < max_wy)
     {
@@ -1914,11 +1929,13 @@ var GamePlayScene = function(game, stage)
       wx += h_spacing;
     }
 
+    //molecules back
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_down();
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_down();
 
+    //borders
     ctx.fillStyle = bg_fill;
     if(bounds.w)
     {
@@ -1930,6 +1947,11 @@ var GamePlayScene = function(game, stage)
     else
       ctx.fillRect(0,0,canv.width,canv.height);
 
+    ctx.strokeStyle = bounds_stroke;
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
+
+    //molecules front
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_up();
     ctx.fillStyle = scroll_fill;
@@ -1939,13 +1961,7 @@ var GamePlayScene = function(game, stage)
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_up();
 
-
-    ctx.strokeStyle = bounds_stroke;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
-
-    ctx.lineWidth = 2;
-
+    //UI
     ctx.fillStyle = "#000000";
     ctx.fillText("Score: "      ,bounds.x+bounds.w-200,   bounds.y-10);
     var oldfont = ctx.font;
@@ -1973,14 +1989,9 @@ var GamePlayScene = function(game, stage)
       levels[i].button.draw();
 
     if(mode == MODE_SUBMIT)
-    {
       outro.draw();
-    }
-
     if(mode == MODE_INTRO)
-    {
       cur_level.introdraw();
-    }
 
     total_stars_disp.draw();
   };
