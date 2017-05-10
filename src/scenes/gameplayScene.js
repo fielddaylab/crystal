@@ -612,9 +612,9 @@ var GamePlayScene = function(game, stage)
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+1;
-    levels[i].star_req_score[0] = 140;
-    levels[i].star_req_score[1] = 280;
-    levels[i].star_req_score[2] = 284;
+    levels[i].star_req_score[0] = 60;
+    levels[i].star_req_score[1] = 70;
+    levels[i].star_req_score[2] = 108;
     j = 0;
     levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
