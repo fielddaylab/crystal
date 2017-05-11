@@ -647,8 +647,8 @@ var GamePlayScene = function(game, stage)
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
-    levels[i].star_req_score[0] = 30;
-    levels[i].star_req_score[1] = 37;
+    levels[i].star_req_score[0] = 37;
+    levels[i].star_req_score[1] = 61;
     levels[i].star_req_score[2] = 70;
     j = 0;
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:right_pos},{cx:0,cy:1,c:left_neg}]);
@@ -672,6 +672,59 @@ var GamePlayScene = function(game, stage)
     {
       ctx.fillStyle = "#000000";
       ctx.fillText("There's a defect in this crystal...",bounds.x+30,100);
+    }
+    i++;
+
+    //L- hard charge seed
+    levels.push(new level(i));
+    levels[i].scale = 1;
+    levels[i].repeat_x = 8;
+    levels[i].repeat_y = 4;
+    levels[i].bounds_w = 8;
+    levels[i].bounds_h = 4;
+    levels[i].scroll_w = 3.5;
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].lock_stars = levels[i-1].lock_stars+2;
+    levels[i].star_req_score[0] = 48;
+    levels[i].star_req_score[1] = 61;
+    levels[i].star_req_score[2] = 90;
+    j = 0;
+    levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
+    j = 0;
+    levels[i].seed[j] = new molecule();
+    levels[i].seed[j].cx = 16;
+    levels[i].seed[j].cy =  0;
+    levels[i].seed[j].wx = levels[i].seed[j].cx-0.5;
+    levels[i].seed[j].wy = levels[i].seed[j].cy-0.5;
+    levels[i].seed[j].template = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
+    j++;
+    levels[i].seed[j] = new molecule();
+    levels[i].seed[j].cx = 17;
+    levels[i].seed[j].cy =  1;
+    levels[i].seed[j].wx = levels[i].seed[j].cx-0.5;
+    levels[i].seed[j].wy = levels[i].seed[j].cy-0.5;
+    levels[i].seed[j].template = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
+    j++;
+
+    levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    levels[i].has_intro = true && TEXT;
+    levels[i].shouldClick = function(evt)
+    {
+      return true;
+    }
+    levels[i].click = function(evt)
+    {
+      cur_level.intro = false;
+    }
+    levels[i].introtick = function()
+    {
+      return cur_level.intro;
+    }
+    levels[i].introdraw = function()
+    {
+      ctx.fillStyle = "#000000";
+      ctx.fillText("Here is a seed pattern",bounds.x+30,100);
     }
     i++;
 
@@ -718,6 +771,22 @@ var GamePlayScene = function(game, stage)
 
     stamps = [];
     molecules = [];
+
+    for(var i = 0; i < cur_level.seed.length; i++)
+    {
+      var s = new molecule();
+      s.locked = true;
+      s.cx = cur_level.seed[i].cx;
+      s.cy = cur_level.seed[i].cy;
+      s.wx = cur_level.seed[i].wx;
+      s.wy = cur_level.seed[i].wy;
+      s.setTemplate(cur_level.seed[i].template);
+      s.up = false;
+      s.up_ticks = 0;
+      bring_to_bottom(s);
+      molecules[molecules.length] = s;
+    }
+
     dragging_molecule = 0;
 
     bounds = {wx:cur_level.bounds_x, wy:cur_level.bounds_y, ww:cur_level.bounds_w, wh:cur_level.bounds_h, x:0,y:0,w:0,h:0 };
@@ -1368,6 +1437,7 @@ var GamePlayScene = function(game, stage)
     self.bounces = [];
     self.happys = [];
     self.total_happy = 0;
+    self.locked = false;
 
     self.setTemplate = function(t)
     {
@@ -1398,6 +1468,7 @@ var GamePlayScene = function(game, stage)
     var worldoff = {wx:0,wy:0};
     self.shouldClickOff = function(evt,woffx,woffy)
     {
+      if(self.locked) return false;
       var hit = false
       for(var i = 0; !hit && i < self.template.blocks.length; i++)
         hit = worldPtWithin(self.wx+self.template.blocks[i].cx,self.wy+self.template.blocks[i].cy,1.,1.,worldevt.wx+woffx,worldevt.wy+woffy);
@@ -1405,6 +1476,7 @@ var GamePlayScene = function(game, stage)
     }
     self.shouldClick = function(evt)
     {
+      if(self.locked) return false;
       if(evt.hitUI) return false;
       if(self.up)
       {
@@ -1443,6 +1515,7 @@ var GamePlayScene = function(game, stage)
 
     self.shouldDragOff = function(evt, woffx, woffy)
     {
+      if(self.locked) return false;
       var hit = false
       for(var i = 0; !hit && i < self.template.blocks.length; i++)
         hit = worldPtWithin(self.wx+self.template.blocks[i].cx,self.wy+self.template.blocks[i].cy,1.,1.,worldevt.wx+woffx,worldevt.wy+woffy);
@@ -1455,6 +1528,7 @@ var GamePlayScene = function(game, stage)
     }
     self.shouldDrag = function(evt)
     {
+      if(self.locked) return false;
       if(dragging_molecule || evt.hitUI) return false;
       if(self.up)
       {
@@ -2126,6 +2200,13 @@ var GamePlayScene = function(game, stage)
       wx += h_spacing;
     }
 
+    var draw_n = 1;
+    if(mode == MODE_SUBMIT)
+    {
+      draw_n = round(0.5+sub_t*2);
+      if(sub_t == 1) draw_n++;
+    }
+
     //defects
     for(var i = 0; i < cur_level.defect.length; i++)
     {
@@ -2136,12 +2217,6 @@ var GamePlayScene = function(game, stage)
     }
 
     //molecules back
-    var draw_n = 1;
-    if(mode == MODE_SUBMIT)
-    {
-      draw_n = round(0.5+sub_t*2);
-      if(sub_t == 1) draw_n++;
-    }
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_down(draw_n);
     for(var i = molecules.length-1; i >= 0; i--)
