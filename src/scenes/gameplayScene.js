@@ -28,8 +28,11 @@ var GamePlayScene = function(game, stage)
   var shadow_dist = 8;
   var bounds_stroke  = "rgba(0,0,0,.6)";
   var shadow_fill  = "rgba(0,0,0,.1)";
+  var defect_fill  = "rgba(0,0,0,.7)";
   var block_fill   = "#F6F6F6";
   var block_stroke = "#E0E0E0";
+  var seed_fill   = "#D6D6D6";
+  var seed_stroke = "#C0C0C0";
   var scroll_fill = "rgba(0,0,0,0.3)";
   var bg_fill     = "rgba(100,0,0,0.05)";
   var grid_fill = "#AAAAAA";
@@ -284,7 +287,7 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
-      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,0,self.level.available_templates[0]);
+      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,0,0,0,self.level.available_templates[0]);
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -367,7 +370,7 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
-      //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,cur_level.available_templates[0]);
+      //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,0,0,cur_level.available_templates[0]);
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -840,7 +843,7 @@ var GamePlayScene = function(game, stage)
     t.cy = -tx;
     t.rotation = (t.rotation+1)%4;
   }
-  var draw_blocks = function(wx,wy,offx,offy,bounces,happys,rot,scale,shadow,template)
+  var draw_blocks = function(wx,wy,offx,offy,bounces,happys,rot,scale,shadow,defect,seed,template)
   {
     var blocks = template.blocks;
 
@@ -881,7 +884,13 @@ var GamePlayScene = function(game, stage)
 
       tctx.fillStyle = block_fill;
       tctx.strokeStyle = block_stroke;
+      if(seed)
+      {
+        tctx.fillStyle = seed_fill;
+        tctx.strokeStyle = seed_stroke;
+      }
       sctx.fillStyle = shadow_fill;
+      if(defect) sctx.fillStyle = defect_fill;
 
       cur = top_left;
 
@@ -1069,14 +1078,14 @@ var GamePlayScene = function(game, stage)
     ctx.scale(scale,scale);
 
     screenSpace(cam,canv,cblock);
-    if(shadow)
+    if(shadow || defect)
       ctx.drawImage(template.tcache[template.rotation].shadow_cache, -cblock.w/2, -cblock.h/2, cblock.w, cblock.h);
     else
       ctx.drawImage(template.tcache[template.rotation].cache, -cblock.w/2, -cblock.h/2, cblock.w, cblock.h);
 
     ctx.restore();
 
-    if(!shadow)
+    if(!shadow && !defect)
     {
       var c = cos(-rot);
       var s = sin(-rot);
@@ -1719,13 +1728,13 @@ var GamePlayScene = function(game, stage)
 
     self.draw_off_up = function(woffx,woffy)
     {
-      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,1,self.template);
+      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,1,0,0,self.template);
       var t = (clamp(0,10,self.up_ticks-5)/10)*0.2;
-      draw_blocks(self.wx+t+woffx,self.wy-t+woffy,0,0,self.bounces,self.happys,self.rot,1,0,self.template);
+      draw_blocks(self.wx+t+woffx,self.wy-t+woffy,0,0,self.bounces,self.happys,self.rot,1,0,0,0,self.template);
     }
     self.draw_off_down = function(woffx,woffy)
     {
-      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,0,self.template);
+      draw_blocks(self.wx+woffx,self.wy+woffy,0,0,self.bounces,self.happys,self.rot,1,0,0,self.locked,self.template);
     }
     self.draw_front_up = function()
     {
@@ -1950,7 +1959,7 @@ var GamePlayScene = function(game, stage)
 
     self.draw = function()
     {
-      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,0,self.rot,1,0,self.template);
+      draw_blocks(self.wx,self.wy-scroll.scroll_wy,self.template.cx,self.template.cy,0,0,self.rot,1,0,0,0,self.template);
     }
   }
 
@@ -2209,12 +2218,7 @@ var GamePlayScene = function(game, stage)
 
     //defects
     for(var i = 0; i < cur_level.defect.length; i++)
-    {
-      draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,cur_level.defect[i].template);
-      draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,cur_level.defect[i].template);
-      draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,cur_level.defect[i].template);
-      draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,cur_level.defect[i].template);
-    }
+      draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,1,0,cur_level.defect[i].template);
 
     //molecules back
     for(var i = molecules.length-1; i >= 0; i--)
