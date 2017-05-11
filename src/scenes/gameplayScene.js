@@ -232,6 +232,8 @@ var GamePlayScene = function(game, stage)
     var self = this;
     self.id = id;
     self.available_templates = [];
+    self.seed = [];
+    self.defect = [];
     self.scale = 1;
     self.repeat_x = 10;
     self.repeat_y = 10;
@@ -554,7 +556,7 @@ var GamePlayScene = function(game, stage)
     levels[i].star_req_score[1] = 37;
     levels[i].star_req_score[2] = 84;
     j = 0;
-    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,1,0,0]},{cx:0,cy:1,c:[0,0,0,-1]}]);
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:right_pos},{cx:0,cy:1,c:left_neg}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
     levels[i].shouldClick = function(evt)
@@ -632,6 +634,45 @@ var GamePlayScene = function(game, stage)
     j = 0;
     levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    i++;
+
+    //domino- flip charge defect
+    levels.push(new level(i));
+    levels[i].scale = 1;
+    levels[i].repeat_x = 6;
+    levels[i].repeat_y = 4;
+    levels[i].bounds_w = 6;
+    levels[i].bounds_h = 4;
+    levels[i].scroll_w = 2.5;
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].lock_stars = levels[i-1].lock_stars+2;
+    levels[i].star_req_score[0] = 30;
+    levels[i].star_req_score[1] = 37;
+    levels[i].star_req_score[2] = 70;
+    j = 0;
+    levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:right_pos},{cx:0,cy:1,c:left_neg}]);
+    j = 0;
+    levels[i].defect[j++] = new defect(16,0,new template(0.5,0.5,[{cx:0,cy:0,c:no_charge}]));
+    levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
+    levels[i].has_intro = true && TEXT;
+    levels[i].shouldClick = function(evt)
+    {
+      return true;
+    }
+    levels[i].click = function(evt)
+    {
+      cur_level.intro = false;
+    }
+    levels[i].introtick = function()
+    {
+      return cur_level.intro;
+    }
+    levels[i].introdraw = function()
+    {
+      ctx.fillStyle = "#000000";
+      ctx.fillText("There's a defect in this crystal...",bounds.x+30,100);
+    }
     i++;
 
     //free play
@@ -1500,6 +1541,26 @@ var GamePlayScene = function(game, stage)
               self.up = true;
           }
       }
+      for(var i = 0; !self.up && i < cur_level.defect.length; i++)
+      {
+        molecule = cur_level.defect[i];
+        for(var j = 0; !self.up && j < self.template.blocks.length; j++)
+          for(var k = 0; !self.up && k < molecule.template.blocks.length; k++)
+          {
+            if(
+              blocks_collide(cx+self.template.blocks[j].cx,                    cy+self.template.blocks[j].cy,                    molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx+cur_level.repeat_x, cy+self.template.blocks[j].cy,                    molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy,                    molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx,                    cy+self.template.blocks[j].cy+cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx,                    cy+self.template.blocks[j].cy-cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx+cur_level.repeat_x, cy+self.template.blocks[j].cy+cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx+cur_level.repeat_x, cy+self.template.blocks[j].cy-cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy+cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
+              blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy-cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy)
+            )
+              self.up = true;
+          }
+      }
       if(was_up && !self.up)
       {
         self.cx = cx;
@@ -1716,6 +1777,16 @@ var GamePlayScene = function(game, stage)
       for(var i = 0; i < 4; i++)
       self.tcache[i] = new tcache();
     }
+  }
+
+  var defect = function(cx,cy,template)
+  {
+    var self = this;
+    self.template = template;
+    self.cx = cx;
+    self.cy = cy;
+    self.wx = cx-0.5;
+    self.wy = cy-0.5;
   }
 
   var stamp = function()
@@ -2053,6 +2124,15 @@ var GamePlayScene = function(game, stage)
       ctx.lineTo(x,canv.height);
       ctx.stroke();
       wx += h_spacing;
+    }
+
+    //defects
+    for(var i = 0; i < cur_level.defect.length; i++)
+    {
+      draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,cur_level.defect[i].template);
+      draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,cur_level.defect[i].template);
+      draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,cur_level.defect[i].template);
+      draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,cur_level.defect[i].template);
     }
 
     //molecules back
