@@ -394,7 +394,7 @@ var GamePlayScene = function(game, stage)
         var bs = s;
         self.bounces[i].tick();
         bs += self.bounces[i].v;
-        if(cur_level.stars > 2-i && n_ticks-self.start_ticks > 30*(3-i))
+        if(cur_level.cur_stars > 2-i && n_ticks-self.start_ticks > 30*(3-i))
           ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
         else
           ctx.drawImage(star,x+offx-bs/2,y+offy-bs/2,bs,bs);
@@ -447,24 +447,10 @@ var GamePlayScene = function(game, stage)
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
-    levels[i].shouldClick = function(evt)
-    {
-      return true;
-    }
-    levels[i].click = function(evt)
-    {
-      cur_level.intro = false;
-    }
-    levels[i].introtick = function()
-    {
-      return cur_level.intro;
-    }
-    levels[i].introdraw = function()
-    {
-      ctx.fillStyle = "#000000";
-      ctx.fillText("<- This is a molecule",bounds.x-110,150);
-      ctx.fillText("Stack 'em here \\/",bounds.x+50,100);
-    }
+    levels[i].shouldClick = function(evt) { return true; }
+    levels[i].click = function(evt) { cur_level.intro = false; }
+    levels[i].introtick = function() { return cur_level.intro; }
+    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("<- This is a molecule",bounds.x-110,150); ctx.fillText("Stack 'em here \\/",bounds.x+50,100); }
     i++;
 
     //tetris s- no charge
@@ -485,25 +471,10 @@ var GamePlayScene = function(game, stage)
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:1,cy:1,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
-    levels[i].shouldClick = function(evt)
-    {
-      return true;
-    }
-    levels[i].click = function(evt)
-    {
-      cur_level.intro = false;
-    }
-    levels[i].introtick = function()
-    {
-      return cur_level.intro;
-    }
-    levels[i].introdraw = function()
-    {
-      ctx.fillStyle = "#000000";
-      ctx.fillText("Some patterns can",bounds.x+50,100);
-      ctx.fillText("fill the space completely.",bounds.x+50,130);
-      ctx.fillText("Others don't.",bounds.x+50,200);
-    }
+    levels[i].shouldClick = function(evt) { return true; }
+    levels[i].click = function(evt) { cur_level.intro = false; }
+    levels[i].introtick = function() { return cur_level.intro; }
+    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Some patterns can",bounds.x+50,100); ctx.fillText("fill the space completely.",bounds.x+50,130); ctx.fillText("Others don't.",bounds.x+50,200); }
     i++;
 
     //tetris T- no charge
@@ -524,24 +495,10 @@ var GamePlayScene = function(game, stage)
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:[0,0,0,0]},{cx:0,cy:1,c:[0,0,0,0]},{cx:-1,cy:0,c:[0,0,0,0]},{cx:1,cy:0,c:[0,0,0,0]}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
-    levels[i].shouldClick = function(evt)
-    {
-      return true;
-    }
-    levels[i].click = function(evt)
-    {
-      cur_level.intro = false;
-    }
-    levels[i].introtick = function()
-    {
-      return cur_level.intro;
-    }
-    levels[i].introdraw = function()
-    {
-      ctx.fillStyle = "#000000";
-      ctx.fillText("Double click",bounds.x+50,100);
-      ctx.fillText("to rotate",bounds.x+50,130);
-    }
+    levels[i].shouldClick = function(evt) { return true; }
+    levels[i].click = function(evt) { cur_level.intro = false; }
+    levels[i].introtick = function() { return cur_level.intro; }
+    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Double click",bounds.x+50,100); ctx.fillText("to rotate",bounds.x+50,130); }
     i++;
 
     //domino- flip charge
@@ -562,24 +519,10 @@ var GamePlayScene = function(game, stage)
     levels[i].available_templates[j++] = new template(0,0.5,[{cx:0,cy:0,c:right_pos},{cx:0,cy:1,c:left_neg}]);
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
-    levels[i].shouldClick = function(evt)
-    {
-      return true;
-    }
-    levels[i].click = function(evt)
-    {
-      cur_level.intro = false;
-    }
-    levels[i].introtick = function()
-    {
-      return cur_level.intro;
-    }
-    levels[i].introdraw = function()
-    {
-      ctx.fillStyle = "#000000";
-      ctx.fillText("Some molecules have charges.",bounds.x+50,100);
-      ctx.fillText("opposites attract.",bounds.x+50,130);
-    }
+    levels[i].shouldClick = function(evt) { return true; }
+    levels[i].click = function(evt) { cur_level.intro = false; }
+    levels[i].introtick = function() { return cur_level.intro; }
+    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Some molecules have charges.",bounds.x+50,100); ctx.fillText("opposites attract.",bounds.x+50,130); }
     i++;
 
     //L- hard charge
@@ -600,24 +543,10 @@ var GamePlayScene = function(game, stage)
     levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
-    levels[i].shouldClick = function(evt)
-    {
-      return true;
-    }
-    levels[i].click = function(evt)
-    {
-      cur_level.intro = false;
-    }
-    levels[i].introtick = function()
-    {
-      return cur_level.intro;
-    }
-    levels[i].introdraw = function()
-    {
-      ctx.fillStyle = "#000000";
-      ctx.fillText("Try different patterns",bounds.x+50,100);
-      ctx.fillText("to get 3 stars.",bounds.x+50,130);
-    }
+    levels[i].shouldClick = function(evt) { return true; }
+    levels[i].click = function(evt) { cur_level.intro = false; }
+    levels[i].introtick = function() { return cur_level.intro; }
+    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Try different patterns",bounds.x+50,100); ctx.fillText("to get 3 stars.",bounds.x+50,130); }
     i++;
 
     //square- hard charge
@@ -659,41 +588,34 @@ var GamePlayScene = function(game, stage)
     levels[i].defect[j++] = new defect(16,0,new template(0.5,0.5,[{cx:0,cy:0,c:no_charge}]));
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
-    levels[i].shouldClick = function(evt)
-    {
-      return true;
-    }
-    levels[i].click = function(evt)
-    {
-      cur_level.intro = false;
-    }
-    levels[i].introtick = function()
-    {
-      return cur_level.intro;
-    }
-    levels[i].introdraw = function()
-    {
-      ctx.fillStyle = "#000000";
-      ctx.fillText("There's a defect in this crystal...",bounds.x+30,100);
-    }
+    levels[i].shouldClick = function(evt) { return true; }
+    levels[i].click = function(evt) { cur_level.intro = false; }
+    levels[i].introtick = function() { return cur_level.intro; }
+    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("There's a defect in this crystal...",bounds.x+30,100); }
     i++;
 
     //L- hard charge seed
     levels.push(new level(i));
     levels[i].scale = 1;
-    levels[i].repeat_x = 8;
-    levels[i].repeat_y = 4;
-    levels[i].bounds_w = 8;
-    levels[i].bounds_h = 4;
-    levels[i].scroll_w = 3.5;
-    if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].repeat_x = 20;
+    levels[i].repeat_y = 12;
+    levels[i].bounds_w = 20;
+    levels[i].bounds_h = 12;
+    levels[i].scroll_w = 2.5;
+    //if(PERFECT)
+    //levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 48;
     levels[i].star_req_score[1] = 61;
     levels[i].star_req_score[2] = 90;
     j = 0;
-    levels[i].available_templates[j++] = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
+    levels[i].available_templates[j++] = new template(0.5,1,
+      [
+        {cx:0,cy:0,c:[0,0,0,1]},
+        {cx:0,cy:1,c:[0,0,0,0]},
+        {cx:0,cy:2,c:[-1,0,0,-1]},
+        {cx:1,cy:0,c:[1,1,0,0]},
+      ]); //L
     j = 0;
     levels[i].seed[j] = new molecule();
     levels[i].seed[j].cx = 16;
@@ -712,23 +634,10 @@ var GamePlayScene = function(game, stage)
 
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
-    levels[i].shouldClick = function(evt)
-    {
-      return true;
-    }
-    levels[i].click = function(evt)
-    {
-      cur_level.intro = false;
-    }
-    levels[i].introtick = function()
-    {
-      return cur_level.intro;
-    }
-    levels[i].introdraw = function()
-    {
-      ctx.fillStyle = "#000000";
-      ctx.fillText("Here is a seed pattern",bounds.x+30,100);
-    }
+    levels[i].shouldClick = function(evt) { return true; }
+    levels[i].click = function(evt) { cur_level.intro = false; }
+    levels[i].introtick = function() { return cur_level.intro; }
+    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Here is a seed pattern",bounds.x+30,100); }
     i++;
 
     //free play
@@ -2006,7 +1915,15 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,back_btn);
 
     clear_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    clear_btn.click = function(evt) { molecules = []; dragging_molecule = 0; }
+    clear_btn.click = function(evt)
+    {
+      for(var i = 0; i < molecules.length ;)
+      {
+        if(molecules[i].locked) i++;
+        else molecules.splice(i,1);
+        dragging_molecule = 0;
+      }
+    }
     clear_btn.ww = game_cam.ww/10;
     clear_btn.wh = game_cam.wh/10;
     clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww/2;
