@@ -597,47 +597,142 @@ var GamePlayScene = function(game, stage)
     //L- hard charge seed
     levels.push(new level(i));
     levels[i].scale = 1;
-    levels[i].repeat_x = 20;
-    levels[i].repeat_y = 12;
-    levels[i].bounds_w = 20;
-    levels[i].bounds_h = 12;
-    levels[i].scroll_w = 2.5;
+    levels[i].repeat_x = 21;
+    levels[i].repeat_y = 14;
+    levels[i].bounds_w = 21;
+    levels[i].bounds_h = 14;
+    levels[i].scroll_w = 9;
     //if(PERFECT)
     //levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 48;
     levels[i].star_req_score[1] = 61;
-    levels[i].star_req_score[2] = 90;
+    levels[i].star_req_score[2] = 224;
     j = 0;
-    levels[i].available_templates[j++] = new template(0.5,1,
+    levels[i].available_templates[j++] = new template(0.5,0.5,
       [
-        {cx:0,cy:0,c:[0,0,0,1]},
-        {cx:0,cy:1,c:[0,0,0,0]},
-        {cx:0,cy:2,c:[-1,0,0,-1]},
-        {cx:1,cy:0,c:[1,1,0,0]},
+        {cx: 1,cy: 0,c:[0,0,0,0]},
+        {cx: 2,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy: 1,c:[0,0,0,0]},
+        {cx: 0,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy:-1,c:[0,0,0,0]},
+        {cx:-1,cy: 0,c:[0,0,0,0]},
+        {cx:-1,cy: 1,c:[0,0,0,0]},
       ]); //L
+
     j = 0;
     levels[i].seed[j] = new molecule();
-    levels[i].seed[j].cx = 16;
-    levels[i].seed[j].cy =  0;
+    levels[i].seed[j].cx = 15;
+    levels[i].seed[j].cy =  -3;
     levels[i].seed[j].wx = levels[i].seed[j].cx-0.5;
     levels[i].seed[j].wy = levels[i].seed[j].cy-0.5;
-    levels[i].seed[j].template = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
+    levels[i].seed[j].template = new template(0.5,0.5,
+      [
+        {cx: 1,cy: 0,c:[0,0,0,0]},
+        {cx: 2,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy: 1,c:[0,0,0,0]},
+        {cx: 0,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy:-1,c:[0,0,0,0]},
+        {cx:-1,cy: 0,c:[0,0,0,0]},
+        {cx:-1,cy: 1,c:[0,0,0,0]},
+      ]); //L
     j++;
     levels[i].seed[j] = new molecule();
-    levels[i].seed[j].cx = 17;
-    levels[i].seed[j].cy =  1;
+    levels[i].seed[j].cx = levels[i].seed[j-1].cx+4;
+    levels[i].seed[j].cy = levels[i].seed[j-1].cy+1;
     levels[i].seed[j].wx = levels[i].seed[j].cx-0.5;
     levels[i].seed[j].wy = levels[i].seed[j].cy-0.5;
-    levels[i].seed[j].template = new template(0.5,1,[{cx:0,cy:0,c:[0,0,0,1]},{cx: 0,cy: 1,c:[0,0,0,0]},{cx: 0,cy:2,c:[-1,0,0,-1]},{cx: 1,cy:0,c:[1,1,0,0]}]); //L
+    levels[i].seed[j].template = new template(0.5,0.5,
+      [
+        {cx: 1,cy: 0,c:[0,0,0,0]},
+        {cx: 2,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy: 1,c:[0,0,0,0]},
+        {cx: 0,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy:-1,c:[0,0,0,0]},
+        {cx:-1,cy: 0,c:[0,0,0,0]},
+        {cx:-1,cy: 1,c:[0,0,0,0]},
+      ]); //L
+    rotate_template(levels[i].seed[j].template);
+    rotate_template(levels[i].seed[j].template);
     j++;
+
+    levels[i].seed[j] = new molecule();
+    levels[i].seed[j].cx = levels[i].seed[j-2].cx-1;
+    levels[i].seed[j].cy = levels[i].seed[j-2].cy+2;
+    levels[i].seed[j].wx = levels[i].seed[j].cx-0.5;
+    levels[i].seed[j].wy = levels[i].seed[j].cy-0.5;
+    levels[i].seed[j].template = new template(0.5,0.5,
+      [
+        {cx: 1,cy: 0,c:[0,0,0,0]},
+        {cx: 2,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy: 1,c:[0,0,0,0]},
+        {cx: 0,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy:-1,c:[0,0,0,0]},
+        {cx:-1,cy: 0,c:[0,0,0,0]},
+        {cx:-1,cy: 1,c:[0,0,0,0]},
+      ]); //L
+    j++;
+    levels[i].seed[j] = new molecule();
+    levels[i].seed[j].cx = levels[i].seed[j-2].cx-1;
+    levels[i].seed[j].cy = levels[i].seed[j-2].cy+2;
+    levels[i].seed[j].wx = levels[i].seed[j].cx-0.5;
+    levels[i].seed[j].wy = levels[i].seed[j].cy-0.5;
+    levels[i].seed[j].template = new template(0.5,0.5,
+      [
+        {cx: 1,cy: 0,c:[0,0,0,0]},
+        {cx: 2,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy: 1,c:[0,0,0,0]},
+        {cx: 0,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy:-1,c:[0,0,0,0]},
+        {cx:-1,cy: 0,c:[0,0,0,0]},
+        {cx:-1,cy: 1,c:[0,0,0,0]},
+      ]); //L
+    rotate_template(levels[i].seed[j].template);
+    rotate_template(levels[i].seed[j].template);
+    j++;
+
+    levels[i].seed[j] = new molecule();
+    levels[i].seed[j].cx = levels[i].seed[j-2].cx-1;
+    levels[i].seed[j].cy = levels[i].seed[j-2].cy+2;
+    levels[i].seed[j].wx = levels[i].seed[j].cx-0.5;
+    levels[i].seed[j].wy = levels[i].seed[j].cy-0.5;
+    levels[i].seed[j].template = new template(0.5,0.5,
+      [
+        {cx: 1,cy: 0,c:[0,0,0,0]},
+        {cx: 2,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy: 1,c:[0,0,0,0]},
+        {cx: 0,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy:-1,c:[0,0,0,0]},
+        {cx:-1,cy: 0,c:[0,0,0,0]},
+        {cx:-1,cy: 1,c:[0,0,0,0]},
+      ]); //L
+    j++;
+    levels[i].seed[j] = new molecule();
+    levels[i].seed[j].cx = levels[i].seed[j-2].cx-1;
+    levels[i].seed[j].cy = levels[i].seed[j-2].cy+2;
+    levels[i].seed[j].wx = levels[i].seed[j].cx-0.5;
+    levels[i].seed[j].wy = levels[i].seed[j].cy-0.5;
+    levels[i].seed[j].template = new template(0.5,0.5,
+      [
+        {cx: 1,cy: 0,c:[0,0,0,0]},
+        {cx: 2,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy: 1,c:[0,0,0,0]},
+        {cx: 0,cy: 0,c:[0,0,0,0]},
+        {cx: 1,cy:-1,c:[0,0,0,0]},
+        {cx:-1,cy: 0,c:[0,0,0,0]},
+        {cx:-1,cy: 1,c:[0,0,0,0]},
+      ]); //L
+    rotate_template(levels[i].seed[j].template);
+    rotate_template(levels[i].seed[j].template);
+    j++;
+
 
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Here is a seed pattern",bounds.x+30,100); }
+    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Here is a seed pattern",bounds.x+30,60); ctx.fillText("Use it as a template.",bounds.x+30,90); }
     i++;
 
     //free play
@@ -1118,8 +1213,8 @@ var GamePlayScene = function(game, stage)
       for(var i = 0; i < molecule.template.blocks.length; i++)
       {
         block = molecule.template.blocks[i];
-        x = molecule.cx+block.cx-bounds.wx+bounds.ww/2-1;
-        y = molecule.cy+block.cy-bounds.wy+bounds.wh/2-1;
+        x = molecule.cx+block.cx-bounds.wx+floor(bounds.ww/2-0.1);
+        y = molecule.cy+block.cy-bounds.wy+floor(bounds.wh/2-0.1);
         self.stampCell(block,x                   ,y                   , id, i);
         self.stampCell(block,x+cur_level.repeat_x,y                   , id, i);
         self.stampCell(block,x-cur_level.repeat_x,y                   , id, i);
