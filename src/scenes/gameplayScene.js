@@ -34,11 +34,11 @@ var GamePlayScene = function(game, stage)
   var seed_fill   = "#D6D6D6";
   var seed_stroke = "#C0C0C0";
   var scroll_fill = "rgba(0,0,0,0.3)";
-  var bg_fill     = "rgba(100,0,0,0.05)";
+  var bg_fill     = "rgba(100,0,0,0.2)";
   var grid_fill = "#AAAAAA";
   var grid_stroke = "#999999";
-  var charge_pos = "#22CC22";
-  var charge_neg = "#CC2222";
+  var charge_pos = "#22FF22";
+  var charge_neg = "#FF2222";
 
   var cache_res = 400;
   var cache_cam_wres = 5;
@@ -405,7 +405,7 @@ var GamePlayScene = function(game, stage)
   var init_levels = function()
   {
     levels = [];
-    var n_rows = 2;
+    var n_rows = 3;
     var n_cols = 4;
     var i = 0;
     var j;
@@ -605,9 +605,9 @@ var GamePlayScene = function(game, stage)
     //if(PERFECT)
     //levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
-    levels[i].star_req_score[0] = 48;
-    levels[i].star_req_score[1] = 61;
-    levels[i].star_req_score[2] = 224;
+    levels[i].star_req_score[0] = 335;
+    levels[i].star_req_score[1] = 335;
+    levels[i].star_req_score[2] = 336;
     j = 0;
     levels[i].available_templates[j++] = new template(0.5,0.5,
       [
@@ -1054,6 +1054,7 @@ var GamePlayScene = function(game, stage)
 
         var d = dblock.w/8;
         tctx.strokeStyle = block_stroke;
+        tctx.lineWidth = 4;
         for(var j = 0; j < 4; j++)
         {
                if(blocks[i].c[j] > 0) tctx.strokeStyle = charge_pos;
@@ -1067,6 +1068,7 @@ var GamePlayScene = function(game, stage)
             case 3: tctx.beginPath(); tctx.moveTo(dblock.x         +d,dblock.y         +d); tctx.lineTo(dblock.x         +d,dblock.y+dblock.h-d); tctx.stroke(); break;
           }
         }
+        tctx.lineWidth = 2;
       }
 
     }
