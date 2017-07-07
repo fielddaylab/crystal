@@ -1,8 +1,10 @@
 
 var TEXT = true;
 var PERFECT = true;
-var G = [];
+var UNLOCKED = true;
 
+//wiggle anger
+var G = [];
 G = [0.25, 0.15, 0.2, 0.08, 0.03, 0.01, 0.005, 0.002, 0.0];
 
 var GamePlayScene = function(game, stage)
@@ -208,6 +210,7 @@ var GamePlayScene = function(game, stage)
       var c = parseInt(getCookie("lvl"+i));
       total_stars += levels[i].stars;
     }
+    if(UNLOCKED) total_stars += 1000;
   }
 
   var totalStarsDisplay = function()
