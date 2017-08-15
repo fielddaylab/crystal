@@ -55,12 +55,15 @@ var LoadingScene = function(game, stage)
     img_srcs = [];
     imgs = [];
 
-    //ctx.font = "12px Special Font"; //put font that nees loading here
+    ctx.font = "12px Architects Daughter"; //put font that nees loading here
     ctx.fillStyle = "#000000";
     ctx.fillText(".",0,0);// funky way to encourage any custom font to load
 
     //put asset paths in loading_img_srcs (for assets used on loading screen itself)
     //loading_img_srcs.push("assets/man.png");
+    loading_img_srcs.push("assets/star.png");
+    loading_img_srcs.push("assets/star_full.png");
+    loading_img_srcs.push("assets/connection.png");
     for(var i = 0; i < loading_img_srcs.length; i++)
     {
       loading_imgs[i] = new Image();

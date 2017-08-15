@@ -28,7 +28,9 @@ var GamePlayScene = function(game, stage)
 
   //params
   var shadow_dist = 8;
-  var bounds_stroke  = "rgba(0,0,0,.6)";
+  var white = "#FFFFFF";
+  var black = "#000000";
+  var bounds_stroke  = white;
   var shadow_fill  = "rgba(0,0,0,.1)";
   var defect_fill  = "rgba(0,0,0,.7)";
   var block_fill   = "#F6F6F6";
@@ -36,9 +38,9 @@ var GamePlayScene = function(game, stage)
   var seed_fill   = "#D6D6D6";
   var seed_stroke = "#C0C0C0";
   var scroll_fill = "rgba(0,0,0,0.3)";
-  var bg_fill     = "rgba(100,0,0,0.2)";
-  var grid_fill = "#AAAAAA";
-  var grid_stroke = "#999999";
+  var bg_fill     = "rgba(24,162,182,0.4)";
+  var grid_fill = "#1B5C72";
+  var grid_stroke = "#327B8E";
   var charge_pos = "#22FF22";
   var charge_neg = "#FF2222";
 
@@ -141,6 +143,8 @@ var GamePlayScene = function(game, stage)
   star.context.closePath();
   star.context.fill();
   star.context.stroke();
+  star = new Image();
+  star.src = "assets/star.png";
 
   var star_full = GenIcon(w,h)
   theta = 0-halfpi;
@@ -162,6 +166,11 @@ var GamePlayScene = function(game, stage)
   star_full.context.closePath();
   star_full.context.fill();
   star_full.context.stroke();
+  star_full = new Image();
+  star_full.src = "assets/star_full.png";
+
+  var connection = new Image();
+  connection.src = "assets/connection.png";
 
   var atoms = [];
   for(var i = 0; i < 5; i++)
@@ -453,7 +462,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("<- This is a molecule",bounds.x-110,150); ctx.fillText("Stack 'em here \\/",bounds.x+50,100); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("<- This is a molecule",bounds.x-110,150); ctx.fillText("Stack 'em here \\/",bounds.x+50,100); }
     i++;
 
     //tetris s- no charge
@@ -477,7 +486,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Some patterns can",bounds.x+50,100); ctx.fillText("fill the space completely.",bounds.x+50,130); ctx.fillText("Others don't.",bounds.x+50,200); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Some patterns can",bounds.x+50,100); ctx.fillText("fill the space completely.",bounds.x+50,130); ctx.fillText("Others don't.",bounds.x+50,200); }
     i++;
 
     //tetris T- no charge
@@ -501,7 +510,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Double click",bounds.x+50,100); ctx.fillText("to rotate",bounds.x+50,130); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Double click",bounds.x+50,100); ctx.fillText("to rotate",bounds.x+50,130); }
     i++;
 
     //domino- flip charge
@@ -525,7 +534,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Some molecules have charges.",bounds.x+50,100); ctx.fillText("opposites attract.",bounds.x+50,130); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Some molecules have charges.",bounds.x+50,100); ctx.fillText("opposites attract.",bounds.x+50,130); }
     i++;
 
     //L- hard charge
@@ -549,7 +558,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Try different patterns",bounds.x+50,100); ctx.fillText("to get 3 stars.",bounds.x+50,130); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Try different patterns",bounds.x+50,100); ctx.fillText("to get 3 stars.",bounds.x+50,130); }
     i++;
 
     //square- hard charge
@@ -594,7 +603,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("There's a defect in this crystal...",bounds.x+30,100); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("There's a defect in this crystal...",bounds.x+30,100); }
     i++;
 
     //L- hard charge seed
@@ -735,7 +744,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = "#000000"; ctx.fillText("Here is a seed pattern",bounds.x+30,60); ctx.fillText("Use it as a template.",bounds.x+30,90); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Here is a seed pattern",bounds.x+30,60); ctx.fillText("Use it as a template.",bounds.x+30,90); }
     i++;
 
     //free play
@@ -2182,7 +2191,7 @@ var GamePlayScene = function(game, stage)
 
   self.draw = function()
   {
-    ctx.font = "20px Arial";
+    ctx.font = "20px Architects Daughter";
 
     var sub_t = min(1,submitting_t/(star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom));
     var quick_sub_t = min(1,submitting_t/star_outro_sub_slide);
@@ -2208,10 +2217,13 @@ var GamePlayScene = function(game, stage)
     while(wy < max_wy)
     {
       y = screenSpaceY(cam,canv,wy);
-      ctx.beginPath();
-      ctx.moveTo(0,y);
-      ctx.lineTo(canv.width,y);
-      ctx.stroke();
+      if(y > bounds.y && y < bounds.y+bounds.h)
+      {
+        ctx.beginPath();
+        ctx.moveTo(bounds.x,y);
+        ctx.lineTo(bounds.x+bounds.w,y);
+        ctx.stroke();
+      }
       wy += v_spacing;
     }
 
@@ -2219,10 +2231,13 @@ var GamePlayScene = function(game, stage)
     while(wx < max_wx)
     {
       x = screenSpaceX(cam,canv,wx);
-      ctx.beginPath();
-      ctx.moveTo(x,0);
-      ctx.lineTo(x,canv.height);
-      ctx.stroke();
+      if(x > bounds.x && x < bounds.x+bounds.w)
+      {
+        ctx.beginPath();
+        ctx.moveTo(x,bounds.y);
+        ctx.lineTo(x,bounds.y+bounds.h);
+        ctx.stroke();
+      }
       wx += h_spacing;
     }
 
@@ -2282,10 +2297,10 @@ var GamePlayScene = function(game, stage)
       ctx.globalAlpha = (1-quick_sub_t);
 
     //UI
-    ctx.fillStyle = "#000000";
+    ctx.fillStyle = white;
     ctx.fillText("Score: "      ,bounds.x+bounds.w-200,   bounds.y-10);
     var oldfont = ctx.font;
-    ctx.font = (20+10*score_bounce.v)+"px Arial";
+    ctx.font = (20+10*score_bounce.v)+"px Architects Daughter";
     ctx.fillText(          score,bounds.x+bounds.w-200+60,bounds.y-10);
     ctx.font = oldfont;
     ctx.fillText("< Menu",back_btn.x,back_btn.y+back_btn.h/2);
