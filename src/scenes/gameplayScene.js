@@ -30,6 +30,8 @@ var GamePlayScene = function(game, stage)
   var shadow_dist = 8;
   var white = "#FFFFFF";
   var black = "#000000";
+  var pcharge = "#00FF00";
+  var ncharge = "#FF0000";
   var bounds_stroke  = white;
   var shadow_fill  = "rgba(0,0,0,.1)";
   var defect_fill  = "rgba(0,0,0,.7)";
@@ -211,6 +213,56 @@ var GamePlayScene = function(game, stage)
   shadow_atom.context.fillRect(0,0,shadow_atom.width,shadow_atom.height);
   shadow_atom.context.globalCompositeOperation = "destination-in";
   shadow_atom.context.drawImage(atoms[0],0,0);
+
+  var qtr = Math.PI/2;
+  var rp_charge = GenIcon(w,h);
+  rp_charge.context.strokeStyle = pcharge;
+  rp_charge.context.lineWidth = 4;
+  rp_charge.context.beginPath();
+  rp_charge.context.arc(w/2,h/2,2*w/6,-qtr/2,-qtr/2+qtr);
+  rp_charge.context.stroke();
+  var dp_charge = GenIcon(w,h);
+  dp_charge.context.strokeStyle = pcharge;
+  dp_charge.context.lineWidth = 4;
+  dp_charge.context.beginPath();
+  dp_charge.context.arc(w/2,h/2,2*w/6,-qtr/2+qtr,-qtr/2+qtr+qtr);
+  dp_charge.context.stroke();
+  var lp_charge = GenIcon(w,h);
+  lp_charge.context.strokeStyle = pcharge;
+  lp_charge.context.lineWidth = 4;
+  lp_charge.context.beginPath();
+  lp_charge.context.arc(w/2,h/2,2*w/6,-qtr/2+qtr+qtr,-qtr/2+qtr+qtr+qtr);
+  lp_charge.context.stroke();
+  var up_charge = GenIcon(w,h);
+  up_charge.context.strokeStyle = pcharge;
+  up_charge.context.lineWidth = 4;
+  up_charge.context.beginPath();
+  up_charge.context.arc(w/2,h/2,2*w/6,-qtr/2+qtr+qtr+qtr,-qtr/2+qtr+qtr+qtr+qtr);
+  up_charge.context.stroke();
+  var rn_charge = GenIcon(w,h);
+  rn_charge.context.strokeStyle = ncharge;
+  rn_charge.context.lineWidth = 4;
+  rn_charge.context.beginPath();
+  rn_charge.context.arc(w/2,h/2,2*w/6,-qtr/2,-qtr/2+qtr);
+  rn_charge.context.stroke();
+  var dn_charge = GenIcon(w,h);
+  dn_charge.context.strokeStyle = ncharge;
+  dn_charge.context.lineWidth = 4;
+  dn_charge.context.beginPath();
+  dn_charge.context.arc(w/2,h/2,2*w/6,-qtr/2+qtr,-qtr/2+qtr+qtr);
+  dn_charge.context.stroke();
+  var ln_charge = GenIcon(w,h);
+  ln_charge.context.strokeStyle = ncharge;
+  ln_charge.context.lineWidth = 4;
+  ln_charge.context.beginPath();
+  ln_charge.context.arc(w/2,h/2,2*w/6,-qtr/2+qtr+qtr,-qtr/2+qtr+qtr+qtr);
+  ln_charge.context.stroke();
+  var un_charge = GenIcon(w,h);
+  un_charge.context.strokeStyle = ncharge;
+  un_charge.context.lineWidth = 4;
+  un_charge.context.beginPath();
+  un_charge.context.arc(w/2,h/2,2*w/6,-qtr/2+qtr+qtr+qtr,-qtr/2+qtr+qtr+qtr+qtr);
+  un_charge.context.stroke();
 
   var loadLevelStars = function()
   {
@@ -749,7 +801,6 @@ var GamePlayScene = function(game, stage)
     rotate_template(levels[i].seed[j].template);
     j++;
 
-
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     levels[i].has_intro = true && TEXT;
     levels[i].shouldClick = function(evt) { return true; }
@@ -790,7 +841,6 @@ var GamePlayScene = function(game, stage)
     levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     i++;
-
   }
 
   var set_level = function(i)
@@ -948,8 +998,8 @@ var GamePlayScene = function(game, stage)
 
           ctx.save();
           ctx.translate(((rx+bounces[i].vx)+(rx_c+bounces[j].vx))/2,((ry+bounces[i].vy)+(ry_c+bounces[j].vy))/2);
-          var rot = atan2((ry_c+bounces[j].vy)-(ry+bounces[i].vy),(rx_c+bounces[j].vx)-(rx+bounces[i].vx));
-          ctx.rotate(rot);
+          var drot = atan2((ry_c+bounces[j].vy)-(ry+bounces[i].vy),(rx_c+bounces[j].vx)-(rx+bounces[i].vx));
+          ctx.rotate(drot);
           var dist = len((ry_c+bounces[j].vy)-(ry+bounces[i].vy),(rx_c+bounces[j].vx)-(rx+bounces[i].vx));
           if(shadow || defect)
             ctx.drawImage(shadow_connection, -dist/2, -dblock.w/4, dist, dblock.w/2);
@@ -983,19 +1033,34 @@ var GamePlayScene = function(game, stage)
       dblock.ww = oldww;
       dblock.wh = oldwh;
 
+      ctx.save();
+      ctx.translate(dblock.x+bounces[i].vx+dblock.w/2, dblock.y+bounces[i].vy+dblock.h/2)
+      ctx.rotate(rot);
       if(shadow || defect)
       {
-        ctx.drawImage(shadow_atom, dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
-      }
-      else if(happys)
-      {
-        var happy = clamp(-2,2,happys[i]);
-        ctx.drawImage(atoms[happy+2], dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
+        ctx.drawImage(shadow_atom, -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
       }
       else
       {
-        ctx.drawImage(atoms[2], dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
+        if(happys)
+        {
+          var happy = clamp(-2,2,happys[i]);
+          ctx.drawImage(atoms[happy+2], -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
+        }
+        else
+        {
+          ctx.drawImage(atoms[2], -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
+        }
+             if(blocks[i].c[0] > 0) ctx.drawImage(up_charge, -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
+        else if(blocks[i].c[0] < 0) ctx.drawImage(un_charge, -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
+             if(blocks[i].c[1] > 0) ctx.drawImage(rp_charge, -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
+        else if(blocks[i].c[1] < 0) ctx.drawImage(rn_charge, -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
+             if(blocks[i].c[2] > 0) ctx.drawImage(dp_charge, -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
+        else if(blocks[i].c[2] < 0) ctx.drawImage(dn_charge, -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
+             if(blocks[i].c[3] > 0) ctx.drawImage(lp_charge, -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
+        else if(blocks[i].c[3] < 0) ctx.drawImage(ln_charge, -dblock.w/2, -dblock.h/2, dblock.w, dblock.h);
       }
+      ctx.restore();
     }
 
   }
