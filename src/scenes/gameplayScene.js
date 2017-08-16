@@ -44,9 +44,6 @@ var GamePlayScene = function(game, stage)
   var charge_pos = "#22FF22";
   var charge_neg = "#FF2222";
 
-  var cache_res = 400;
-  var cache_cam_wres = 5;
-
   var star_outro_sub_slide = 40;
   var star_outro_sub_star = 100;
   var star_outro_sub_zoom = 200;
@@ -101,7 +98,6 @@ var GamePlayScene = function(game, stage)
   var tx;
   var ty;
   var dblock = {wx:0,wy:0,ww:1,wh:1,x:0,y:0,w:0,h:0};
-  var cblock = {wx:0,wy:0,ww:cache_cam_wres,wh:cache_cam_wres,x:0,y:0,w:0,h:0};
   var w;
   var h;
   var in_r;
@@ -839,7 +835,6 @@ var GamePlayScene = function(game, stage)
       for(var j = 0; j < 4; j++)
         to.blocks[i].c[j] = from.blocks[i].c[j];
     }
-    to.tcache = from.tcache;
     to.rotation = from.rotation;
   }
   var rotate_template = function(t)
@@ -859,295 +854,125 @@ var GamePlayScene = function(game, stage)
     t.cy = -tx;
     t.rotation = (t.rotation+1)%4;
   }
+  var null_bounces = [];
+  for(var i = 0; i < 100; i++)
+  {
+    null_bounces[i] = new bounce2();
+  }
   var draw_blocks = function(wx,wy,offx,offy,bounces,happys,rot,scale,shadow,defect,seed,template)
   {
     var blocks = template.blocks;
+    if(!bounces) bounces = null_bounces;
 
-    if(!template.tcache[template.rotation].cached)
-    {
-      template.tcache[template.rotation].cached = true;
-
-      var top_left;
-      var cur;
-      var leftmost = 100;
-      var topmost = -100;
-
-      var tcam = { wx:0, wy:0, ww:cache_cam_wres, wh:cache_cam_wres };
-      var tcanv = template.tcache[template.rotation].cache;
-      var tctx = tcanv.context;
-      var scanv = template.tcache[template.rotation].shadow_cache;
-      var sctx = scanv.context;
-
-      tctx.clearRect(0, 0, cache_res, cache_res);
-      sctx.clearRect(0, 0, cache_res, cache_res);
-
-      screenSpace(tcam,tcanv,dblock);
-
-      for(var i = 0; i < blocks.length; i++)
-        if(blocks[i].cx < leftmost) leftmost = blocks[i].cx;
-      for(var i = 0; i < blocks.length; i++)
-        if(blocks[i].cx == leftmost && blocks[i].cy > topmost)
-        {
-          topmost = blocks[i].cy;
-          top_left = i;
-        }
-
-      var xb = dblock.ww*3/8;
-      var yb = dblock.wh*3/8;
-      var start;
-      var done;
-      var found;
-
-      tctx.fillStyle = block_fill;
-      tctx.strokeStyle = block_stroke;
-      if(seed)
-      {
-        tctx.fillStyle = seed_fill;
-        tctx.strokeStyle = seed_stroke;
-      }
-      sctx.fillStyle = shadow_fill;
-      if(defect) sctx.fillStyle = defect_fill;
-
-      cur = top_left;
-
-      tctx.beginPath();
-      sctx.beginPath();
-
-      dblock.wx = blocks[cur].cx-xb;
-      dblock.wy = blocks[cur].cy+yb;
-      screenSpace(tcam,tcanv,dblock);
-      tctx.moveTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-      sctx.moveTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-
-      start = 0;
-      done = 0;
-      while(!done)
-      {
-        found = false;
-        for(var i = 0; !found && !done && i < 4; i++) //start at top, CW
-        {
-          switch((i+start)%4)
-          {
-            case 0: //check top
-            {
-              for(var j = 0; !found && j < blocks.length; j++)
-              {
-                if(cur != j &&
-                  blocks[j].cx == blocks[cur].cx   &&
-                  blocks[j].cy == blocks[cur].cy+1)
-                {
-                  found = true;
-                  cur = j;
-
-                  dblock.wx = blocks[cur].cx-xb;
-                  dblock.wy = blocks[cur].cy-yb;
-                  screenSpace(tcam,tcanv,dblock);
-                  tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-                  sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-
-                  start = 3;
-                }
-              }
-              if(!found)
-              {
-                dblock.wx = blocks[cur].cx+xb;
-                dblock.wy = blocks[cur].cy+yb;
-                screenSpace(tcam,tcanv,dblock);
-                tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-                sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-              }
-            }
-            break;
-            case 1: //check right
-            {
-              for(var j = 0; !found && j < blocks.length; j++)
-              {
-                if(cur != j &&
-                  blocks[j].cx == blocks[cur].cx+1 &&
-                  blocks[j].cy == blocks[cur].cy)
-                {
-                  found = true;
-                  cur = j;
-
-                  dblock.wx = blocks[cur].cx-xb;
-                  dblock.wy = blocks[cur].cy+yb;
-                  screenSpace(tcam,tcanv,dblock);
-                  tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-                  sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-
-                  start = 0;
-                }
-              }
-              if(!found)
-              {
-                dblock.wx = blocks[cur].cx+xb;
-                dblock.wy = blocks[cur].cy-yb;
-                screenSpace(tcam,tcanv,dblock);
-                tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-                sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-              }
-            }
-            break;
-            case 2: //check bottom
-            {
-              for(var j = 0; !found && j < blocks.length; j++)
-              {
-                if(cur != j &&
-                  blocks[j].cx == blocks[cur].cx   &&
-                  blocks[j].cy == blocks[cur].cy-1)
-                {
-                  found = true;
-                  cur = j;
-
-                  dblock.wx = blocks[cur].cx+xb;
-                  dblock.wy = blocks[cur].cy+yb;
-                  screenSpace(tcam,tcanv,dblock);
-                  tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-                  sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-
-                  start = 1;
-                }
-              }
-              if(!found)
-              {
-                dblock.wx = blocks[cur].cx-xb;
-                dblock.wy = blocks[cur].cy-yb;
-                screenSpace(tcam,tcanv,dblock);
-                tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-                sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-              }
-            }
-            break;
-            case 3: //check left
-            {
-              for(var j = 0; !found && j < blocks.length; j++)
-              {
-                if(cur != j &&
-                  blocks[j].cx == blocks[cur].cx-1 &&
-                  blocks[j].cy == blocks[cur].cy)
-                {
-                  found = true;
-                  cur = j;
-
-                  dblock.wx = blocks[cur].cx+xb;
-                  dblock.wy = blocks[cur].cy-yb;
-                  screenSpace(tcam,tcanv,dblock);
-                  tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-                  sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-
-                  start = 2;
-                }
-              }
-              if(!found)
-              {
-                dblock.wx = blocks[cur].cx-xb;
-                dblock.wy = blocks[cur].cy+yb;
-                screenSpace(tcam,tcanv,dblock);
-                tctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-                sctx.lineTo(dblock.x+dblock.w/2,dblock.y+dblock.h/2);
-              }
-            }
-            break;
-          }
-
-          if(!found && cur == top_left && (i+start)%4 == 3) done = 1;
-        }
-      }
-      tctx.fill();
-      sctx.fill();
-      tctx.stroke();
-
-      //charges
-      for(var i = 0; i < blocks.length; i++)
-      {
-        dblock.wx = blocks[i].cx;
-        dblock.wy = blocks[i].cy;
-        screenSpace(tcam,tcanv,dblock);
-
-        var d = dblock.w/8;
-        tctx.strokeStyle = block_stroke;
-        tctx.lineWidth = 4;
-        for(var j = 0; j < 4; j++)
-        {
-               if(blocks[i].c[j] > 0) tctx.strokeStyle = charge_pos;
-          else if(blocks[i].c[j] < 0) tctx.strokeStyle = charge_neg;
-          else continue;
-          switch(j)
-          {
-            case 0: tctx.beginPath(); tctx.moveTo(dblock.x         +d,dblock.y         +d); tctx.lineTo(dblock.x+dblock.w-d,dblock.y         +d); tctx.stroke(); break;
-            case 1: tctx.beginPath(); tctx.moveTo(dblock.x+dblock.w-d,dblock.y         +d); tctx.lineTo(dblock.x+dblock.w-d,dblock.y+dblock.h-d); tctx.stroke(); break;
-            case 2: tctx.beginPath(); tctx.moveTo(dblock.x         +d,dblock.y+dblock.h-d); tctx.lineTo(dblock.x+dblock.w-d,dblock.y+dblock.h-d); tctx.stroke(); break;
-            case 3: tctx.beginPath(); tctx.moveTo(dblock.x         +d,dblock.y         +d); tctx.lineTo(dblock.x         +d,dblock.y+dblock.h-d); tctx.stroke(); break;
-          }
-        }
-        tctx.lineWidth = 2;
-      }
-
-    }
-
-    tx = screenSpaceX(cam,canv,wx);
-    ty = screenSpaceY(cam,canv,wy);
     screenSpace(cam,canv,dblock);
 
-    ctx.save();
-    ctx.translate(tx,ty);
-    ctx.rotate(rot);
-    ctx.translate(-offx*dblock.w*scale,offy*dblock.h*scale);
-    ctx.scale(scale,scale);
+    var c = cos(-rot);
+    var s = sin(-rot);
+    var rx;
+    var ry;
+    var rx_c; //connection
+    var ry_c;
+    var oldww;
+    var oldwh;
 
-    screenSpace(cam,canv,cblock);
-    if(shadow || defect)
-      ctx.drawImage(template.tcache[template.rotation].shadow_cache, -cblock.w/2, -cblock.h/2, cblock.w, cblock.h);
-    else
-      ctx.drawImage(template.tcache[template.rotation].cache, -cblock.w/2, -cblock.h/2, cblock.w, cblock.h);
-
-    ctx.restore();
-
-    if(!shadow && !defect)
+    //connections
+    for(var i = 0; i < blocks.length; i++)
     {
-      var c = cos(-rot);
-      var s = sin(-rot);
-      var rx;
-      var ry;
-      var oldww;
-      var oldwh;
-      for(var i = 0; i < blocks.length; i++)
+      for(var j = i+1; j < blocks.length; j++)
       {
-        rx = blocks[i].cx-offx;
-        ry = blocks[i].cy-offy;
-
-        dblock.wx = rx*c - ry*s;
-        dblock.wy = rx*s + ry*c;
-
-        dblock.wx *= scale;
-        dblock.wy *= scale;
-
-        dblock.wx += wx;
-        dblock.wy += wy;
-
-        oldww = dblock.ww;
-        oldwh = dblock.wh;
-        dblock.ww *= scale;
-        dblock.wh *= scale;
-        screenSpace(cam,canv,dblock);
-        dblock.ww = oldww;
-        dblock.wh = oldwh;
-
-        if(happys)
+        if(
+          (blocks[i].cx == blocks[j].cx && abs(blocks[i].cy-blocks[j].cy) == 1) ||
+          (blocks[i].cy == blocks[j].cy && abs(blocks[i].cx-blocks[j].cx) == 1)
+        )
         {
-          var happy = clamp(-2,2,happys[i]);
-          if(bounces)
-            ctx.drawImage(atoms[happy+2], dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
-          else
-            ctx.drawImage(atoms[happy+2], dblock.x, dblock.y, dblock.w, dblock.h);
+          rx = blocks[i].cx-offx;
+          ry = blocks[i].cy-offy;
+
+          dblock.wx = rx*c - ry*s;
+          dblock.wy = rx*s + ry*c;
+
+          dblock.wx *= scale;
+          dblock.wy *= scale;
+
+          dblock.wx += wx;
+          dblock.wy += wy;
+
+          oldww = dblock.ww;
+          oldwh = dblock.wh;
+          dblock.ww *= scale;
+          dblock.wh *= scale;
+          screenSpace(cam,canv,dblock);
+          dblock.ww = oldww;
+          dblock.wh = oldwh;
+
+          rx = dblock.x+dblock.w/2;
+          ry = dblock.y+dblock.h/2;
+
+          rx_c = blocks[j].cx-offx;
+          ry_c = blocks[j].cy-offy;
+
+          dblock.wx = rx_c*c - ry_c*s;
+          dblock.wy = rx_c*s + ry_c*c;
+
+          dblock.wx *= scale;
+          dblock.wy *= scale;
+
+          dblock.wx += wx;
+          dblock.wy += wy;
+
+          oldww = dblock.ww;
+          oldwh = dblock.wh;
+          dblock.ww *= scale;
+          dblock.wh *= scale;
+          screenSpace(cam,canv,dblock);
+          dblock.ww = oldww;
+          dblock.wh = oldwh;
+
+          rx_c = dblock.x+dblock.w/2;
+          ry_c = dblock.y+dblock.h/2;
+
+          ctx.save();
+          ctx.translate(((rx+bounces[i].vx)+(rx_c+bounces[j].vx))/2,((ry+bounces[i].vy)+(ry_c+bounces[j].vy))/2);
+          var rot = atan2((ry_c+bounces[j].vy)-(ry+bounces[i].vy),(rx_c+bounces[j].vx)-(rx+bounces[i].vx));
+          ctx.rotate(rot);
+          var dist = len((ry_c+bounces[j].vy)-(ry+bounces[i].vy),(rx_c+bounces[j].vx)-(rx+bounces[i].vx));
+          ctx.drawImage(connection, -dist/2, -dblock.w/4, dist, dblock.w/2);
+          ctx.restore();
         }
-        else
-        {
-          if(bounces)
-            ctx.drawImage(atoms[2], dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
-          else
-            ctx.drawImage(atoms[2], dblock.x, dblock.y, dblock.w, dblock.h);
-        }
+      }
+    }
+
+    //atoms
+    for(var i = 0; i < blocks.length; i++)
+    {
+      rx = blocks[i].cx-offx;
+      ry = blocks[i].cy-offy;
+
+      dblock.wx = rx*c - ry*s;
+      dblock.wy = rx*s + ry*c;
+
+      dblock.wx *= scale;
+      dblock.wy *= scale;
+
+      dblock.wx += wx;
+      dblock.wy += wy;
+
+      oldww = dblock.ww;
+      oldwh = dblock.wh;
+      dblock.ww *= scale;
+      dblock.wh *= scale;
+      screenSpace(cam,canv,dblock);
+      dblock.ww = oldww;
+      dblock.wh = oldwh;
+
+      if(happys)
+      {
+        var happy = clamp(-2,2,happys[i]);
+        ctx.drawImage(atoms[happy+2], dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
+      }
+      else
+      {
+        ctx.drawImage(atoms[2], dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
       }
     }
 
@@ -1856,14 +1681,6 @@ var GamePlayScene = function(game, stage)
     }
   }
 
-  var tcache = function()
-  {
-    var self = this;
-    self.cache = GenIcon(cache_res,cache_res);
-    self.shadow_cache = GenIcon(cache_res,cache_res);
-    self.cached = false;
-  }
-
   var template = function(cx,cy,blocks)
   {
     var self = this;
@@ -1871,13 +1688,6 @@ var GamePlayScene = function(game, stage)
     self.cy = cy;
     self.blocks = blocks;
     self.rotation = 0;
-
-    self.tcache = [];
-    if(blocks) //else will get copied
-    {
-      for(var i = 0; i < 4; i++)
-      self.tcache[i] = new tcache();
-    }
   }
 
   var defect = function(cx,cy,template)

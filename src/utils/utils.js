@@ -251,6 +251,16 @@ var worldSpace = function(cam, canv, obj) //opposite of screenspace
   obj.wh = (obj.h/canv.height)*cam.wh;
 }
 
+function lensqr(x,y)
+{
+  return x*x+y*y;
+}
+
+function len(x,y)
+{
+  return Math.sqrt(x*x+y*y);
+}
+
 function vlensqr(v)
 {
   return v.x*v.x+v.y*v.y;
