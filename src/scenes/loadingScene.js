@@ -64,6 +64,8 @@ var LoadingScene = function(game, stage)
     loading_img_srcs.push("assets/star.png");
     loading_img_srcs.push("assets/star_full.png");
     loading_img_srcs.push("assets/connection.png");
+    loading_img_srcs.push("assets/bg.jpg");
+    loading_img_srcs.push("assets/menu_bg.jpg");
     for(var i = 0; i < loading_img_srcs.length; i++)
     {
       loading_imgs[i] = new Image();

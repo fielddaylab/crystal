@@ -30,8 +30,6 @@ var GamePlayScene = function(game, stage)
   var shadow_dist = 8;
   var white = "#FFFFFF";
   var black = "#000000";
-  var pcharge = "#00FF00";
-  var ncharge = "#FF0000";
   var bounds_stroke  = white;
   var shadow_fill  = "rgba(0,0,0,.1)";
   var defect_fill  = "rgba(0,0,0,.7)";
@@ -40,11 +38,12 @@ var GamePlayScene = function(game, stage)
   var seed_fill   = "#D6D6D6";
   var seed_stroke = "#C0C0C0";
   var scroll_fill = "rgba(0,0,0,0.3)";
-  var bg_fill     = "rgba(24,162,182,0.4)";
-  var grid_fill = "#1B5C72";
-  var grid_stroke = "#327B8E";
+  var bg_fill     = "rgba(15,25,70,0.6)";
+  var grid_fill = "rgba(25,102,122,0.7)";
+  var grid_stroke = "#277F93";
   var charge_pos = "#22FF22";
   var charge_neg = "#FF2222";
+  var btn_bg = "#53BBB9";
 
   var star_outro_sub_slide = 40;
   var star_outro_sub_star = 100;
@@ -180,6 +179,14 @@ var GamePlayScene = function(game, stage)
   }
   connection.src = "assets/connection.png";
 
+  var bg = new Image();
+  bg.src = "assets/bg.jpg";
+  var menu_bg = new Image();
+  menu_bg.src = "assets/menu_bg.jpg";
+
+  var bgbox = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
+  var menubgbox = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
+
   var atoms = [];
   for(var i = 0; i < 5; i++)
   {
@@ -216,8 +223,8 @@ var GamePlayScene = function(game, stage)
 
   var qtr = Math.PI/2;
   var rp_charge = GenIcon(w,h);
-  rp_charge.context.strokeStyle = pcharge;
-  rp_charge.context.fillStyle = pcharge;
+  rp_charge.context.strokeStyle = charge_pos;
+  rp_charge.context.fillStyle = charge_pos;
   rp_charge.context.font = "20px Architects Daughter";
   rp_charge.context.textAlign = "center";
   rp_charge.context.lineWidth = 4;
@@ -226,8 +233,8 @@ var GamePlayScene = function(game, stage)
   rp_charge.context.stroke();
   rp_charge.context.fillText("+",w-5,h/2);
   var dp_charge = GenIcon(w,h);
-  dp_charge.context.strokeStyle = pcharge;
-  dp_charge.context.fillStyle = pcharge;
+  dp_charge.context.strokeStyle = charge_pos;
+  dp_charge.context.fillStyle = charge_pos;
   dp_charge.context.font = "20px Architects Daughter";
   dp_charge.context.textAlign = "center";
   dp_charge.context.lineWidth = 4;
@@ -236,8 +243,8 @@ var GamePlayScene = function(game, stage)
   dp_charge.context.stroke();
   dp_charge.context.fillText("+",w/2,h);
   var lp_charge = GenIcon(w,h);
-  lp_charge.context.strokeStyle = pcharge;
-  lp_charge.context.fillStyle = pcharge;
+  lp_charge.context.strokeStyle = charge_pos;
+  lp_charge.context.fillStyle = charge_pos;
   lp_charge.context.font = "20px Architects Daughter";
   lp_charge.context.textAlign = "center";
   lp_charge.context.lineWidth = 4;
@@ -246,8 +253,8 @@ var GamePlayScene = function(game, stage)
   lp_charge.context.stroke();
   lp_charge.context.fillText("+",5,h/2);
   var up_charge = GenIcon(w,h);
-  up_charge.context.strokeStyle = pcharge;
-  up_charge.context.fillStyle = pcharge;
+  up_charge.context.strokeStyle = charge_pos;
+  up_charge.context.fillStyle = charge_pos;
   up_charge.context.font = "20px Architects Daughter";
   up_charge.context.textAlign = "center";
   up_charge.context.lineWidth = 4;
@@ -256,8 +263,8 @@ var GamePlayScene = function(game, stage)
   up_charge.context.stroke();
   up_charge.context.fillText("+",w/2,10);
   var rn_charge = GenIcon(w,h);
-  rn_charge.context.strokeStyle = ncharge;
-  rn_charge.context.fillStyle = ncharge;
+  rn_charge.context.strokeStyle = charge_neg;
+  rn_charge.context.fillStyle = charge_neg;
   rn_charge.context.font = "20px Architects Daughter";
   rn_charge.context.textAlign = "center";
   rn_charge.context.lineWidth = 4;
@@ -266,8 +273,8 @@ var GamePlayScene = function(game, stage)
   rn_charge.context.stroke();
   rn_charge.context.fillText("-",w-5,h/2);
   var dn_charge = GenIcon(w,h);
-  dn_charge.context.strokeStyle = ncharge;
-  dn_charge.context.fillStyle = ncharge;
+  dn_charge.context.strokeStyle = charge_neg;
+  dn_charge.context.fillStyle = charge_neg;
   dn_charge.context.font = "20px Architects Daughter";
   dn_charge.context.textAlign = "center";
   dn_charge.context.lineWidth = 4;
@@ -276,8 +283,8 @@ var GamePlayScene = function(game, stage)
   dn_charge.context.stroke();
   dn_charge.context.fillText("-",w/2,h);
   var ln_charge = GenIcon(w,h);
-  ln_charge.context.strokeStyle = ncharge;
-  ln_charge.context.fillStyle = ncharge;
+  ln_charge.context.strokeStyle = charge_neg;
+  ln_charge.context.fillStyle = charge_neg;
   ln_charge.context.font = "20px Architects Daughter";
   ln_charge.context.textAlign = "center";
   ln_charge.context.lineWidth = 4;
@@ -286,8 +293,8 @@ var GamePlayScene = function(game, stage)
   ln_charge.context.stroke();
   ln_charge.context.fillText("-",5,h/2);
   var un_charge = GenIcon(w,h);
-  un_charge.context.strokeStyle = ncharge;
-  un_charge.context.fillStyle = ncharge;
+  un_charge.context.strokeStyle = charge_neg;
+  un_charge.context.fillStyle = charge_neg;
   un_charge.context.font = "20px Architects Daughter";
   un_charge.context.textAlign = "center";
   un_charge.context.lineWidth = 4;
@@ -2011,6 +2018,18 @@ var GamePlayScene = function(game, stage)
       cam.wh = lerp(cam.wh,game_cam.wh*(1+t*3),0.1);
     }
 
+    bgbox.wx = game_cam.wx;
+    bgbox.wy = game_cam.wy;
+    bgbox.ww = game_cam.ww;
+    bgbox.wh = game_cam.wh;
+    screenSpace(cam,canv,bgbox);
+
+    menubgbox.wx = menu_cam.wx;
+    menubgbox.wy = menu_cam.wy;
+    menubgbox.ww = menu_cam.ww;
+    menubgbox.wh = menu_cam.wh;
+    screenSpace(cam,canv,menubgbox);
+
     //screen space based on new cam
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
@@ -2024,21 +2043,21 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,scroll);
 
     back_btn.ww = game_cam.ww/10;
-    back_btn.wh = game_cam.wh/10;
-    back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww/2;
-    back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh/2;
+    back_btn.wh = game_cam.wh/15;
+    back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww;
+    back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh;
     screenSpace(cam,canv,back_btn);
 
     clear_btn.ww = game_cam.ww/10;
-    clear_btn.wh = game_cam.wh/10;
-    clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww/2;
-    clear_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh-clear_btn.wh/2;
+    clear_btn.wh = game_cam.wh/15;
+    clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww;
+    clear_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh*1.5-clear_btn.wh;
     screenSpace(cam,canv,clear_btn);
 
-    submit_btn.ww = game_cam.ww/5;
-    submit_btn.wh = game_cam.wh/10;
+    submit_btn.ww = game_cam.ww/4;
+    submit_btn.wh = game_cam.wh/15;
     submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww;
-    submit_btn.wy = game_cam.wy-game_cam.wh/2+submit_btn.wh/2;
+    submit_btn.wy = game_cam.wy-game_cam.wh/2+submit_btn.wh;
     screenSpace(cam,canv,submit_btn);
 
     //resolve input
@@ -2123,6 +2142,8 @@ var GamePlayScene = function(game, stage)
   self.draw = function()
   {
     ctx.font = "30px Architects Daughter";
+    ctx.drawImage(bg,bgbox.x,bgbox.y,bgbox.w,bgbox.h);
+    ctx.drawImage(menu_bg,menubgbox.x,menubgbox.y,menubgbox.w,menubgbox.h);
 
     var sub_t = min(1,submitting_t/(star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom));
     var quick_sub_t = min(1,submitting_t/star_outro_sub_slide);
@@ -2228,19 +2249,20 @@ var GamePlayScene = function(game, stage)
       ctx.globalAlpha = (1-quick_sub_t);
 
     //UI
+    ctx.fillStyle = btn_bg;
+    fillRBox(back_btn,20,ctx);
+    fillRBox(clear_btn,20,ctx);
+    fillRBox(submit_btn,20,ctx);
+
     ctx.fillStyle = white;
     ctx.fillText("Stability: "      ,bounds.x+bounds.w-200,   bounds.y-10);
     var oldfont = ctx.font;
     ctx.font = (20+10*score_bounce.v)+"px Architects Daughter";
     ctx.fillText(          score,bounds.x+bounds.w-80,bounds.y-10);
     ctx.font = oldfont;
-    ctx.fillText("< Menu",back_btn.x,back_btn.y+back_btn.h/2);
-    ctx.fillText("Clear",clear_btn.x,clear_btn.y+clear_btn.h/2);
-    ctx.fillText("Grow Crystal",submit_btn.x,submit_btn.y+submit_btn.h/2);
-
-    strokeBox(back_btn,ctx);
-    strokeBox(clear_btn,ctx);
-    strokeBox(submit_btn,ctx);
+    ctx.fillText("< Menu",back_btn.x+10,back_btn.y+back_btn.h/2+10);
+    ctx.fillText("Clear",clear_btn.x+10,clear_btn.y+clear_btn.h/2+10);
+    ctx.fillText("Grow Crystal",submit_btn.x+10,submit_btn.y+submit_btn.h/2+10);
 
     var b = cur_stars_bounce.v*10;
     for(var i = 0; i < 3; i++)

@@ -512,6 +512,25 @@ function strokeBox(box,ctx)
 {
   ctx.strokeRect(box.x,box.y,box.w,box.h);
 }
+function fillBox(box,ctx)
+{
+  ctx.fillRect(box.x,box.y,box.w,box.h);
+}
+function fillRBox(box,r,ctx)
+{
+  ctx.beginPath();
+  ctx.moveTo(box.x+r,box.y);
+  ctx.lineTo(box.x+box.w-r,box.y);
+  ctx.quadraticCurveTo(box.x+box.w,box.y,box.x+box.w,box.y+r);
+  ctx.lineTo(box.x+box.w,box.y+box.h-r);
+  ctx.quadraticCurveTo(box.x+box.w,box.y+box.h,box.x+box.w-r,box.y+box.h);
+  ctx.lineTo(box.x+r,box.y+box.h);
+  ctx.quadraticCurveTo(box.x,box.y+box.h,box.x,box.y+box.h-r);
+  ctx.lineTo(box.x,box.y+r);
+  ctx.quadraticCurveTo(box.x,box.y,box.x+r,box.y);
+  ctx.closePath();
+  ctx.fill();
+}
 
 //straight up stolen from the internet
 function setCookie(name, val, days)
