@@ -557,7 +557,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("<- This is a molecule",bounds.x-110,150); ctx.fillText("Stack 'em here \\/",bounds.x+50,100); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("<- This is a molecule",bounds.x-110,350); ctx.fillText("Stack 'em here ->",bounds.x+50,400); }
     i++;
 
     //tetris s- no charge
@@ -581,7 +581,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Some patterns can",bounds.x+50,100); ctx.fillText("fill the space completely.",bounds.x+50,130); ctx.fillText("Others don't.",bounds.x+50,200); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Some patterns can",bounds.x+50,300); ctx.fillText("fill the space completely.",bounds.x+50,330); ctx.fillText("Find those patterns!",bounds.x+50,400); }
     i++;
 
     //tetris T- no charge
@@ -605,7 +605,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Double click",bounds.x+50,100); ctx.fillText("to rotate",bounds.x+50,130); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Double click",bounds.x+50,300); ctx.fillText("to rotate",bounds.x+50,330); }
     i++;
 
     //domino- flip charge
@@ -629,7 +629,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Some molecules have charges.",bounds.x+50,100); ctx.fillText("opposites attract.",bounds.x+50,130); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Some molecules have charges.",bounds.x+50,300); ctx.fillText("opposites attract.",bounds.x+50,350); }
     i++;
 
     //L- hard charge
@@ -653,7 +653,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Try different patterns",bounds.x+50,100); ctx.fillText("to get 3 stars.",bounds.x+50,130); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Try different patterns",bounds.x+50,300); ctx.fillText("to get 3 stars.",bounds.x+50,350); }
     i++;
 
     //square- hard charge
@@ -698,7 +698,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("There's a defect in this crystal...",bounds.x+30,100); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("There's a defect in this crystal...",bounds.x+30,300); }
     i++;
 
     //L- hard charge seed
@@ -838,7 +838,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Here is a seed pattern",bounds.x+30,60); ctx.fillText("Use it as a template.",bounds.x+30,90); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Here is a seed pattern",bounds.x+30,160); ctx.fillText("Use it as a template.",bounds.x+30,220); }
     i++;
 
     //free play
@@ -1973,9 +1973,8 @@ var GamePlayScene = function(game, stage)
     submit_btn.ww = game_cam.ww/5;
     submit_btn.wh = game_cam.wh/10;
     submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
-    submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
+    submit_btn.wy = game_cam.wy-game_cam.wh/2-submit_btn.wh/2;
     screenSpace(cam,canv,submit_btn);
-
 
     cur_stars_bounce = new bounce();
     score_bounce = new bounce();
@@ -2035,8 +2034,8 @@ var GamePlayScene = function(game, stage)
 
     submit_btn.ww = game_cam.ww/5;
     submit_btn.wh = game_cam.wh/10;
-    submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
-    submit_btn.wy = game_cam.wy+game_cam.wh/2-submit_btn.wh/2;
+    submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww;
+    submit_btn.wy = game_cam.wy-game_cam.wh/2+submit_btn.wh/2;
     screenSpace(cam,canv,submit_btn);
 
     //resolve input
@@ -2120,7 +2119,7 @@ var GamePlayScene = function(game, stage)
 
   self.draw = function()
   {
-    ctx.font = "20px Architects Daughter";
+    ctx.font = "30px Architects Daughter";
 
     var sub_t = min(1,submitting_t/(star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom));
     var quick_sub_t = min(1,submitting_t/star_outro_sub_slide);
@@ -2230,11 +2229,15 @@ var GamePlayScene = function(game, stage)
     ctx.fillText("Stability: "      ,bounds.x+bounds.w-200,   bounds.y-10);
     var oldfont = ctx.font;
     ctx.font = (20+10*score_bounce.v)+"px Architects Daughter";
-    ctx.fillText(          score,bounds.x+bounds.w-200+60,bounds.y-10);
+    ctx.fillText(          score,bounds.x+bounds.w-80,bounds.y-10);
     ctx.font = oldfont;
     ctx.fillText("< Menu",back_btn.x,back_btn.y+back_btn.h/2);
     ctx.fillText("Clear",clear_btn.x,clear_btn.y+clear_btn.h/2);
-    ctx.fillText("[Submit]",submit_btn.x,submit_btn.y+submit_btn.h/2);
+    ctx.fillText("Grow Crystal",submit_btn.x,submit_btn.y+submit_btn.h/2);
+
+    strokeBox(back_btn,ctx);
+    strokeBox(clear_btn,ctx);
+    strokeBox(submit_btn,ctx);
 
     var b = cur_stars_bounce.v*10;
     for(var i = 0; i < 3; i++)
@@ -2245,10 +2248,9 @@ var GamePlayScene = function(game, stage)
         ctx.drawImage(star     ,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
     }
 
-    ctx.fillText("Crystal Packer 5000!!!",levels[0].button.x,levels[0].button.y);
-    ctx.fillText("Choose a   ^",levels[0].button.x-100,levels[0].button.y+125);
-    ctx.fillText("|",levels[0].button.x+4,levels[0].button.y+135);
-    ctx.fillText("Molecule --",levels[0].button.x-100,levels[0].button.y+150);
+    //ctx.fillText("Choose a   ^",levels[0].button.x-100,levels[0].button.y+125);
+    //ctx.fillText("|",levels[0].button.x+4,levels[0].button.y+135);
+    //ctx.fillText("Molecule --",levels[0].button.x-100,levels[0].button.y+150);
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
 

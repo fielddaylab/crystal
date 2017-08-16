@@ -508,6 +508,11 @@ var bounce2 = function(targetx=0,targety=0,vx=0,vy=0,velx=0,vely=0,pull=0.1,drag
   }
 }
 
+function strokeBox(box,ctx)
+{
+  ctx.strokeRect(box.x,box.y,box.w,box.h);
+}
+
 //straight up stolen from the internet
 function setCookie(name, val, days)
 {
