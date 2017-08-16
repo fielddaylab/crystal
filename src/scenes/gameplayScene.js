@@ -1,7 +1,7 @@
 
 var TEXT = true;
 var PERFECT = true;
-var UNLOCKED = true;
+var UNLOCKED = false;
 
 //wiggle anger
 var G = [];
@@ -394,6 +394,22 @@ var GamePlayScene = function(game, stage)
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
       ctx.stroke();
+
+      if(total_stars < self.level.lock_stars)
+      {
+        ctx.fillStyle = "rgba(0,0,0,0.8)";
+        ctx.beginPath();
+        ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
+        ctx.fill();
+
+        draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,1,0,0,self.level.available_templates[0]);
+
+        ctx.drawImage(star_full,self.x+10,self.y+self.h/2-10,40,40);
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillText("X"+self.level.lock_stars,self.x+50,self.y+self.h/2+20);
+
+      }
+      else
       draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,0,0,0,self.level.available_templates[0]);
 
       var x = self.x+self.w/2;
@@ -422,19 +438,6 @@ var GamePlayScene = function(game, stage)
           ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
         else
           ctx.drawImage(star,x+offx-bs/2,y+offy-bs/2,bs,bs);
-      }
-
-      if(total_stars < self.level.lock_stars)
-      {
-        ctx.fillStyle = "rgba(0,0,0,0.8)";
-        ctx.beginPath();
-        ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/4,0,2*Math.PI);
-        ctx.fill();
-
-        ctx.drawImage(lock_img,self.x+20,self.y+20,self.w-40,self.h-40);
-        ctx.drawImage(star_full,self.x+10,self.y+self.h/2-10,40,40);
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillText("X"+self.level.lock_stars,self.x+50,self.y+self.h/2+20);
       }
     }
 
