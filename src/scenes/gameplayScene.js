@@ -166,6 +166,16 @@ var GamePlayScene = function(game, stage)
   star_full.src = "assets/star_full.png";
 
   var connection = new Image();
+
+  var shadow_connection = GenIcon(connection.width,connection.height);
+  connection.onload = function()
+  {
+    shadow_connection = GenIcon(connection.width,connection.height);
+    shadow_connection.context.fillStyle = black;
+    shadow_connection.context.fillRect(0,0,shadow_connection.width,shadow_connection.height);
+    shadow_connection.context.globalCompositeOperation = "destination-in";
+    shadow_connection.context.drawImage(connection,0,0);
+  }
   connection.src = "assets/connection.png";
 
   var atoms = [];
@@ -196,6 +206,11 @@ var GamePlayScene = function(game, stage)
     //atom.context.fillText(i,w/2,h/2);
     atoms.push(atom);
   }
+  var shadow_atom = GenIcon(w,h);
+  shadow_atom.context.fillStyle = black;
+  shadow_atom.context.fillRect(0,0,shadow_atom.width,shadow_atom.height);
+  shadow_atom.context.globalCompositeOperation = "destination-in";
+  shadow_atom.context.drawImage(atoms[0],0,0);
 
   var loadLevelStars = function()
   {
@@ -443,10 +458,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 6;
     levels[i].repeat_y = 4;
     levels[i].bounds_w = 6;
-    levels[i].bounds_h = 4;
+    levels[i].bounds_h = 6;
     levels[i].scroll_w = 2.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = 0;
     levels[i].star_req_score[0] = 22;
     levels[i].star_req_score[1] = 30;
@@ -467,10 +482,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 6;
     levels[i].repeat_y = 4;
     levels[i].bounds_w = 6;
-    levels[i].bounds_h = 4;
+    levels[i].bounds_h = 6;
     levels[i].scroll_w = 3.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+3;
     levels[i].star_req_score[0] = 13;
     levels[i].star_req_score[1] = 20;
@@ -491,10 +506,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 6;
     levels[i].repeat_y = 4;
     levels[i].bounds_w = 6;
-    levels[i].bounds_h = 4;
+    levels[i].bounds_h = 6;
     levels[i].scroll_w = 3.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+3;
     levels[i].star_req_score[0] = 8;
     levels[i].star_req_score[1] = 17;
@@ -515,10 +530,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 6;
     levels[i].repeat_y = 4;
     levels[i].bounds_w = 6;
-    levels[i].bounds_h = 4;
+    levels[i].bounds_h = 6;
     levels[i].scroll_w = 2.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 36;
     levels[i].star_req_score[1] = 37;
@@ -539,10 +554,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 8;
     levels[i].repeat_y = 4;
     levels[i].bounds_w = 8;
-    levels[i].bounds_h = 4;
+    levels[i].bounds_h = 8;
     levels[i].scroll_w = 3.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 48;
     levels[i].star_req_score[1] = 61;
@@ -563,10 +578,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 10;
     levels[i].repeat_y = 6;
     levels[i].bounds_w = 10;
-    levels[i].bounds_h = 6;
+    levels[i].bounds_h = 10;
     levels[i].scroll_w = 2.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+1;
     levels[i].star_req_score[0] = 60;
     levels[i].star_req_score[1] = 70;
@@ -582,10 +597,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 6;
     levels[i].repeat_y = 4;
     levels[i].bounds_w = 6;
-    levels[i].bounds_h = 4;
+    levels[i].bounds_h = 6;
     levels[i].scroll_w = 2.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 37;
     levels[i].star_req_score[1] = 61;
@@ -608,10 +623,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 21;
     levels[i].repeat_y = 14;
     levels[i].bounds_w = 21;
-    levels[i].bounds_h = 14;
+    levels[i].bounds_h = 21;
     levels[i].scroll_w = 9;
     //if(PERFECT)
-    //levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    //levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 335;
     levels[i].star_req_score[1] = 335;
@@ -747,12 +762,12 @@ var GamePlayScene = function(game, stage)
     levels.push(new level(i));
     levels[i].scale = 2;
     levels[i].repeat_x = 18;
-    levels[i].repeat_y = 10;
+    levels[i].repeat_y = 18;
     levels[i].bounds_w = 18;
-    levels[i].bounds_h = 10;
+    levels[i].bounds_h = 18;
     levels[i].scroll_w = 3;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*2-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+1;
     levels[i].star_req_score[0] = 0;
     levels[i].star_req_score[1] = 0;
@@ -936,7 +951,10 @@ var GamePlayScene = function(game, stage)
           var rot = atan2((ry_c+bounces[j].vy)-(ry+bounces[i].vy),(rx_c+bounces[j].vx)-(rx+bounces[i].vx));
           ctx.rotate(rot);
           var dist = len((ry_c+bounces[j].vy)-(ry+bounces[i].vy),(rx_c+bounces[j].vx)-(rx+bounces[i].vx));
-          ctx.drawImage(connection, -dist/2, -dblock.w/4, dist, dblock.w/2);
+          if(shadow || defect)
+            ctx.drawImage(shadow_connection, -dist/2, -dblock.w/4, dist, dblock.w/2);
+          else
+            ctx.drawImage(connection, -dist/2, -dblock.w/4, dist, dblock.w/2);
           ctx.restore();
         }
       }
@@ -965,7 +983,11 @@ var GamePlayScene = function(game, stage)
       dblock.ww = oldww;
       dblock.wh = oldwh;
 
-      if(happys)
+      if(shadow || defect)
+      {
+        ctx.drawImage(shadow_atom, dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
+      }
+      else if(happys)
       {
         var happy = clamp(-2,2,happys[i]);
         ctx.drawImage(atoms[happy+2], dblock.x+bounces[i].vx, dblock.y+bounces[i].vy, dblock.w, dblock.h);
@@ -1805,8 +1827,8 @@ var GamePlayScene = function(game, stage)
     stamps = [];
     molecules = [];
 
-    game_cam = { wx:-20, wy:0, ww:12, wh:6 };
-    menu_cam = { wx:-20, wy:0, ww:12, wh:6 };
+    game_cam = { wx:-20, wy:0, ww:12, wh:8 };
+    menu_cam = { wx:-20, wy:0, ww:12, wh:8 };
     cam = { wx:menu_cam.wx, wy:menu_cam.wy, ww:menu_cam.ww, wh:menu_cam.wh };
     bounds = {wx:0, wy:0, ww:0, wh:0, x:0,y:0,w:0,h:0 };
 
@@ -2108,7 +2130,7 @@ var GamePlayScene = function(game, stage)
 
     //UI
     ctx.fillStyle = white;
-    ctx.fillText("Score: "      ,bounds.x+bounds.w-200,   bounds.y-10);
+    ctx.fillText("Stability: "      ,bounds.x+bounds.w-200,   bounds.y-10);
     var oldfont = ctx.font;
     ctx.font = (20+10*score_bounce.v)+"px Architects Daughter";
     ctx.fillText(          score,bounds.x+bounds.w-200+60,bounds.y-10);
