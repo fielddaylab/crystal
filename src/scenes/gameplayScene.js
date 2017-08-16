@@ -480,6 +480,7 @@ var GamePlayScene = function(game, stage)
     {
       mode = MODE_MENU;
       countLevelStars();
+      if(cur_level.comic) cur_level.comic();
     }
 
     self.draw = function()
@@ -568,6 +569,7 @@ var GamePlayScene = function(game, stage)
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("<- This is a molecule",bounds.x-110,350); ctx.fillText("Stack 'em here ->",bounds.x+50,400); }
+    levels[i].comic = function() { game.setScene(2,{start:1,length:1}); };
     i++;
 
     //tetris s- no charge
@@ -1920,8 +1922,11 @@ var GamePlayScene = function(game, stage)
     }
   }
 
+  var readied = false;
   self.ready = function()
   {
+    if(readied) return;
+    readied = true;
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
 
@@ -2142,6 +2147,7 @@ var GamePlayScene = function(game, stage)
   self.draw = function()
   {
     ctx.font = "30px Architects Daughter";
+    ctx.textAlign = "left";
     ctx.drawImage(bg,bgbox.x,bgbox.y,bgbox.w,bgbox.h);
     ctx.drawImage(menu_bg,menubgbox.x,menubgbox.y,menubgbox.w,menubgbox.h);
 

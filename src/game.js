@@ -15,6 +15,7 @@ var Game = function(init)
     new NullScene(self, stage),
     new LoadingScene(self, stage),
     //new TestScene(self, stage),
+    new ComicScene(self, stage),
     new GamePlayScene(self, stage),
   ];
   var cur_scene = 0;
@@ -39,16 +40,16 @@ var Game = function(init)
     old_cur_scene = cur_scene;
   };
 
-  self.nextScene = function()
+  self.nextScene = function(args)
   {
-    self.setScene(cur_scene+1);
+    self.setScene(cur_scene+1,args);
   };
 
-  self.setScene = function(i)
+  self.setScene = function(i,args)
   {
     scenes[cur_scene].cleanup();
     cur_scene = i;
-    scenes[cur_scene].ready();
+    scenes[cur_scene].ready(args);
   }
 };
 
