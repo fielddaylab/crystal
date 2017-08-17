@@ -1984,21 +1984,15 @@ var GamePlayScene = function(game, stage)
     mode = MODE_MENU;
 
     total_stars_disp = new totalStarsDisplay();
-    total_stars_disp.wx = -25;
-    total_stars_disp.wy =   2;
-    total_stars_disp.ww = 1;
-    total_stars_disp.wh = 1;
-    screenSpace(cam,canv,total_stars_disp);
+    total_stars_disp.wx = levels[0].button.wx-1.5;
+    total_stars_disp.wy = levels[0].button.wy+0.5;
+    total_stars_disp.ww = 0.1;
+    total_stars_disp.wh = 0.1;
 
     outro = new star_outro();
 
     back_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     back_btn.click = function(evt) { mode = MODE_MENU; countLevelStars(); evt.hitUI = true; }
-    back_btn.ww = game_cam.ww/5;
-    back_btn.wh = game_cam.wh/10;
-    back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww/2;
-    back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh/2;
-    screenSpace(cam,canv,back_btn);
 
     clear_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     clear_btn.click = function(evt)
@@ -2011,29 +2005,22 @@ var GamePlayScene = function(game, stage)
       }
     }
     clear_btn.ww = game_cam.ww/5;
-    clear_btn.wh = game_cam.wh/10;
-    clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww/2;
-    clear_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh-clear_btn.wh/2;
-    screenSpace(cam,canv,clear_btn);
 
     submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     submit_btn.click = function(evt) { mode = MODE_SUBMIT; submitting_t = 0; evt.hitUI = true; }
-    submit_btn.ww = game_cam.ww/5;
-    submit_btn.wh = game_cam.wh/10;
-    submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww/2;
-    submit_btn.wy = game_cam.wy-game_cam.wh/2-submit_btn.wh/2;
-    screenSpace(cam,canv,submit_btn);
 
     museum_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     museum_btn.click = function(evt) { mode = MODE_MUSEUM; museum_t = 0; evt.hitUI = true; }
+
+    museum = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
+    museum.click = function(evt) { mode = MODE_MENU; evt.hitUI = true; }
+
     museum_btn.ww = menu_cam.ww/10;
     museum_btn.wh = menu_cam.wh/10;
     museum_btn.wx = menu_cam.wx+menu_cam.ww/2-museum_btn.ww/2;
     museum_btn.wy = menu_cam.wy+menu_cam.wh/2-museum_btn.wh;
     screenSpace(cam,canv,museum_btn);
 
-    museum = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
-    museum.click = function(evt) { mode = MODE_MENU; evt.hitUI = true; }
     museum.ww = menu_cam.ww*2/3;
     museum.wh = menu_cam.wh;
     museum.wx = menu_cam.wx+menu_cam.ww/2+museum.ww/2;
@@ -2094,15 +2081,15 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
 
-    back_btn.ww = game_cam.ww/10;
+    back_btn.ww = game_cam.ww/5;
     back_btn.wh = game_cam.wh/15;
-    back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww;
+    back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww/2+0.1;
     back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh;
     screenSpace(cam,canv,back_btn);
 
-    clear_btn.ww = game_cam.ww/10;
+    clear_btn.ww = game_cam.ww/5;
     clear_btn.wh = game_cam.wh/15;
-    clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww;
+    clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww/2+0.1;
     clear_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh*1.5-clear_btn.wh;
     screenSpace(cam,canv,clear_btn);
 
