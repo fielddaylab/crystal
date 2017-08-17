@@ -191,6 +191,11 @@ var GamePlayScene = function(game, stage)
   var bg = new Image();
   bg.src = "assets/bg.jpg";
 
+  var menu_circle_0 = new Image();
+  menu_circle_0.src = "assets/menu_circle_0.png";
+  var menu_circle_1 = new Image();
+  menu_circle_1.src = "assets/menu_circle_1.png";
+
   var bgbox;
   var museum;
 
@@ -405,16 +410,18 @@ var GamePlayScene = function(game, stage)
 
     self.draw = function()
     {
-      ctx.beginPath();
-      ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
-      ctx.stroke();
+      //ctx.beginPath();
+      //ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
+      //ctx.stroke();
 
       if(total_stars < self.level.lock_stars)
       {
         ctx.fillStyle = "rgba(0,0,0,0.8)";
-        ctx.beginPath();
-        ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
-        ctx.fill();
+        var w = 4*self.w/5;
+        ctx.drawImage(menu_circle_0,self.x+self.w/2-w/2,self.y+self.h/2-w/2,w,w);
+        //ctx.beginPath();
+        //ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
+        //ctx.fill();
 
         draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,1,0,0,self.level.available_templates[0]);
 
@@ -424,7 +431,11 @@ var GamePlayScene = function(game, stage)
 
       }
       else
-      draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,0,0,0,self.level.available_templates[0]);
+      {
+        var w = 4*self.w/5;
+        ctx.drawImage(menu_circle_1,self.x+self.w/2-w/2,self.y+self.h/2-w/2,w,w);
+        draw_blocks(self.wx,self.wy,self.level.available_templates[0].cx,self.level.available_templates[0].cy,0,0,self.rotoff+n_ticks/100,0.5,0,0,0,self.level.available_templates[0]);
+      }
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -1932,7 +1943,12 @@ var GamePlayScene = function(game, stage)
   var readied = false;
   self.ready = function()
   {
-    if(readied) return;
+    if(readied)
+    {
+      clicker.flush();
+      dragger.flush();
+      return;
+    }
     readied = true;
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
@@ -1948,14 +1964,14 @@ var GamePlayScene = function(game, stage)
     molecules = [];
 
     game_cam = { wx:-20, wy:0, ww:12, wh:8 };
-    menu_cam = { wx:-20, wy:0, ww:12, wh:8 };
+    menu_cam = { wx:-20, wy:0, ww:8, wh:6 };
     cam = { wx:menu_cam.wx, wy:menu_cam.wy, ww:menu_cam.ww, wh:menu_cam.wh };
-    game_bg_cam = { wx:0.25, wy:0, ww:1, wh:1 };
-    menu_bg_cam = { wx:-0.25, wy:0, ww:1, wh:1 };
+    game_bg_cam = { wx:0.5, wy:0, ww:1, wh:1 };
+    menu_bg_cam = { wx:-0.5, wy:0, ww:1, wh:1 };
     bg_cam = { wx:menu_bg_cam.wx, wy:menu_bg_cam.wy, ww:menu_bg_cam.ww, wh:menu_bg_cam.wh };
     bounds = {wx:0, wy:0, ww:0, wh:0, x:0,y:0,w:0,h:0 };
 
-    bgbox = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:1.5,wh:1}
+    bgbox = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:2,wh:1}
     screenSpace(bg_cam,canv,bgbox);
 
     init_levels();
@@ -2010,7 +2026,7 @@ var GamePlayScene = function(game, stage)
     museum_btn.ww = menu_cam.ww/10;
     museum_btn.wh = menu_cam.wh/10;
     museum_btn.wx = menu_cam.wx+menu_cam.ww/2-museum_btn.ww/2;
-    museum_btn.wy = menu_cam.wy+menu_cam.wh/2-museum_btn.wh/2;
+    museum_btn.wy = menu_cam.wy+menu_cam.wh/2-museum_btn.wh;
     screenSpace(cam,canv,museum_btn);
 
     museum = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
@@ -2167,9 +2183,13 @@ var GamePlayScene = function(game, stage)
       else
         museum_t--;
 
-      if(museum_t > 100) museum_t = 100;
-    }
+      if(museum_t > 20) museum_t = 20;
 
+      var t = (museum_t/20)
+      t *= t;
+      museum_btn.wx = lerp(menu_cam.wx+menu_cam.ww/2-museum_btn.ww/2,menu_cam.wx+menu_cam.ww/2-museum.ww-museum_btn.ww/2,t);
+      museum.wx = lerp(menu_cam.wx+menu_cam.ww/2+museum.ww/2,menu_cam.wx+menu_cam.ww/2-museum.ww/2,t);
+    }
     screenSpace(cam,canv,museum_btn);
     screenSpace(cam,canv,museum);
 
@@ -2340,7 +2360,7 @@ var GamePlayScene = function(game, stage)
       cur_level.introdraw();
 
     fillRBox(museum_btn,20,ctx);
-    fillRBox(museum,20,ctx);
+    if(museum_t != -1) fillRBox(museum,20,ctx);
 
     total_stars_disp.draw();
   };

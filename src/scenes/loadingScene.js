@@ -66,6 +66,9 @@ var LoadingScene = function(game, stage)
     loading_img_srcs.push("assets/star_empty.png");
     loading_img_srcs.push("assets/connection.png");
     loading_img_srcs.push("assets/bg.jpg");
+    loading_img_srcs.push("assets/menu_circle_0.png");
+    loading_img_srcs.push("assets/menu_circle_1.png");
+    loading_img_srcs.push("assets/museum.png");
     for(var i = 0; i < 3; i++)
       loading_img_srcs.push("assets/comic/comic_"+i+".png");
     for(var i = 0; i < loading_img_srcs.length; i++)
