@@ -22,6 +22,7 @@ var GamePlayScene = function(game, stage)
   var ENUM = 0;
 
   var MODE_MENU   = ENUM; ENUM++;
+  var MODE_MUSEUM = ENUM; ENUM++;
   var MODE_GAME   = ENUM; ENUM++;
   var MODE_SUBMIT = ENUM; ENUM++;
   var MODE_INTRO  = ENUM; ENUM++;
@@ -65,6 +66,7 @@ var GamePlayScene = function(game, stage)
   var total_stars;
   var score;
   var submitting_t;
+  var museum_t;
 
   //static state
   var levels;
@@ -93,6 +95,7 @@ var GamePlayScene = function(game, stage)
   var back_btn;
   var clear_btn;
   var submit_btn;
+  var museum_btn;
 
   //viz state
   var cur_stars_bounce;
@@ -189,6 +192,7 @@ var GamePlayScene = function(game, stage)
   bg.src = "assets/bg.jpg";
 
   var bgbox;
+  var museum;
 
   var atoms = [];
   for(var i = 0; i < 5; i++)
@@ -455,6 +459,7 @@ var GamePlayScene = function(game, stage)
     {
       if(total_stars < self.level.lock_stars) return;
       set_level(self.level.id);
+      if(cur_level.comic) cur_level.comic();
       mode = MODE_INTRO;
     }
   }
@@ -483,7 +488,6 @@ var GamePlayScene = function(game, stage)
     {
       mode = MODE_MENU;
       countLevelStars();
-      if(cur_level.comic) cur_level.comic();
     }
 
     self.draw = function()
@@ -1937,6 +1941,7 @@ var GamePlayScene = function(game, stage)
     total_stars = 0;
     score = 0;
     submitting_t = -1;
+    museum_t = -1;
 
     score_board = new board();
     stamps = [];
@@ -2000,6 +2005,22 @@ var GamePlayScene = function(game, stage)
     submit_btn.wy = game_cam.wy-game_cam.wh/2-submit_btn.wh/2;
     screenSpace(cam,canv,submit_btn);
 
+    museum_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
+    museum_btn.click = function(evt) { mode = MODE_MUSEUM; museum_t = 0; evt.hitUI = true; }
+    museum_btn.ww = menu_cam.ww/10;
+    museum_btn.wh = menu_cam.wh/10;
+    museum_btn.wx = menu_cam.wx+menu_cam.ww/2-museum_btn.ww/2;
+    museum_btn.wy = menu_cam.wy+menu_cam.wh/2-museum_btn.wh/2;
+    screenSpace(cam,canv,museum_btn);
+
+    museum = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
+    museum.click = function(evt) { mode = MODE_MENU; evt.hitUI = true; }
+    museum.ww = menu_cam.ww*2/3;
+    museum.wh = menu_cam.wh;
+    museum.wx = menu_cam.wx+menu_cam.ww/2+museum.ww/2;
+    museum.wy = menu_cam.wy;
+    screenSpace(cam,canv,museum);
+
     cur_stars_bounce = new bounce();
     score_bounce = new bounce();
   }
@@ -2009,7 +2030,7 @@ var GamePlayScene = function(game, stage)
     n_ticks++;
 
     //lerp cam
-    if(mode == MODE_MENU)
+    if(mode == MODE_MENU || mode == MODE_MUSEUM)
     {
       cam.wx = lerp(cam.wx,menu_cam.wx,0.1);
       cam.wy = lerp(cam.wy,menu_cam.wy,0.1);
@@ -2097,6 +2118,11 @@ var GamePlayScene = function(game, stage)
     {
       for(var i = 0; i < levels.length; i++)
         clicker.filter(levels[i].button);
+      clicker.filter(museum_btn);
+    }
+    else if (mode == MODE_MUSEUM)
+    {
+      clicker.filter(museum);
     }
     else if(mode == MODE_SUBMIT)
     {
@@ -2134,6 +2160,18 @@ var GamePlayScene = function(game, stage)
       screenSpace(cam,canv,outro);
       submitting_t++;
     }
+    if(museum_t != -1)
+    {
+      if(mode == MODE_MUSEUM)
+        museum_t++;
+      else
+        museum_t--;
+
+      if(museum_t > 100) museum_t = 100;
+    }
+
+    screenSpace(cam,canv,museum_btn);
+    screenSpace(cam,canv,museum);
 
     var old_cur_stars = cur_level.cur_stars;
     cur_level.cur_stars = 0;
@@ -2300,6 +2338,9 @@ var GamePlayScene = function(game, stage)
       outro.draw();
     if(mode == MODE_INTRO)
       cur_level.introdraw();
+
+    fillRBox(museum_btn,20,ctx);
+    fillRBox(museum,20,ctx);
 
     total_stars_disp.draw();
   };
