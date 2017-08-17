@@ -196,6 +196,9 @@ var GamePlayScene = function(game, stage)
   var menu_circle_1 = new Image();
   menu_circle_1.src = "assets/menu_circle_1.png";
 
+  var museum_img = new Image();
+  museum_img.src = "assets/museum.png";
+
   var bgbox;
   var museum;
 
@@ -1991,7 +1994,7 @@ var GamePlayScene = function(game, stage)
 
     back_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     back_btn.click = function(evt) { mode = MODE_MENU; countLevelStars(); evt.hitUI = true; }
-    back_btn.ww = game_cam.ww/10;
+    back_btn.ww = game_cam.ww/5;
     back_btn.wh = game_cam.wh/10;
     back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww/2;
     back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh/2;
@@ -2007,7 +2010,7 @@ var GamePlayScene = function(game, stage)
         dragging_molecule = 0;
       }
     }
-    clear_btn.ww = game_cam.ww/10;
+    clear_btn.ww = game_cam.ww/5;
     clear_btn.wh = game_cam.wh/10;
     clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww/2;
     clear_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh-clear_btn.wh/2;
@@ -2359,8 +2362,17 @@ var GamePlayScene = function(game, stage)
     if(mode == MODE_INTRO)
       cur_level.introdraw();
 
-    fillRBox(museum_btn,20,ctx);
-    if(museum_t != -1) fillRBox(museum,20,ctx);
+    if(museum_t != -1)
+    {
+      ctx.drawImage(museum_img,museum_btn.x-30,museum.y-45,museum_btn.w+museum.w+80,museum.h+90);
+    }
+    else
+    {
+      ctx.drawImage(museum_img,
+      0,0,museum_btn.w+80,museum_img.height,
+      museum_btn.x-25,museum.y-45,museum_btn.w+30,museum.h+90
+      );
+    }
 
     total_stars_disp.draw();
   };
