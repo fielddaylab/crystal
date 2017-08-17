@@ -76,6 +76,9 @@ var GamePlayScene = function(game, stage)
   var game_cam;
   var menu_cam;
   var cam;
+  var game_bg_cam;
+  var menu_bg_cam;
+  var bg_cam;
   var bounds;
 
   //indexes
@@ -166,6 +169,9 @@ var GamePlayScene = function(game, stage)
   star_full = new Image();
   star_full.src = "assets/star_full.png";
 
+  var star_empty = new Image();
+  star_empty.src = "assets/star_empty.png";
+
   var connection = new Image();
 
   var shadow_connection = GenIcon(connection.width,connection.height);
@@ -181,11 +187,8 @@ var GamePlayScene = function(game, stage)
 
   var bg = new Image();
   bg.src = "assets/bg.jpg";
-  var menu_bg = new Image();
-  menu_bg.src = "assets/menu_bg.jpg";
 
-  var bgbox = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
-  var menubgbox = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
+  var bgbox;
 
   var atoms = [];
   for(var i = 0; i < 5; i++)
@@ -444,7 +447,7 @@ var GamePlayScene = function(game, stage)
         if(self.level.stars > 2-i)
           ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
         else
-          ctx.drawImage(star,x+offx-bs/2,y+offy-bs/2,bs,bs);
+          ctx.drawImage(star_empty,x+offx-bs/2,y+offy-bs/2,bs,bs);
       }
     }
 
@@ -515,7 +518,7 @@ var GamePlayScene = function(game, stage)
         if(cur_level.cur_stars > 2-i && n_ticks-self.start_ticks > 30*(3-i))
           ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
         else
-          ctx.drawImage(star,x+offx-bs/2,y+offy-bs/2,bs,bs);
+          ctx.drawImage(star_empty,x+offx-bs/2,y+offy-bs/2,bs,bs);
       }
     }
   }
@@ -1942,7 +1945,13 @@ var GamePlayScene = function(game, stage)
     game_cam = { wx:-20, wy:0, ww:12, wh:8 };
     menu_cam = { wx:-20, wy:0, ww:12, wh:8 };
     cam = { wx:menu_cam.wx, wy:menu_cam.wy, ww:menu_cam.ww, wh:menu_cam.wh };
+    game_bg_cam = { wx:0.25, wy:0, ww:1, wh:1 };
+    menu_bg_cam = { wx:-0.25, wy:0, ww:1, wh:1 };
+    bg_cam = { wx:menu_bg_cam.wx, wy:menu_bg_cam.wy, ww:menu_bg_cam.ww, wh:menu_bg_cam.wh };
     bounds = {wx:0, wy:0, ww:0, wh:0, x:0,y:0,w:0,h:0 };
+
+    bgbox = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:1.5,wh:1}
+    screenSpace(bg_cam,canv,bgbox);
 
     init_levels();
     loadLevelStars();
@@ -2006,6 +2015,10 @@ var GamePlayScene = function(game, stage)
       cam.wy = lerp(cam.wy,menu_cam.wy,0.1);
       cam.ww = lerp(cam.ww,menu_cam.ww,0.1);
       cam.wh = lerp(cam.wh,menu_cam.wh,0.1);
+      bg_cam.wx = lerp(bg_cam.wx,menu_bg_cam.wx,0.1);
+      bg_cam.wy = lerp(bg_cam.wy,menu_bg_cam.wy,0.1);
+      bg_cam.ww = lerp(bg_cam.ww,menu_bg_cam.ww,0.1);
+      bg_cam.wh = lerp(bg_cam.wh,menu_bg_cam.wh,0.1);
     }
     if(mode == MODE_GAME || mode == MODE_INTRO)
     {
@@ -2013,27 +2026,21 @@ var GamePlayScene = function(game, stage)
       cam.wy = lerp(cam.wy,game_cam.wy,0.1);
       cam.ww = lerp(cam.ww,game_cam.ww,0.1);
       cam.wh = lerp(cam.wh,game_cam.wh,0.1);
+      bg_cam.wx = lerp(bg_cam.wx,game_bg_cam.wx,0.1);
+      bg_cam.wy = lerp(bg_cam.wy,game_bg_cam.wy,0.1);
+      bg_cam.ww = lerp(bg_cam.ww,game_bg_cam.ww,0.1);
+      bg_cam.wh = lerp(bg_cam.wh,game_bg_cam.wh,0.1);
     }
     if(mode == MODE_SUBMIT)
     {
+      var t = min(1,submitting_t/(star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom));
       cam.wx = lerp(cam.wx,game_cam.wx,0.1);
       cam.wy = lerp(cam.wy,game_cam.wy,0.1);
-      var t = min(1,submitting_t/(star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom));
       cam.ww = lerp(cam.ww,game_cam.ww*(1+t*3),0.1);
       cam.wh = lerp(cam.wh,game_cam.wh*(1+t*3),0.1);
     }
 
-    bgbox.wx = game_cam.wx;
-    bgbox.wy = game_cam.wy;
-    bgbox.ww = game_cam.ww;
-    bgbox.wh = game_cam.wh;
-    screenSpace(cam,canv,bgbox);
-
-    menubgbox.wx = menu_cam.wx;
-    menubgbox.wy = menu_cam.wy;
-    menubgbox.ww = menu_cam.ww;
-    menubgbox.wh = menu_cam.wh;
-    screenSpace(cam,canv,menubgbox);
+    screenSpace(bg_cam,canv,bgbox);
 
     //screen space based on new cam
     screenSpace(cam,canv,bounds);
@@ -2149,7 +2156,6 @@ var GamePlayScene = function(game, stage)
     ctx.font = "30px Architects Daughter";
     ctx.textAlign = "left";
     ctx.drawImage(bg,bgbox.x,bgbox.y,bgbox.w,bgbox.h);
-    ctx.drawImage(menu_bg,menubgbox.x,menubgbox.y,menubgbox.w,menubgbox.h);
 
     var sub_t = min(1,submitting_t/(star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom));
     var quick_sub_t = min(1,submitting_t/star_outro_sub_slide);
@@ -2260,23 +2266,26 @@ var GamePlayScene = function(game, stage)
     fillRBox(clear_btn,20,ctx);
     fillRBox(submit_btn,20,ctx);
 
+    ctx.fillStyle = btn_bg;
+    fillR(bounds.x+bounds.w-300,bounds.y-50,300,40,20,ctx);
     ctx.fillStyle = white;
-    ctx.fillText("Stability: "      ,bounds.x+bounds.w-200,   bounds.y-10);
+    ctx.fillText("Stability: ", bounds.x+bounds.w-200, bounds.y-20);
     var oldfont = ctx.font;
     ctx.font = (20+10*score_bounce.v)+"px Architects Daughter";
-    ctx.fillText(          score,bounds.x+bounds.w-80,bounds.y-10);
+    ctx.fillText(score,bounds.x+bounds.w-80,bounds.y-20);
     ctx.font = oldfont;
     ctx.fillText("< Menu",back_btn.x+10,back_btn.y+back_btn.h/2+10);
     ctx.fillText("Clear",clear_btn.x+10,clear_btn.y+clear_btn.h/2+10);
     ctx.fillText("Grow Crystal",submit_btn.x+10,submit_btn.y+submit_btn.h/2+10);
 
     var b = cur_stars_bounce.v*10;
+    var y = bounds.y-38-b/2;
     for(var i = 0; i < 3; i++)
     {
       if(cur_level.cur_stars > i)
-        ctx.drawImage(star_full,bounds.x+bounds.w-270+20*i-b/2,bounds.y-26-b/2,20+b,20+b);
+        ctx.drawImage(star_full,bounds.x+bounds.w-270+20*i-b/2,y,20+b,20+b);
       else
-        ctx.drawImage(star     ,bounds.x+bounds.w-270+20*i,bounds.y-26,20,20);
+        ctx.drawImage(star     ,bounds.x+bounds.w-270+20*i,y+b/2,20,20);
     }
 
     //ctx.fillText("Choose a   ^",levels[0].button.x-100,levels[0].button.y+125);
