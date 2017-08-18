@@ -199,6 +199,21 @@ var GamePlayScene = function(game, stage)
   var museum_img = new Image();
   museum_img.src = "assets/museum.png";
 
+  var crystal_titles = [];
+  crystal_titles.push("Ceramic");
+  crystal_titles.push("Chocolate");
+  crystal_titles.push("Quartz");
+  crystal_titles.push("Steel");
+  crystal_titles.push("Snowflake");
+  crystal_titles.push("Tourmaline");
+
+  var crystal_imgs = [];
+  for(var i = 0; i < crystal_titles.length; i++)
+  {
+    crystal_imgs[i] = new Image();
+    crystal_imgs[i].src = "assets/crystals/"+crystal_titles[i].toLowerCase()+".png";
+  }
+
   var bgbox;
   var museum;
 
@@ -2010,7 +2025,7 @@ var GamePlayScene = function(game, stage)
     submit_btn.click = function(evt) { mode = MODE_SUBMIT; submitting_t = 0; evt.hitUI = true; }
 
     museum_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    museum_btn.click = function(evt) { mode = MODE_MUSEUM; museum_t = 0; evt.hitUI = true; }
+    museum_btn.click = function(evt) { if(mode == MODE_MENU) { mode = MODE_MUSEUM; museum_t = 0; } else mode = MODE_MENU; evt.hitUI = true; }
 
     museum = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
     museum.click = function(evt) { mode = MODE_MENU; evt.hitUI = true; }
@@ -2129,6 +2144,7 @@ var GamePlayScene = function(game, stage)
     else if (mode == MODE_MUSEUM)
     {
       clicker.filter(museum);
+      clicker.filter(museum_btn);
     }
     else if(mode == MODE_SUBMIT)
     {
@@ -2352,6 +2368,28 @@ var GamePlayScene = function(game, stage)
     if(museum_t != -1)
     {
       ctx.drawImage(museum_img,museum_btn.x-30,museum.y-45,museum_btn.w+museum.w+80,museum.h+90);
+      for(var i = 0; i < 3; i++)
+      {
+        for(var j = 0; j < 3; j++)
+        {
+          var index = i*3+j;
+          ctx.fillStyle = black;
+          if(index < crystal_imgs.length)
+          {
+            if(total_stars >= (index+1)*3)
+            {
+              ctx.drawImage(crystal_imgs[index], museum.x+30+j*190, museum.y+130+i*180, 150,140);
+              ctx.fillText(crystal_titles[index], museum.x+30+j*190, museum.y+130+i*180+140);
+              //ctx.fillRect(museum.x+30+j*190, museum.y+130+i*180, 150,140);
+            }
+            else
+            {
+              ctx.drawImage(star_full,museum.x+30+j*190,museum.y+130+i*180,40,40);
+              ctx.fillText("X"+(index+1)*3,museum.x+30+j*190+45,museum.y+130+i*180+30);
+            }
+          }
+        }
+      }
     }
     else
     {

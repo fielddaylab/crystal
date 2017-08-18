@@ -69,6 +69,12 @@ var LoadingScene = function(game, stage)
     loading_img_srcs.push("assets/menu_circle_0.png");
     loading_img_srcs.push("assets/menu_circle_1.png");
     loading_img_srcs.push("assets/museum.png");
+    loading_img_srcs.push("assets/crystals/ceramic.png");
+    loading_img_srcs.push("assets/crystals/chocolate.png");
+    loading_img_srcs.push("assets/crystals/quartz.png");
+    loading_img_srcs.push("assets/crystals/steel.png");
+    loading_img_srcs.push("assets/crystals/snowflake.png");
+    loading_img_srcs.push("assets/crystals/tourmaline.png");
     for(var i = 0; i < 3; i++)
       loading_img_srcs.push("assets/comic/comic_"+i+".png");
     for(var i = 0; i < loading_img_srcs.length; i++)
