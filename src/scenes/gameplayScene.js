@@ -543,11 +543,16 @@ var GamePlayScene = function(game, stage)
     self.draw = function()
     {
       ctx.fillStyle = scroll_fill;
+      /*
       ctx.beginPath();
       ctx.arc(self.x+self.w/2,self.y+self.h/2,self.w,0,2*Math.PI);
       ctx.fill();
-      //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,0,0,cur_level.available_templates[0]);
+      */
       ctx.fillStyle = white;
+      fillR(self.x-self.w/2,self.y,self.w*2,self.h,20,ctx);
+      ctx.drawImage(win_img,self.x+self.w/2-win_img.width/4,self.y-win_img.height/4-50,win_img.width/2,win_img.height/2);
+      //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,0,0,cur_level.available_templates[0]);
+      ctx.fillStyle = black;
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -581,6 +586,7 @@ var GamePlayScene = function(game, stage)
         ctx.fillText(score_charge,        x + 120, y-20);
         ctx.fillText("Total:",            x - 120, y+40);
         ctx.fillText(score,               x + 120, y+40);
+        ctx.strokeStyle = black;
         strokeR(x-80, y+70, 160, 50, 20, ctx);
         ctx.fillText("Next Level", x-70, y+100);
       }
