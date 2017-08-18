@@ -1,7 +1,7 @@
 
 var TEXT = true;
 var PERFECT = true;
-var UNLOCKED = true;
+var UNLOCKED = false;
 
 //wiggle anger
 var G = [];
