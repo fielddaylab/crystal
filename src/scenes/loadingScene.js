@@ -69,6 +69,7 @@ var LoadingScene = function(game, stage)
     loading_img_srcs.push("assets/loading/flag.png");
     loading_img_srcs.push("assets/loading/logo.png");
     loading_img_srcs.push("assets/loading/pole.png");
+    loading_img_srcs.push("assets/loading/mrsec.png");
     for(var i = 0; i < loading_img_srcs.length; i++)
     {
       loading_imgs[i] = new Image();
@@ -91,6 +92,9 @@ var LoadingScene = function(game, stage)
     img_srcs.push("assets/crystals/steel.png");
     img_srcs.push("assets/crystals/snowflake.png");
     img_srcs.push("assets/crystals/tourmaline.png");
+    img_srcs.push("assets/win.png");
+    img_srcs.push("assets/tab_crystal.png");
+    img_srcs.push("assets/tab_close.png");
     for(var i = 0; i < 3; i++)
       img_srcs.push("assets/comic/comic_"+i+".png");
     for(var i = 0; i < img_srcs.length; i++)
@@ -184,10 +188,13 @@ var LoadingScene = function(game, stage)
           ctx.globalAlpha = f;
           w = 640/2;
           h = 118/2;
-          ctx.drawImage(loading_imgs[3],240,260+20,w,h);
+          ctx.drawImage(loading_imgs[3],240,260+200,w,h);
           w = 534/1.5;
           h = 22/1.5;
-          ctx.drawImage(loading_imgs[0],240,260+100,w,h);
+          ctx.drawImage(loading_imgs[0],240,260+280,w,h);
+          w = 534/1.5;
+          h = 118;
+          ctx.drawImage(loading_imgs[5],240,260+20,w,h);
         }
         ctx.globalAlpha = 1;
 

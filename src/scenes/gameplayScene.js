@@ -1,7 +1,7 @@
 
 var TEXT = true;
 var PERFECT = true;
-var UNLOCKED = false;
+var UNLOCKED = true;
 
 //wiggle anger
 var G = [];
@@ -200,6 +200,14 @@ var GamePlayScene = function(game, stage)
 
   var museum_img = new Image();
   museum_img.src = "assets/museum.png";
+
+  var tab_crystal_img = new Image();
+  tab_crystal_img.src = "assets/tab_crystal.png";
+  var tab_close_img = new Image();
+  tab_close_img.src = "assets/tab_close.png";
+
+  var win_img = new Image();
+  win_img.src = "assets/win.png";
 
   var crystal_titles = [];
   crystal_titles.push("Ceramic");
@@ -2429,6 +2437,7 @@ var GamePlayScene = function(game, stage)
           }
         }
       }
+      ctx.drawImage(tab_close_img,museum.x-60,museum.y+50,40,40);
     }
     else
     {
@@ -2436,6 +2445,7 @@ var GamePlayScene = function(game, stage)
       0,0,museum_btn.w+80,museum_img.height,
       museum_btn.x-25,museum.y-45,museum_btn.w+30,museum.h+90
       );
+      ctx.drawImage(tab_crystal_img,museum.x-60,museum.y+50,40,40);
     }
 
     total_stars_disp.draw();
