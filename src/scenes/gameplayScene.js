@@ -489,6 +489,17 @@ var GamePlayScene = function(game, stage)
       if(total_stars < self.level.lock_stars) return;
       set_level(self.level.id);
       if(cur_level.comic) cur_level.comic();
+
+      //jump ahead to avoid flash
+      cam.wx = lerp(cam.wx,game_cam.wx,0.5);
+      cam.wy = lerp(cam.wy,game_cam.wy,0.5);
+      cam.ww = lerp(cam.ww,game_cam.ww,0.5);
+      cam.wh = lerp(cam.wh,game_cam.wh,0.5);
+      bg_cam.wx = lerp(bg_cam.wx,game_bg_cam.wx,0.5);
+      bg_cam.wy = lerp(bg_cam.wy,game_bg_cam.wy,0.5);
+      bg_cam.ww = lerp(bg_cam.ww,game_bg_cam.ww,0.5);
+      bg_cam.wh = lerp(bg_cam.wh,game_bg_cam.wh,0.5);
+
       mode = MODE_INTRO;
     }
   }
