@@ -1,7 +1,7 @@
 
 var TEXT = true;
 var PERFECT = true;
-var UNLOCKED = false;
+var UNLOCKED = true;
 
 //wiggle anger
 var G = [];
@@ -39,7 +39,7 @@ var GamePlayScene = function(game, stage)
   var seed_fill   = "#D6D6D6";
   var seed_stroke = "#C0C0C0";
   var scroll_fill = "rgba(0,0,0,0.3)";
-  var bg_fill     = "rgba(15,25,70,0.6)";
+  var bg_fill     = "rgba(2,59,76,0.3)";
   var grid_fill = "rgba(25,102,122,0.7)";
   var grid_stroke = "#277F93";
   var charge_pos = "#22FF22";
@@ -65,6 +65,8 @@ var GamePlayScene = function(game, stage)
   var n_ticks;
   var total_stars;
   var score;
+  var score_pack;
+  var score_charge;
   var submitting_t;
   var museum_t;
 
@@ -532,10 +534,12 @@ var GamePlayScene = function(game, stage)
 
     self.draw = function()
     {
+      ctx.fillStyle = scroll_fill;
       ctx.beginPath();
-      ctx.arc(self.x+self.w/2,self.y+self.h/2,2*self.w/5,0,2*Math.PI);
-      ctx.stroke();
+      ctx.arc(self.x+self.w/2,self.y+self.h/2,self.w,0,2*Math.PI);
+      ctx.fill();
       //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,0,0,cur_level.available_templates[0]);
+      ctx.fillStyle = white;
 
       var x = self.x+self.w/2;
       var y = self.y+self.h/2;
@@ -549,7 +553,7 @@ var GamePlayScene = function(game, stage)
       {
         theta = quarterpi+(i/2)*halfpi;
         offx = cos(theta)*self.w/3;
-        offy = sin(theta)*self.h/3;
+        offy = sin(theta)*self.h/3-250;
         switch(i)
         {
           case 0: if(t == 90) self.bounces[i].vel = 2; break;
@@ -563,6 +567,14 @@ var GamePlayScene = function(game, stage)
           ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
         else
           ctx.drawImage(star_empty,x+offx-bs/2,y+offy-bs/2,bs,bs);
+        ctx.fillText("Packing:",          x - 120, y-60);
+        ctx.fillText(score_pack,          x + 120, y-60);
+        ctx.fillText("Charge Bonus:",     x - 120, y-20);
+        ctx.fillText(score_charge,        x + 120, y-20);
+        ctx.fillText("Total:",            x - 120, y+40);
+        ctx.fillText(score,               x + 120, y+40);
+        strokeR(x-80, y+70, 160, 50, 20, ctx);
+        ctx.fillText("Next Level", x-70, y+100);
       }
     }
   }
@@ -1259,7 +1271,9 @@ var GamePlayScene = function(game, stage)
       var cell;
       var neighbor;
       var cell_score;
-      var score = 0;
+      score = 0;
+      score_pack = 0;
+      score_charge = 0;
       for(var i = -1; i < cur_level.repeat_y-1; i++)
       {
         for(var j = -1; j < cur_level.repeat_x-1; j++)
@@ -1272,6 +1286,12 @@ var GamePlayScene = function(game, stage)
             {
               cell_score = (cell.c[1]*neighbor.c[3]*-1)*5;
               if(cell_score == 0) cell_score = 1;
+              switch(cell_score)
+              {
+                case  1: score_pack += 1; break;
+                case  5: score_pack += 1; score_charge += 4; break;
+                case -5: score_pack += 1; score_charge -= 6; break;
+              }
               score            += cell_score;
               cell.score_right += cell_score;
               if(j < cur_level.repeat_x-1) //otherwise can get counted twice (which is good for score- not for happy)
@@ -1288,6 +1308,12 @@ var GamePlayScene = function(game, stage)
             {
               cell_score = (cell.c[0]*neighbor.c[2]*-1)*5;
               if(cell_score == 0) cell_score = 1;
+              switch(cell_score)
+              {
+                case  1: score_pack += 1; break;
+                case  5: score_pack += 1; score_charge += 4; break;
+                case -5: score_pack += 1; score_charge -= 6; break;
+              }
               score         += cell_score;
               cell.score_up += cell_score;
               if(i < cur_level.repeat_y-1) //otherwise can get counted twice (which is good for score- not for happy)
@@ -2175,7 +2201,7 @@ var GamePlayScene = function(game, stage)
 
     var old_score = score;
     score_board.populate();
-    score = score_board.score();
+    score_board.score();
     if(score != old_score)
       score_bounce.vel = 1;
 
@@ -2249,7 +2275,7 @@ var GamePlayScene = function(game, stage)
     var h_spacing = 1;
 
     ctx.fillStyle = grid_fill;
-    ctx.fillRect(0,0,canv.width,canv.height);
+    ctx.fillRect(bounds.x,bounds.y,bounds.w,bounds.h);
     ctx.strokeStyle = grid_stroke;
 
     wy = floor(min_wy/v_spacing)*v_spacing;
@@ -2336,9 +2362,10 @@ var GamePlayScene = function(game, stage)
       ctx.globalAlpha = (1-quick_sub_t);
 
     //UI
-    ctx.fillStyle = btn_bg;
-    fillRBox(back_btn,20,ctx);
-    fillRBox(clear_btn,20,ctx);
+    ctx.strokeStyle = white;
+    strokeRBox(back_btn,20,ctx);
+    strokeRBox(clear_btn,20,ctx);
+    ctx.fillStyle = white;
     fillRBox(submit_btn,20,ctx);
 
     ctx.fillStyle = btn_bg;
@@ -2351,6 +2378,7 @@ var GamePlayScene = function(game, stage)
     ctx.font = oldfont;
     ctx.fillText("< Menu",back_btn.x+10,back_btn.y+back_btn.h/2+10);
     ctx.fillText("Clear",clear_btn.x+10,clear_btn.y+clear_btn.h/2+10);
+    ctx.fillStyle = black;
     ctx.fillText("Grow Crystal",submit_btn.x+10,submit_btn.y+submit_btn.h/2+10);
 
     var b = cur_stars_bounce.v*10;

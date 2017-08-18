@@ -531,6 +531,21 @@ function fillRBox(box,r,ctx)
   ctx.closePath();
   ctx.fill();
 }
+function strokeRBox(box,r,ctx)
+{
+  ctx.beginPath();
+  ctx.moveTo(box.x+r,box.y);
+  ctx.lineTo(box.x+box.w-r,box.y);
+  ctx.quadraticCurveTo(box.x+box.w,box.y,box.x+box.w,box.y+r);
+  ctx.lineTo(box.x+box.w,box.y+box.h-r);
+  ctx.quadraticCurveTo(box.x+box.w,box.y+box.h,box.x+box.w-r,box.y+box.h);
+  ctx.lineTo(box.x+r,box.y+box.h);
+  ctx.quadraticCurveTo(box.x,box.y+box.h,box.x,box.y+box.h-r);
+  ctx.lineTo(box.x,box.y+r);
+  ctx.quadraticCurveTo(box.x,box.y,box.x+r,box.y);
+  ctx.closePath();
+  ctx.stroke();
+}
 function fillR(x,y,w,h,r,ctx)
 {
   ctx.beginPath();
@@ -545,6 +560,21 @@ function fillR(x,y,w,h,r,ctx)
   ctx.quadraticCurveTo(x,y,x+r,y);
   ctx.closePath();
   ctx.fill();
+}
+function strokeR(x,y,w,h,r,ctx)
+{
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+  ctx.stroke();
 }
 
 //straight up stolen from the internet
