@@ -1,7 +1,7 @@
 
 var TEXT = true;
 var PERFECT = true;
-var UNLOCKED = true;
+var UNLOCKED = false;
 
 //wiggle anger
 var G = [];
@@ -362,7 +362,7 @@ var GamePlayScene = function(game, stage)
       var c = parseInt(getCookie("lvl"+i));
       total_stars += levels[i].stars;
     }
-    //if(UNLOCKED) total_stars += 1000;
+    if(UNLOCKED) total_stars += 1000;
   }
 
   var totalStarsDisplay = function()
@@ -530,6 +530,8 @@ var GamePlayScene = function(game, stage)
     self.h = 0;
 
     self.start_ticks = 0;
+    self.unlocked = -1;
+    self.displaying_unlocked = 0;
 
     self.bounces = [];
     for(var i = 0; i < 3; i++)
@@ -537,59 +539,91 @@ var GamePlayScene = function(game, stage)
 
     self.click = function(evt)
     {
-      mode = MODE_MENU;
-      countLevelStars();
+      if(!self.displaying_unlocked && self.unlocked != -1) self.displaying_unlocked = 1;
+      else
+      {
+        mode = MODE_MENU;
+        countLevelStars();
+        self.unlocked = -1;
+        self.displaying_unlocked = 0;
+      }
     }
 
     self.draw = function()
     {
-      ctx.fillStyle = scroll_fill;
-      /*
-      ctx.beginPath();
-      ctx.arc(self.x+self.w/2,self.y+self.h/2,self.w,0,2*Math.PI);
-      ctx.fill();
-      */
-      ctx.fillStyle = white;
-      fillR(self.x-self.w/2,self.y,self.w*2,self.h,20,ctx);
-      ctx.drawImage(win_img,self.x+self.w/2-win_img.width/4,self.y-win_img.height/4-50,win_img.width/2,win_img.height/2);
-      //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,0,0,cur_level.available_templates[0]);
-      ctx.fillStyle = black;
-
-      var x = self.x+self.w/2;
-      var y = self.y+self.h/2;
-      var s = self.w/3;
-      var theta;
-      var offx;
-      var offy;
-      var t = (n_ticks-self.start_ticks)%200;
-      var p;
-      for(var i = 0; i < 3; i++)
+      if(self.displaying_unlocked)
       {
-        theta = quarterpi+(i/2)*halfpi;
-        offx = cos(theta)*self.w/3;
-        offy = sin(theta)*self.h/3-250;
-        switch(i)
-        {
-          case 0: if(t == 90) self.bounces[i].vel = 2; break;
-          case 1: if(t == 60) self.bounces[i].vel = 2; break;
-          case 2: if(t == 30) self.bounces[i].vel = 2; break;
-        }
-        var bs = s;
-        self.bounces[i].tick();
-        bs += self.bounces[i].v;
-        if(cur_level.cur_stars > 2-i && n_ticks-self.start_ticks > 30*(3-i))
-          ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
-        else
-          ctx.drawImage(star_empty,x+offx-bs/2,y+offy-bs/2,bs,bs);
-        ctx.fillText("Packing:",          x - 120, y-60);
-        ctx.fillText(score_pack,          x + 120, y-60);
-        ctx.fillText("Charge Bonus:",     x - 120, y-20);
-        ctx.fillText(score_charge,        x + 120, y-20);
-        ctx.fillText("Total:",            x - 120, y+40);
-        ctx.fillText(score,               x + 120, y+40);
+        ctx.fillStyle = scroll_fill;
+        /*
+        ctx.beginPath();
+        ctx.arc(self.x+self.w/2,self.y+self.h/2,self.w,0,2*Math.PI);
+        ctx.fill();
+        */
+        ctx.fillStyle = white;
+        fillR(self.x-self.w/2,self.y,self.w*2,self.h,20,ctx);
+        var img = crystal_imgs[self.unlocked];
+        ctx.drawImage(img,self.x+self.w/2-100,self.y-50,200,img.height*200/img.width);
+        //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,0,0,cur_level.available_templates[0]);
+        ctx.fillStyle = black;
         ctx.strokeStyle = black;
+        var x = self.x+self.w/2;
+        var y = self.y+self.h/2;
+        ctx.textAlign = "center";
+        ctx.fillText("You Unlocked", x, y-20);
+        ctx.fillText(crystal_titles[self.unlocked], x, y+40);
         strokeR(x-80, y+70, 160, 50, 20, ctx);
-        ctx.fillText("Next Level", x-70, y+100);
+        ctx.fillText("Ok!", x, y+100);
+      }
+      else
+      {
+        ctx.fillStyle = scroll_fill;
+        /*
+        ctx.beginPath();
+        ctx.arc(self.x+self.w/2,self.y+self.h/2,self.w,0,2*Math.PI);
+        ctx.fill();
+        */
+        ctx.fillStyle = white;
+        fillR(self.x-self.w/2,self.y,self.w*2,self.h,20,ctx);
+        ctx.drawImage(win_img,self.x+self.w/2-win_img.width/4,self.y-win_img.height/4-50,win_img.width/2,win_img.height/2);
+        //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,0,0,cur_level.available_templates[0]);
+        ctx.fillStyle = black;
+
+        var x = self.x+self.w/2;
+        var y = self.y+self.h/2;
+        var s = self.w/3;
+        var theta;
+        var offx;
+        var offy;
+        var t = (n_ticks-self.start_ticks)%200;
+        var p;
+        for(var i = 0; i < 3; i++)
+        {
+          theta = quarterpi+(i/2)*halfpi;
+          offx = cos(theta)*self.w/3;
+          offy = sin(theta)*self.h/3-250;
+          switch(i)
+          {
+            case 0: if(t == 90) self.bounces[i].vel = 2; break;
+            case 1: if(t == 60) self.bounces[i].vel = 2; break;
+            case 2: if(t == 30) self.bounces[i].vel = 2; break;
+          }
+          var bs = s;
+          self.bounces[i].tick();
+          bs += self.bounces[i].v;
+          if(cur_level.cur_stars > 2-i && n_ticks-self.start_ticks > 30*(3-i))
+            ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
+          else
+            ctx.drawImage(star_empty,x+offx-bs/2,y+offy-bs/2,bs,bs);
+          ctx.fillText("Packing:",          x - 120, y-60);
+          ctx.fillText(score_pack,          x + 120, y-60);
+          ctx.fillText("Charge Bonus:",     x - 120, y-20);
+          ctx.fillText(score_charge,        x + 120, y-20);
+          ctx.fillText("Total:",            x - 120, y+40);
+          ctx.fillText(score,               x + 120, y+40);
+          ctx.strokeStyle = black;
+          strokeR(x-80, y+70, 160, 50, 20, ctx);
+          ctx.fillText("Next Level", x-70, y+100);
+        }
       }
     }
   }
@@ -2075,7 +2109,7 @@ var GamePlayScene = function(game, stage)
     clear_btn.ww = game_cam.ww/5;
 
     submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    submit_btn.click = function(evt) { mode = MODE_SUBMIT; submitting_t = 0; evt.hitUI = true; }
+    submit_btn.click = function(evt) { mode = MODE_SUBMIT; submitting_t = 0; var old_total = total_stars; countLevelStars(); var new_total = total_stars; total_stars = old_total; if(floor(new_total/3) > floor(old_total/3) && (floor(new_total/3)-1) < crystal_titles.length) outro.unlocked = (floor(new_total/3)-1); evt.hitUI = true; }
 
     museum_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     museum_btn.click = function(evt) { if(mode == MODE_MENU) { mode = MODE_MUSEUM; museum_t = 0; } else mode = MODE_MENU; evt.hitUI = true; }
