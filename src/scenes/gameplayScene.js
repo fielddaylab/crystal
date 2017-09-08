@@ -211,6 +211,13 @@ var GamePlayScene = function(game, stage)
   var win_img = new Image();
   win_img.src = "assets/win.png";
 
+  var select_aud = new Audio("assets/blip.mp3");
+  var drop_aud   = new Audio("assets/blip.mp3");
+  var rot_aud    = new Audio("assets/blip.mp3");
+  var star_aud   = new Audio("assets/blip.mp3");
+  var finish_aud = new Audio("assets/blip.mp3");
+  var level_aud  = new Audio("assets/blip.mp3");
+
   var crystal_titles = [];
   crystal_titles.push("Ceramic");
   crystal_titles.push("Chocolate");
@@ -499,6 +506,7 @@ var GamePlayScene = function(game, stage)
     self.click = function(evt)
     {
       if(total_stars < self.level.lock_stars) return;
+      level_aud.play();
       set_level(self.level.id);
       if(cur_level.comic) cur_level.comic();
 
@@ -606,9 +614,9 @@ var GamePlayScene = function(game, stage)
           offy = sin(halfpi)*self.h/3-250;
           switch(i)
           {
-            case 0: if(t == 90) self.bounces[i].vel = 2; break;
-            case 1: if(t == 60) self.bounces[i].vel = 2; break;
-            case 2: if(t == 30) self.bounces[i].vel = 2; break;
+            case 0: if(t == 90) { self.bounces[i].vel = 2; star_aud.play(); } break;
+            case 1: if(t == 60) { self.bounces[i].vel = 2; star_aud.play(); } break;
+            case 2: if(t == 30) { self.bounces[i].vel = 2; star_aud.play(); } break;
           }
           var bs = s;
           self.bounces[i].tick();
@@ -1509,6 +1517,7 @@ var GamePlayScene = function(game, stage)
       {
         self.dragging = false;
         var s = new molecule();
+        select_aud.play();
         s.wx = stamp_hit.wx;
         s.wy = stamp_hit.wy-self.scroll_wy;
         s.setTemplate(stamp_hit.template);
@@ -1617,6 +1626,7 @@ var GamePlayScene = function(game, stage)
     {
       if(self.click_ticks < 20 && self.target_rot == 0)
       {
+        rot_aud.play();
         self.base_rot = self.rot;
         self.target_rot += halfpi;
         if(self.target_rot >= twopi-0.001) self.target_rot = 0;
@@ -1667,6 +1677,7 @@ var GamePlayScene = function(game, stage)
       if(hit)
       {
         evt.hitUI = true;
+        if(!self.up) select_aud.play();
         self.up = true;
         bring_to_top(self);
         dragging_molecule = self;
@@ -1706,6 +1717,7 @@ var GamePlayScene = function(game, stage)
       var molecule;
       var cx = round(self.wx+0.5);
       var cy = round(self.wy+0.5);
+      if(self.up) drop_aud.play();
       self.up = false;
       for(var i = 0; !self.up && i < molecules.length; i++)
       {
@@ -1725,7 +1737,10 @@ var GamePlayScene = function(game, stage)
               blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy+cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
               blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy-cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy)
             )
+            {
+              if(!self.up) select_aud.play();
               self.up = true;
+            }
           }
       }
       for(var i = 0; !self.up && i < cur_level.defect.length; i++)
@@ -1745,7 +1760,10 @@ var GamePlayScene = function(game, stage)
               blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy+cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy) ||
               blocks_collide(cx+self.template.blocks[j].cx-cur_level.repeat_x, cy+self.template.blocks[j].cy-cur_level.repeat_y, molecule.cx+molecule.template.blocks[k].cx, molecule.cy+molecule.template.blocks[k].cy)
             )
+            {
+              if(!self.up) select_aud.play();
               self.up = true;
+            }
           }
       }
       if(was_up && !self.up)
@@ -2117,7 +2135,7 @@ var GamePlayScene = function(game, stage)
     clear_btn.ww = game_cam.ww/5;
 
     submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    submit_btn.click = function(evt) { mode = MODE_SUBMIT; submitting_t = 0; var old_total = total_stars; countLevelStars(); var new_total = total_stars; total_stars = old_total; if(floor(new_total/3) > floor(old_total/3) && (floor(new_total/3)-1) < crystal_titles.length) outro.unlocked = (floor(new_total/3)-1); evt.hitUI = true; }
+    submit_btn.click = function(evt) { mode = MODE_SUBMIT; finish_aud.play(); submitting_t = 0; var old_total = total_stars; countLevelStars(); var new_total = total_stars; total_stars = old_total; if(floor(new_total/3) > floor(old_total/3) && (floor(new_total/3)-1) < crystal_titles.length) outro.unlocked = (floor(new_total/3)-1); evt.hitUI = true; }
 
     museum_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     museum_btn.click = function(evt) { if(mode == MODE_MENU) { mode = MODE_MUSEUM; museum_t = 0; } else mode = MODE_MENU; evt.hitUI = true; }
