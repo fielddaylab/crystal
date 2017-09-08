@@ -31,6 +31,7 @@ var GamePlayScene = function(game, stage)
   var shadow_dist = 8;
   var white = "#FFFFFF";
   var black = "#000000";
+  var bluish = "#49A0B3";
   var bounds_stroke  = white;
   var shadow_fill  = "rgba(0,0,0,.1)";
   var defect_fill  = "rgba(0,0,0,.7)";
@@ -564,15 +565,15 @@ var GamePlayScene = function(game, stage)
         var img = crystal_imgs[self.unlocked];
         ctx.drawImage(img,self.x+self.w/2-100,self.y-50,200,img.height*200/img.width);
         //draw_blocks(self.wx,self.wy,cur_level.available_templates[0].cx,cur_level.available_templates[0].cy,0,0,n_ticks/100,1,0,0,0,cur_level.available_templates[0]);
-        ctx.fillStyle = black;
-        ctx.strokeStyle = black;
+        ctx.fillStyle = bluish;
+        ctx.strokeStyle = bluish;
         var x = self.x+self.w/2;
         var y = self.y+self.h/2;
         ctx.textAlign = "center";
         ctx.fillText("You Unlocked", x, y-20);
         ctx.fillText(crystal_titles[self.unlocked], x, y+40);
         strokeR(x-80, y+70, 160, 50, 20, ctx);
-        ctx.fillText("Ok!", x, y+100);
+        ctx.fillText("Ok!", x, y+105);
       }
       else
       {
@@ -599,8 +600,10 @@ var GamePlayScene = function(game, stage)
         for(var i = 0; i < 3; i++)
         {
           theta = quarterpi+(i/2)*halfpi;
-          offx = cos(theta)*self.w/3;
+          offx = cos(theta)*self.w/2;
           offy = sin(theta)*self.h/3-250;
+          //overwrite offy to make straight:
+          offy = sin(halfpi)*self.h/3-250;
           switch(i)
           {
             case 0: if(t == 90) self.bounces[i].vel = 2; break;
@@ -614,16 +617,21 @@ var GamePlayScene = function(game, stage)
             ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
           else
             ctx.drawImage(star_empty,x+offx-bs/2,y+offy-bs/2,bs,bs);
-          ctx.fillText("Packing:",          x - 120, y-60);
-          ctx.fillText(score_pack,          x + 120, y-60);
-          ctx.fillText("Charge Bonus:",     x - 120, y-20);
-          ctx.fillText(score_charge,        x + 120, y-20);
-          ctx.fillText("Total:",            x - 120, y+40);
-          ctx.fillText(score,               x + 120, y+40);
-          ctx.strokeStyle = black;
-          strokeR(x-80, y+70, 160, 50, 20, ctx);
-          ctx.fillText("Next Level", x-70, y+100);
         }
+        ctx.fillStyle = bluish;
+        ctx.strokeStyle = bluish;
+        ctx.fillText("Packing:",          x - 120, y-60);
+        ctx.fillText(score_pack,          x + 120, y-60);
+        ctx.fillText("Charge Bonus:",     x - 120, y-20);
+        ctx.fillText(score_charge,        x + 120, y-20);
+        ctx.beginPath();
+        ctx.moveTo(x-120,y);
+        ctx.lineTo(x+120,y);
+        ctx.stroke();
+        ctx.fillText("Total:",            x - 120, y+40);
+        ctx.fillText(score,               x + 120, y+40);
+        strokeR(x-80, y+70, 160, 50, 20, ctx);
+        ctx.fillText("Next Level", x-72, y+105);
       }
     }
   }
