@@ -69,6 +69,7 @@ var GamePlayScene = function(game, stage)
   var score_charge;
   var submitting_t;
   var museum_t;
+  var museum_tab_t;
 
   //static state
   var levels;
@@ -361,7 +362,7 @@ var GamePlayScene = function(game, stage)
       var c = parseInt(getCookie("lvl"+i));
       total_stars += levels[i].stars;
     }
-    if(UNLOCKED) total_stars += 1000;
+    //if(UNLOCKED) total_stars += 1000;
   }
 
   var totalStarsDisplay = function()
@@ -2027,6 +2028,7 @@ var GamePlayScene = function(game, stage)
     score = 0;
     submitting_t = -1;
     museum_t = -1;
+    museum_tab_t = 9999;
 
     score_board = new board();
     stamps = [];
@@ -2247,6 +2249,14 @@ var GamePlayScene = function(game, stage)
       museum_btn.wx = lerp(menu_cam.wx+menu_cam.ww/2-museum_btn.ww/2,menu_cam.wx+menu_cam.ww/2-museum.ww-museum_btn.ww/2,t);
       museum.wx = lerp(menu_cam.wx+menu_cam.ww/2+museum.ww/2,menu_cam.wx+menu_cam.ww/2-museum.ww/2,t);
     }
+    if(mode != MODE_MENU && mode != MODE_MUSEUM)
+    {
+      museum_tab_t = 0;
+    }
+    else
+    {
+      museum_tab_t++;
+    }
     screenSpace(cam,canv,museum_btn);
     screenSpace(cam,canv,museum);
 
@@ -2447,11 +2457,15 @@ var GamePlayScene = function(game, stage)
     }
     else
     {
-      ctx.drawImage(museum_img,
-      0,0,museum_btn.w+80,museum_img.height,
-      museum_btn.x-25,museum.y-45,museum_btn.w+30,museum.h+90
-      );
-      ctx.drawImage(tab_crystal_img,museum.x-60,museum.y+50,40,40);
+      var mint = 80;
+      var maxt = 100;
+      if(museum_tab_t > mint)
+      {
+        if(museum_tab_t > maxt) museum_tab_t = maxt;
+        var t = mapVal(mint,maxt,1,0,museum_tab_t);
+        ctx.drawImage(museum_img, 0,0,museum_btn.w+80,museum_img.height, museum_btn.x-25+t*100,museum.y-45,museum_btn.w+30,museum.h+90);
+        ctx.drawImage(tab_crystal_img,museum.x-60+t*100,museum.y+50,40,40);
+      }
     }
 
     total_stars_disp.draw();
