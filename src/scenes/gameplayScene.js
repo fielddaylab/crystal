@@ -222,12 +222,12 @@ var GamePlayScene = function(game, stage)
   var level_aud  = new Audio("assets/blip.mp3");
 
   var crystal_titles = [];
-  crystal_titles.push("Ceramic");
-  crystal_titles.push("Chocolate");
   crystal_titles.push("Quartz");
-  crystal_titles.push("Steel");
   crystal_titles.push("Snowflake");
   crystal_titles.push("Tourmaline");
+  crystal_titles.push("Ceramic");
+  crystal_titles.push("Chocolate");
+  crystal_titles.push("Steel");
 
   var crystal_imgs = [];
   for(var i = 0; i < crystal_titles.length; i++)
