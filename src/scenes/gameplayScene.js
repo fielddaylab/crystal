@@ -2264,8 +2264,8 @@ var GamePlayScene = function(game, stage)
     }
     else if(mode == MODE_SUBMIT)
     {
-      if(submitting_t > star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom)
-        clicker.filter(outro);
+      //if(submitting_t > star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom)
+      clicker.filter(outro);
     }
 
     clicker.flush();
