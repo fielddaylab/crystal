@@ -211,6 +211,9 @@ var GamePlayScene = function(game, stage)
   var win_img = new Image();
   win_img.src = "assets/win.png";
 
+  var logo_img = new Image();
+  logo_img.src = "assets/logo.png";
+
   var select_aud = new Audio("assets/blip.mp3");
   var drop_aud   = new Audio("assets/blip.mp3");
   var rot_aud    = new Audio("assets/blip.mp3");
@@ -660,7 +663,7 @@ var GamePlayScene = function(game, stage)
     function lvly(i)
     {
       var y = floor(i/n_cols);
-      return menu_cam.wy+menu_cam.wh/2-(y+.5)/(n_rows)*menu_cam.wh;
+      return menu_cam.wy+menu_cam.wh/2-0.5-((y+1)/(n_rows+1))*menu_cam.wh;
     }
     function lvlw(i)
     {
@@ -2478,6 +2481,7 @@ var GamePlayScene = function(game, stage)
     //ctx.fillText("Choose a   ^",levels[0].button.x-100,levels[0].button.y+125);
     //ctx.fillText("|",levels[0].button.x+4,levels[0].button.y+135);
     //ctx.fillText("Molecule --",levels[0].button.x-100,levels[0].button.y+150);
+    ctx.drawImage(logo_img,levels[0].button.x,levels[0].button.y-100,500,160);
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
 
