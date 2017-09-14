@@ -39,7 +39,7 @@ var GamePlayScene = function(game, stage)
   var block_stroke = "#E0E0E0";
   var seed_fill   = "#D6D6D6";
   var seed_stroke = "#C0C0C0";
-  var scroll_fill = "rgba(0,0,0,0.3)";
+  var scroll_fill = "rgba(0,0,0,0.8)";
   var bg_fill     = "rgba(2,59,76,0.3)";
   var grid_fill = "rgba(25,102,122,0.7)";
   var grid_stroke = "#277F93";
@@ -2506,18 +2506,23 @@ var GamePlayScene = function(game, stage)
             if(total_stars >= (index+1)*3)
             {
               ctx.drawImage(crystal_imgs[index], museum.x+30+j*190, museum.y+130+i*180, 150,140);
-              ctx.fillText(crystal_titles[index], museum.x+30+j*190, museum.y+130+i*180+140);
+              ctx.font = "20px Roboto Mono";
+              ctx.textAlign = "center";
+              ctx.fillText(crystal_titles[index], museum.x+30+j*190+75, museum.y+130+i*180+135);
               //ctx.fillRect(museum.x+30+j*190, museum.y+130+i*180, 150,140);
             }
             else
             {
               ctx.drawImage(star_full,museum.x+30+j*190,museum.y+130+i*180,40,40);
+              ctx.font = "30px Architects Daughter";
+              ctx.textAlign = "left";
               ctx.fillText("X"+(index+1)*3,museum.x+30+j*190+45,museum.y+130+i*180+30);
             }
           }
         }
       }
       ctx.drawImage(tab_close_img,museum.x-60,museum.y+50,40,40);
+      ctx.font = "30px Architects Daughter";
     }
     else
     {

@@ -62,6 +62,9 @@ var LoadingScene = function(game, stage)
     ctx.font = "12px Open Sans"; //put font that nees loading here
     ctx.fillStyle = "#000000";
     ctx.fillText(".",0,0);// funky way to encourage any custom font to load
+    ctx.font = "12px Roboto Mono"; //put font that nees loading here
+    ctx.fillStyle = "#000000";
+    ctx.fillText(".",0,0);// funky way to encourage any custom font to load
 
     //put asset paths in loading_img_srcs (for assets used on loading screen itself)
     loading_img_srcs.push("assets/loading/experiment.png");
