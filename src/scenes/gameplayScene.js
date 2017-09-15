@@ -17,6 +17,7 @@ var GamePlayScene = function(game, stage)
 
   var clicker;
   var dragger;
+  var hoverer;
 
   //enums
   var ENUM = 0;
@@ -126,6 +127,17 @@ var GamePlayScene = function(game, stage)
   lock_img.context.arc(w/2,h/2,w/3,0,2*Math.PI);
   lock_img.context.stroke();
   lock_img.context.fillRect(10,h/2,w-20,h/2-10);
+
+  var q_img = GenIcon(w,h);
+  q_img.context.fillStyle = bluish;
+  q_img.context.strokeStyle = bluish;
+  q_img.context.lineWidth = 4;
+  q_img.context.beginPath();
+  q_img.context.arc(w/2,w/2,w/3,0,twopi);
+  q_img.context.stroke();
+  q_img.context.textAlign = "center"
+  q_img.context.font = "40px Architects Daughter";
+  q_img.context.fillText("?",w/2,2*h/3);
 
   in_r = w/4;
   out_r = w/2-5;
@@ -561,6 +573,41 @@ var GamePlayScene = function(game, stage)
       }
     }
 
+    self.ibox_pack = new (function()
+    {
+      var self = this;
+      self.x = 0;
+      self.y = 0;
+      self.w = 40;
+      self.h = 40;
+
+      self.hover = function()
+      {
+        self.hovering = true;
+      }
+      self.unhover = function()
+      {
+        self.hovering = false;
+      }
+    })();
+    self.ibox_charge = new (function()
+    {
+      var self = this;
+      self.x = 0;
+      self.y = 0;
+      self.w = 40;
+      self.h = 40;
+
+      self.hover = function()
+      {
+        self.hovering = true;
+      }
+      self.unhover = function()
+      {
+        self.hovering = false;
+      }
+    })();
+
     self.draw = function()
     {
       if(self.displaying_unlocked)
@@ -631,8 +678,14 @@ var GamePlayScene = function(game, stage)
         }
         ctx.fillStyle = bluish;
         ctx.strokeStyle = bluish;
+        self.ibox_pack.x = x-120-40;
+        self.ibox_pack.y = y-60-25;
+        ctx.drawImage(q_img,self.ibox_pack.x,self.ibox_pack.y,self.ibox_pack.w,self.ibox_pack.h);
         ctx.fillText("Packing:",          x - 120, y-60);
         ctx.fillText(score_pack,          x + 120, y-60);
+        self.ibox_charge.x = x-120-40;
+        self.ibox_charge.y = y-20-25;
+        ctx.drawImage(q_img,self.ibox_charge.x,self.ibox_charge.y,self.ibox_charge.w,self.ibox_charge.h);
         ctx.fillText("Charge Bonus:",     x - 120, y-20);
         ctx.fillText(score_charge,        x + 120, y-20);
         ctx.beginPath();
@@ -2080,11 +2133,13 @@ var GamePlayScene = function(game, stage)
     {
       clicker.flush();
       dragger.flush();
+      hoverer.flush();
       return;
     }
     readied = true;
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
+    hoverer = new Hoverer({source:stage.dispCanv.canvas});
 
     n_ticks = 0;
     total_stars = 0;
@@ -2266,10 +2321,13 @@ var GamePlayScene = function(game, stage)
     {
       //if(submitting_t > star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom)
       clicker.filter(outro);
+      hoverer.filter(outro.ibox_pack);
+      hoverer.filter(outro.ibox_charge);
     }
 
     clicker.flush();
     dragger.flush();
+    hoverer.flush();
 
     //tick data
     for(var i = 0; i < molecules.length; i++)
@@ -2538,6 +2596,33 @@ var GamePlayScene = function(game, stage)
     }
 
     total_stars_disp.draw();
+
+    if(mode == MODE_SUBMIT)
+    {
+      if(outro.ibox_pack.hovering)
+      {
+        ctx.fillStyle = white;
+        ctx.strokeStyle = bluish;
+        var w = 440;
+        var h = 60;
+        fillR(outro.ibox_pack.x-w/2,outro.ibox_pack.y,w,h,10,ctx);
+        strokeR(outro.ibox_pack.x-w/2,outro.ibox_pack.y,w,h,10,ctx);
+        ctx.fillStyle = bluish;
+        ctx.fillText("+1 for every neighboring atom",outro.ibox_pack.x-w/2+10,outro.ibox_pack.y+40)
+      }
+      if(outro.ibox_charge.hovering)
+      {
+        ctx.fillStyle = white;
+        ctx.strokeStyle = bluish;
+        var w = 400;
+        var h = 100;
+        fillR(outro.ibox_charge.x-w/2,outro.ibox_charge.y,w,h,10,ctx);
+        strokeR(outro.ibox_charge.x-w/2,outro.ibox_charge.y,w,h,10,ctx);
+        ctx.fillStyle = bluish;
+        ctx.fillText("+4 for balanced charge,",outro.ibox_charge.x-w/2+10,outro.ibox_charge.y+40)
+        ctx.fillText("-6 for unbalanced charge",outro.ibox_charge.x-w/2+10,outro.ibox_charge.y+80)
+      }
+    }
   };
 
   self.cleanup = function()
