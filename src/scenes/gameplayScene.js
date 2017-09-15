@@ -736,7 +736,7 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_h = 6;
     levels[i].scroll_w = 2.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = 0;
     levels[i].star_req_score[0] = 22;
     levels[i].star_req_score[1] = 30;
@@ -761,7 +761,7 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_h = 6;
     levels[i].scroll_w = 3.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+3;
     levels[i].star_req_score[0] = 13;
     levels[i].star_req_score[1] = 20;
@@ -785,7 +785,7 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_h = 6;
     levels[i].scroll_w = 3.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+3;
     levels[i].star_req_score[0] = 8;
     levels[i].star_req_score[1] = 17;
@@ -809,7 +809,7 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_h = 6;
     levels[i].scroll_w = 2.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 36;
     levels[i].star_req_score[1] = 37;
@@ -830,10 +830,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 8;
     levels[i].repeat_y = 4;
     levels[i].bounds_w = 8;
-    levels[i].bounds_h = 8;
+    levels[i].bounds_h = 6;
     levels[i].scroll_w = 3.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 48;
     levels[i].star_req_score[1] = 61;
@@ -854,10 +854,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 10;
     levels[i].repeat_y = 6;
     levels[i].bounds_w = 10;
-    levels[i].bounds_h = 10;
+    levels[i].bounds_h = 6;
     levels[i].scroll_w = 2.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+1;
     levels[i].star_req_score[0] = 60;
     levels[i].star_req_score[1] = 70;
@@ -876,7 +876,7 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_h = 6;
     levels[i].scroll_w = 2.5;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 37;
     levels[i].star_req_score[1] = 61;
@@ -899,10 +899,10 @@ var GamePlayScene = function(game, stage)
     levels[i].repeat_x = 21;
     levels[i].repeat_y = 14;
     levels[i].bounds_w = 21;
-    levels[i].bounds_h = 21;
+    levels[i].bounds_h = 14;
     levels[i].scroll_w = 9;
-    //if(PERFECT)
-    //levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
+    if(PERFECT)
+    levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
     levels[i].star_req_score[0] = 335;
     levels[i].star_req_score[1] = 335;
@@ -1042,7 +1042,7 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_h = 18;
     levels[i].scroll_w = 3;
     if(PERFECT)
-    levels[i].scroll_w = (levels[i].bounds_h+2)*4/3-(levels[i].bounds_w+2);
+    levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+1;
     levels[i].star_req_score[0] = 0;
     levels[i].star_req_score[1] = 0;
@@ -1094,7 +1094,15 @@ var GamePlayScene = function(game, stage)
     dragging_molecule = 0;
 
     bounds = {wx:cur_level.bounds_x, wy:cur_level.bounds_y, ww:cur_level.bounds_w, wh:cur_level.bounds_h, x:0,y:0,w:0,h:0 };
-    game_cam = {wx:cur_level.bounds_x-cur_level.scroll_w/2, wy:cur_level.bounds_y, ww:cur_level.bounds_w+2+cur_level.scroll_w, wh:cur_level.bounds_h+2 };
+    if(cur_level.bounds_w > cur_level.bounds_h)
+    {
+      //levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
+      game_cam = {wx:cur_level.bounds_x-cur_level.scroll_w/2, wy:cur_level.bounds_y, ww:cur_level.bounds_w+2+cur_level.scroll_w, wh:cur_level.bounds_w+2 };
+    }
+    else
+    {
+      game_cam = {wx:cur_level.bounds_x-cur_level.scroll_w/2, wy:cur_level.bounds_y, ww:cur_level.bounds_w+2+cur_level.scroll_w, wh:cur_level.bounds_w+2 };
+    }
 
     scroll = new scroller();
     scroll.scroll_wy_min -= 0.2;
