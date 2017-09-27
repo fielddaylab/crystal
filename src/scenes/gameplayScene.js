@@ -2526,7 +2526,7 @@ var GamePlayScene = function(game, stage)
     ctx.fillStyle = white;
     ctx.fillText("Stability: ", bounds.x+bounds.w-200, bounds.y-20);
     var oldfont = ctx.font;
-    ctx.font = (20+10*score_bounce.v)+"px Architects Daughter";
+    ctx.font = (30+10*score_bounce.v)+"px Architects Daughter";
     ctx.fillText(score,bounds.x+bounds.w-80,bounds.y-20);
     ctx.font = oldfont;
     ctx.fillText("< Menu",back_btn.x+10,back_btn.y+back_btn.h/2+10);
