@@ -578,8 +578,8 @@ var GamePlayScene = function(game, stage)
       var self = this;
       self.x = 0;
       self.y = 0;
-      self.w = 40;
-      self.h = 40;
+      self.w = 30;
+      self.h = 30;
 
       self.hover = function()
       {
@@ -595,8 +595,8 @@ var GamePlayScene = function(game, stage)
       var self = this;
       self.x = 0;
       self.y = 0;
-      self.w = 40;
-      self.h = 40;
+      self.w = 30;
+      self.h = 30;
 
       self.hover = function()
       {
@@ -628,8 +628,9 @@ var GamePlayScene = function(game, stage)
         var x = self.x+self.w/2;
         var y = self.y+self.h/2;
         ctx.textAlign = "center";
-        ctx.fillText("You Unlocked", x, y-20);
-        ctx.fillText(crystal_titles[self.unlocked], x, y+40);
+        ctx.fillText("unlocked in", x, y-15);
+        //ctx.fillText(crystal_titles[self.unlocked], x, y+40);
+        ctx.fillText("Crystal Museum!", x, y+35);
         strokeR(x-80, y+70, 160, 50, 20, ctx);
         ctx.fillText("Ok!", x, y+105);
       }
@@ -1036,10 +1037,10 @@ var GamePlayScene = function(game, stage)
     //free play
     levels.push(new level(i));
     levels[i].scale = 2;
-    levels[i].repeat_x = 18;
-    levels[i].repeat_y = 18;
-    levels[i].bounds_w = 18;
-    levels[i].bounds_h = 18;
+    levels[i].repeat_x = 12;
+    levels[i].repeat_y = 10;
+    levels[i].bounds_w = 12;
+    levels[i].bounds_h = 10;
     levels[i].scroll_w = 3;
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
