@@ -2548,7 +2548,6 @@ var GamePlayScene = function(game, stage)
     //ctx.fillText("Choose a   ^",levels[0].button.x-100,levels[0].button.y+125);
     //ctx.fillText("|",levels[0].button.x+4,levels[0].button.y+135);
     //ctx.fillText("Molecule --",levels[0].button.x-100,levels[0].button.y+150);
-    ctx.drawImage(logo_img,levels[0].button.x,levels[0].button.y-100,500,160);
     for(var i = 0; i < levels.length; i++)
       levels[i].button.draw();
 
@@ -2632,6 +2631,7 @@ var GamePlayScene = function(game, stage)
         ctx.fillText("-6 for unbalanced charge",outro.ibox_charge.x-w/2+10,outro.ibox_charge.y+80)
       }
     }
+    ctx.drawImage(logo_img,levels[0].button.x,levels[0].button.y-100,500,160);
   };
 
   self.cleanup = function()
