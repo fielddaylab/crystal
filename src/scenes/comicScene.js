@@ -96,6 +96,7 @@ var ComicScene = function(game, stage)
   var duh = 0;
   self.tick = function()
   {
+    game.nextScene(); return;
     if(cur_img >= imgs.length) { game.nextScene(); }
     else
     {
