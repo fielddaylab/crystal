@@ -97,6 +97,7 @@ var LoadingScene = function(game, stage)
     img_srcs.push("assets/crystals/rocksalt.png");
     img_srcs.push("assets/crystals/snowflake.png");
     img_srcs.push("assets/crystals/steel.png");
+    img_srcs.push("assets/crystals/chocolate.png");
     img_srcs.push("assets/win.png");
     img_srcs.push("assets/tab_crystal.png");
     img_srcs.push("assets/tab_close.png");

@@ -242,6 +242,7 @@ var GamePlayScene = function(game, stage)
   crystal_titles.push("Rocksalt");
   crystal_titles.push("Snowflake");
   crystal_titles.push("Steel");
+  crystal_titles.push("Chocolate");
 
   var crystal_imgs = [];
   for(var i = 0; i < crystal_titles.length; i++)
