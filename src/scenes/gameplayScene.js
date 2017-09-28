@@ -235,9 +235,9 @@ var GamePlayScene = function(game, stage)
 
   var crystal_titles = [];
   crystal_titles.push("Amethyst");
-  crystal_titles.push("Aquamarine");
-  crystal_titles.push("Bysmuth");
   crystal_titles.push("Diamond");
+  crystal_titles.push("Bysmuth");
+  crystal_titles.push("Aquamarine");
   crystal_titles.push("Quartz");
   crystal_titles.push("Rocksalt");
   crystal_titles.push("Snowflake");
