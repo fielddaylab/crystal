@@ -89,12 +89,14 @@ var LoadingScene = function(game, stage)
     img_srcs.push("assets/menu_circle_0.png");
     img_srcs.push("assets/menu_circle_1.png");
     img_srcs.push("assets/museum.png");
-    img_srcs.push("assets/crystals/ceramic.png");
-    img_srcs.push("assets/crystals/chocolate.png");
+    img_srcs.push("assets/crystals/amethyst.png");
+    img_srcs.push("assets/crystals/aquamarine.png");
+    img_srcs.push("assets/crystals/bysmuth.png");
+    img_srcs.push("assets/crystals/diamond.png");
     img_srcs.push("assets/crystals/quartz.png");
-    img_srcs.push("assets/crystals/steel.png");
+    img_srcs.push("assets/crystals/rocksalt.png");
     img_srcs.push("assets/crystals/snowflake.png");
-    img_srcs.push("assets/crystals/tourmaline.png");
+    img_srcs.push("assets/crystals/steel.png");
     img_srcs.push("assets/win.png");
     img_srcs.push("assets/tab_crystal.png");
     img_srcs.push("assets/tab_close.png");

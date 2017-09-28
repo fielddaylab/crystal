@@ -234,11 +234,13 @@ var GamePlayScene = function(game, stage)
   var level_aud  = new Audio("assets/blip.mp3");
 
   var crystal_titles = [];
+  crystal_titles.push("Amethyst");
+  crystal_titles.push("Aquamarine");
+  crystal_titles.push("Bysmuth");
+  crystal_titles.push("Diamond");
   crystal_titles.push("Quartz");
+  crystal_titles.push("Rocksalt");
   crystal_titles.push("Snowflake");
-  crystal_titles.push("Tourmaline");
-  crystal_titles.push("Ceramic");
-  crystal_titles.push("Chocolate");
   crystal_titles.push("Steel");
 
   var crystal_imgs = [];
@@ -2573,10 +2575,12 @@ var GamePlayScene = function(game, stage)
           {
             if(total_stars >= (index+1)*3)
             {
-              ctx.drawImage(crystal_imgs[index], museum.x+30+j*190, museum.y+130+i*180, 150,140);
+              var h = 160;
+              var w = crystal_imgs[index].width*(h/crystal_imgs[index].height);
+              ctx.drawImage(crystal_imgs[index], museum.x+105+j*190-w/2, museum.y+200+i*175-h/2, w, h);
               ctx.font = "20px Roboto Mono";
               ctx.textAlign = "center";
-              ctx.fillText(crystal_titles[index], museum.x+30+j*190+75, museum.y+130+i*180+135);
+              //ctx.fillText(crystal_titles[index], museum.x+30+j*190+75, museum.y+130+i*180+135);
               //ctx.fillRect(museum.x+30+j*190, museum.y+130+i*180, 150,140);
             }
             else
