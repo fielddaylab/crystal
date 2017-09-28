@@ -248,6 +248,9 @@ var GamePlayScene = function(game, stage)
     crystal_imgs[i].src = "assets/crystals/"+crystal_titles[i].toLowerCase()+".png";
   }
 
+  var default_font = "20px Architects Daughter";
+  var instr_font = "30px Architects Daughter";
+
   var bgbox;
   var museum;
 
@@ -289,7 +292,7 @@ var GamePlayScene = function(game, stage)
   var rp_charge = GenIcon(w,h);
   rp_charge.context.strokeStyle = charge_pos;
   rp_charge.context.fillStyle = charge_pos;
-  rp_charge.context.font = "20px Architects Daughter";
+  rp_charge.context.font = default_font;
   rp_charge.context.textAlign = "center";
   rp_charge.context.lineWidth = 4;
   rp_charge.context.beginPath();
@@ -299,7 +302,7 @@ var GamePlayScene = function(game, stage)
   var dp_charge = GenIcon(w,h);
   dp_charge.context.strokeStyle = charge_pos;
   dp_charge.context.fillStyle = charge_pos;
-  dp_charge.context.font = "20px Architects Daughter";
+  dp_charge.context.font = default_font;
   dp_charge.context.textAlign = "center";
   dp_charge.context.lineWidth = 4;
   dp_charge.context.beginPath();
@@ -309,7 +312,7 @@ var GamePlayScene = function(game, stage)
   var lp_charge = GenIcon(w,h);
   lp_charge.context.strokeStyle = charge_pos;
   lp_charge.context.fillStyle = charge_pos;
-  lp_charge.context.font = "20px Architects Daughter";
+  lp_charge.context.font = default_font;
   lp_charge.context.textAlign = "center";
   lp_charge.context.lineWidth = 4;
   lp_charge.context.beginPath();
@@ -319,7 +322,7 @@ var GamePlayScene = function(game, stage)
   var up_charge = GenIcon(w,h);
   up_charge.context.strokeStyle = charge_pos;
   up_charge.context.fillStyle = charge_pos;
-  up_charge.context.font = "20px Architects Daughter";
+  up_charge.context.font = default_font;
   up_charge.context.textAlign = "center";
   up_charge.context.lineWidth = 4;
   up_charge.context.beginPath();
@@ -329,7 +332,7 @@ var GamePlayScene = function(game, stage)
   var rn_charge = GenIcon(w,h);
   rn_charge.context.strokeStyle = charge_neg;
   rn_charge.context.fillStyle = charge_neg;
-  rn_charge.context.font = "20px Architects Daughter";
+  rn_charge.context.font = default_font;
   rn_charge.context.textAlign = "center";
   rn_charge.context.lineWidth = 4;
   rn_charge.context.beginPath();
@@ -339,7 +342,7 @@ var GamePlayScene = function(game, stage)
   var dn_charge = GenIcon(w,h);
   dn_charge.context.strokeStyle = charge_neg;
   dn_charge.context.fillStyle = charge_neg;
-  dn_charge.context.font = "20px Architects Daughter";
+  dn_charge.context.font = default_font;
   dn_charge.context.textAlign = "center";
   dn_charge.context.lineWidth = 4;
   dn_charge.context.beginPath();
@@ -349,7 +352,7 @@ var GamePlayScene = function(game, stage)
   var ln_charge = GenIcon(w,h);
   ln_charge.context.strokeStyle = charge_neg;
   ln_charge.context.fillStyle = charge_neg;
-  ln_charge.context.font = "20px Architects Daughter";
+  ln_charge.context.font = default_font;
   ln_charge.context.textAlign = "center";
   ln_charge.context.lineWidth = 4;
   ln_charge.context.beginPath();
@@ -359,7 +362,7 @@ var GamePlayScene = function(game, stage)
   var un_charge = GenIcon(w,h);
   un_charge.context.strokeStyle = charge_neg;
   un_charge.context.fillStyle = charge_neg;
-  un_charge.context.font = "20px Architects Daughter";
+  un_charge.context.font = default_font;
   un_charge.context.textAlign = "center";
   un_charge.context.lineWidth = 4;
   un_charge.context.beginPath();
@@ -628,8 +631,7 @@ var GamePlayScene = function(game, stage)
         var x = self.x+self.w/2;
         var y = self.y+self.h/2;
         ctx.textAlign = "center";
-        ctx.fillText("unlocked in", x, y-15);
-        //ctx.fillText(crystal_titles[self.unlocked], x, y+40);
+        ctx.fillText("unlocked in", x, y);
         ctx.fillText("Crystal Museum!", x, y+35);
         strokeR(x-80, y+70, 160, 50, 20, ctx);
         ctx.fillText("Ok!", x, y+105);
@@ -749,7 +751,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("<- This is a molecule",bounds.x-110,350); ctx.fillText("Stack 'em here ->",bounds.x+50,400); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("<- This is a molecule",bounds.x-110,350); ctx.fillText("Stack 'em here ->",bounds.x+50,400); }
     levels[i].comic = function() { game.setScene(2,{start:1,length:1}); };
     i++;
 
@@ -774,7 +776,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Some patterns can",bounds.x+50,300); ctx.fillText("fill the space completely.",bounds.x+50,330); ctx.fillText("Find those patterns!",bounds.x+50,400); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Some patterns can",bounds.x+50,300); ctx.fillText("fill the space completely.",bounds.x+50,330); ctx.fillText("Find those patterns!",bounds.x+50,400); }
     i++;
 
     //tetris T- no charge
@@ -798,7 +800,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Double click",bounds.x+50,300); ctx.fillText("to rotate",bounds.x+50,330); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Double click",bounds.x+50,300); ctx.fillText("to rotate",bounds.x+50,330); }
     i++;
 
     //domino- flip charge
@@ -822,7 +824,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Some molecules have charges.",bounds.x+50,300); ctx.fillText("opposites attract.",bounds.x+50,350); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Some molecules have charges.",bounds.x+50,300); ctx.fillText("opposites attract.",bounds.x+50,350); }
     i++;
 
     //L- hard charge
@@ -846,7 +848,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Try different patterns",bounds.x+50,300); ctx.fillText("to get 3 stars.",bounds.x+50,350); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Try different patterns",bounds.x+50,300); ctx.fillText("to get 3 stars.",bounds.x+50,350); }
     i++;
 
     //square- hard charge
@@ -891,7 +893,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("There's a defect in this crystal...",bounds.x+30,300); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("There's a defect in this crystal...",bounds.x+30,300); }
     i++;
 
     //L- hard charge seed
@@ -1031,7 +1033,7 @@ var GamePlayScene = function(game, stage)
     levels[i].shouldClick = function(evt) { return true; }
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
-    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.fillText("Here is a seed pattern",bounds.x+30,160); ctx.fillText("Use it as a template.",bounds.x+30,220); }
+    levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Here is a seed pattern",bounds.x+30,160); ctx.fillText("Use it as a template.",bounds.x+30,220); }
     i++;
 
     //free play
@@ -2276,21 +2278,21 @@ var GamePlayScene = function(game, stage)
     screenSpace(cam,canv,bounds);
     screenSpace(cam,canv,scroll);
 
-    back_btn.ww = game_cam.ww/5;
-    back_btn.wh = game_cam.wh/15;
+    back_btn.ww = game_cam.ww/10;
+    back_btn.wh = game_cam.wh/20;
     back_btn.wx = game_cam.wx-game_cam.ww/2+back_btn.ww/2+0.1;
     back_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh;
     screenSpace(cam,canv,back_btn);
 
-    clear_btn.ww = game_cam.ww/5;
-    clear_btn.wh = game_cam.wh/15;
-    clear_btn.wx = game_cam.wx-game_cam.ww/2+clear_btn.ww/2+0.1;
-    clear_btn.wy = game_cam.wy+game_cam.wh/2-back_btn.wh*1.5-clear_btn.wh;
+    clear_btn.ww = back_btn.ww;
+    clear_btn.wh = back_btn.wh;
+    clear_btn.wx = back_btn.wx+back_btn.ww+game_cam.ww/100;
+    clear_btn.wy = back_btn.wy;
     screenSpace(cam,canv,clear_btn);
 
-    submit_btn.ww = game_cam.ww/4;
-    submit_btn.wh = game_cam.wh/15;
-    submit_btn.wx = game_cam.wx+game_cam.ww/2-submit_btn.ww;
+    submit_btn.ww = back_btn.ww*2;
+    submit_btn.wh = back_btn.wh;
+    submit_btn.wx = game_cam.wx-game_cam.ww/2+submit_btn.ww/2+0.1;
     submit_btn.wy = game_cam.wy-game_cam.wh/2+submit_btn.wh;
     screenSpace(cam,canv,submit_btn);
 
@@ -2408,7 +2410,7 @@ var GamePlayScene = function(game, stage)
 
   self.draw = function()
   {
-    ctx.font = "30px Architects Daughter";
+    ctx.font = default_font;
     ctx.textAlign = "left";
     ctx.drawImage(bg,bgbox.x,bgbox.y,bgbox.w,bgbox.h);
 
@@ -2522,27 +2524,26 @@ var GamePlayScene = function(game, stage)
     ctx.fillStyle = white;
     fillRBox(submit_btn,20,ctx);
 
-    ctx.fillStyle = btn_bg;
-    fillR(bounds.x+bounds.w-300,bounds.y-50,300,40,20,ctx);
+    ctx.font = default_font;
     ctx.fillStyle = white;
-    ctx.fillText("Stability: ", bounds.x+bounds.w-200, bounds.y-20);
+    ctx.fillText("Crystal Stability: ",scroll.x+13,scroll.y+115);
     var oldfont = ctx.font;
-    ctx.font = (30+10*score_bounce.v)+"px Architects Daughter";
-    ctx.fillText(score,bounds.x+bounds.w-80,bounds.y-20);
+    ctx.font = (20+10*score_bounce.v)+"px Architects Daughter";
+    ctx.fillText(score,scroll.x+175,scroll.y+115);
     ctx.font = oldfont;
     ctx.fillText("< Menu",back_btn.x+10,back_btn.y+back_btn.h/2+10);
-    ctx.fillText("Clear",clear_btn.x+10,clear_btn.y+clear_btn.h/2+10);
+    ctx.fillText("Clear",clear_btn.x+10+5,clear_btn.y+clear_btn.h/2+10);
     ctx.fillStyle = black;
-    ctx.fillText("Grow Crystal",submit_btn.x+10,submit_btn.y+submit_btn.h/2+10);
+    ctx.fillText("Grow Crystal",submit_btn.x+10+5,submit_btn.y+submit_btn.h/2+10);
 
     var b = cur_stars_bounce.v*10;
-    var y = bounds.y-38-b/2;
+    var y = scroll.y+70-b/2;
     for(var i = 0; i < 3; i++)
     {
       if(cur_level.cur_stars > i)
-        ctx.drawImage(star_full,bounds.x+bounds.w-270+20*i-b/2,y,20+b,20+b);
+        ctx.drawImage(star_full,scroll.x+65+30*i-b/2,y,20+b,20+b);
       else
-        ctx.drawImage(star     ,bounds.x+bounds.w-270+20*i,y+b/2,20,20);
+        ctx.drawImage(star     ,scroll.x+65+30*i,y+b/2,20,20);
     }
 
     //ctx.fillText("Choose a   ^",levels[0].button.x-100,levels[0].button.y+125);
@@ -2558,6 +2559,7 @@ var GamePlayScene = function(game, stage)
     if(mode == MODE_INTRO)
       cur_level.introdraw();
 
+    ctx.drawImage(logo_img,levels[0].button.x,levels[0].button.y-100,levels[0].button.w*3.5,logo_img.height*(levels[0].button.w*3.5/logo_img.width));
     if(museum_t != -1)
     {
       ctx.drawImage(museum_img,museum_btn.x-30,museum.y-45,museum_btn.w+museum.w+80,museum.h+90);
@@ -2580,7 +2582,7 @@ var GamePlayScene = function(game, stage)
             else
             {
               ctx.drawImage(star_full,museum.x+30+j*190,museum.y+130+i*180,40,40);
-              ctx.font = "30px Architects Daughter";
+              ctx.font = default_font;
               ctx.textAlign = "left";
               ctx.fillText("X"+(index+1)*3,museum.x+30+j*190+45,museum.y+130+i*180+30);
             }
@@ -2588,7 +2590,7 @@ var GamePlayScene = function(game, stage)
         }
       }
       ctx.drawImage(tab_close_img,museum.x-60,museum.y+50,40,40);
-      ctx.font = "30px Architects Daughter";
+      ctx.font = default_font;
     }
     else
     {
@@ -2631,7 +2633,6 @@ var GamePlayScene = function(game, stage)
         ctx.fillText("-6 for unbalanced charge",outro.ibox_charge.x-w/2+10,outro.ibox_charge.y+80)
       }
     }
-    ctx.drawImage(logo_img,levels[0].button.x,levels[0].button.y-100,500,160);
   };
 
   self.cleanup = function()
