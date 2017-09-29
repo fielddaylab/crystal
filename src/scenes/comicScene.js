@@ -39,12 +39,16 @@ var ComicScene = function(game, stage)
         {
           var old_h = dc.height;
           var old_w = dc.width;
+          var old_x = dc.width/2;
           var old_y = dc.height/2;
-          var new_h = imgs[0].height*(old_w/imgs[0].width);
+          var scaling_ratio = 0.85;
+          var new_h = imgs[0].height*(old_w/imgs[0].width)*scaling_ratio;
           for(var i = 0; i < slots.length; i++)
           {
-            slots[i].y = ((slots[i].y-old_y)*(new_h/old_h))+old_y;
-            slots[i].h *= (new_h/old_h);
+            slots[i].x = ((slots[i].x-old_x)*scaling_ratio)+old_x;
+            slots[i].w *= scaling_ratio;
+            slots[i].y = ((slots[i].y-old_y)*(new_h/old_h)*scaling_ratio)+old_y;
+            slots[i].h *= (new_h/old_h)*scaling_ratio;
           }
         }
       }
