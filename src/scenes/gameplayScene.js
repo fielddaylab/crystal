@@ -2403,7 +2403,11 @@ var GamePlayScene = function(game, stage)
     if(score > cur_level.best) cur_level.best = score;
     for(var i = 0; i < 3; i++)
       if(score >= cur_level.star_req_score[i]) cur_level.cur_stars = i+1;
-    if(cur_level.cur_stars > cur_level.stars) cur_level.stars = cur_level.cur_stars;
+    if(cur_level.cur_stars > cur_level.stars)
+    {
+      cur_level.stars = cur_level.cur_stars;
+      ga('send', 'event', 'crystal_level', 'complete', cur_level.id, cur_level.stars);
+    }
     if(cur_level.cur_stars != old_cur_stars)
     {
       cur_level.cur_stars_t = 0;
