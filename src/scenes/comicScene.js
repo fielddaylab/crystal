@@ -33,6 +33,21 @@ var ComicScene = function(game, stage)
     for(var i = args.start; i < args.start+args.length; i++)
     {
       imgs[i-args.start] = new Image();
+      if(i-args.start == 0)
+      {
+        imgs[0].onload = function()
+        {
+          var old_h = dc.height;
+          var old_w = dc.width;
+          var old_y = dc.height/2;
+          var new_h = imgs[0].height*(old_w/imgs[0].width);
+          for(var i = 0; i < slots.length; i++)
+          {
+            slots[i].y = ((slots[i].y-old_y)*(new_h/old_h))+old_y;
+            slots[i].h *= (new_h/old_h);
+          }
+        }
+      }
       imgs[i-args.start].src = "assets/comic/comic_"+i+".png";
     }
 
@@ -47,7 +62,6 @@ var ComicScene = function(game, stage)
     var y = dc.height/2;
     var w = dc.width;
     var h = dc.height;
-    if(imgs.length) h = imgs[0].height*(w/imgs[0].width);
     slots[0] = { x:-w/2,         y:y-h/4,     w:w/2,   h:h/2   }; //off
     slots[1] = { x:-w/3 ,        y:y-h/3,     w:2*w/3, h:2*h/3 }; //visible
     slots[2] = { x:x-(3*w/8),    y:y-(3*h/8), w:3*w/4, h:3*h/4 }; //center
