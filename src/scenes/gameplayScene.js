@@ -755,7 +755,7 @@ var GamePlayScene = function(game, stage)
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("<- This is a molecule",bounds.x-110,350); ctx.fillText("Stack 'em here ->",bounds.x+50,400); }
-    levels[i].comic = function() { game.setScene(2,{start:1,length:1}); };
+    levels[i].comic = function() { game.setScene(2,{start:0,length:8}); };
     i++;
 
     //tetris s- no charge
@@ -780,6 +780,7 @@ var GamePlayScene = function(game, stage)
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Some patterns can",bounds.x+50,300); ctx.fillText("fill the space completely.",bounds.x+50,330); ctx.fillText("Find those patterns!",bounds.x+50,400); }
+    levels[i].comic = function() { game.setScene(2,{start:8,length:7}); };
     i++;
 
     //tetris T- no charge
@@ -828,6 +829,7 @@ var GamePlayScene = function(game, stage)
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Some molecules have charges.",bounds.x+50,300); ctx.fillText("opposites attract.",bounds.x+50,350); }
+    levels[i].comic = function() { game.setScene(2,{start:15,length:8}); };
     i++;
 
     //L- hard charge
@@ -897,6 +899,7 @@ var GamePlayScene = function(game, stage)
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("There's a defect in this crystal...",bounds.x+30,300); }
+    levels[i].comic = function() { game.setScene(2,{start:23,length:5}); };
     i++;
 
     //L- hard charge seed

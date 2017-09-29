@@ -29,7 +29,7 @@ var ComicScene = function(game, stage)
     clicker = new Clicker({source:stage.dispCanv.canvas});
 
     imgs = [];
-    if(!args) args = {start:0,length:3};
+    if(!args) args = {start:0,length:0};
     for(var i = args.start; i < args.start+args.length; i++)
     {
       imgs[i-args.start] = new Image();
@@ -96,7 +96,6 @@ var ComicScene = function(game, stage)
   var duh = 0;
   self.tick = function()
   {
-    game.nextScene(); return;
     if(cur_img >= imgs.length) { game.nextScene(); }
     else
     {

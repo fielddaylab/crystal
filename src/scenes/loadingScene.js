@@ -102,7 +102,7 @@ var LoadingScene = function(game, stage)
     img_srcs.push("assets/tab_crystal.png");
     img_srcs.push("assets/tab_close.png");
     img_srcs.push("assets/logo.png");
-    for(var i = 0; i < 3; i++)
+    for(var i = 0; i < 28; i++)
       img_srcs.push("assets/comic/comic_"+i+".png");
     for(var i = 0; i < img_srcs.length; i++)
     {
