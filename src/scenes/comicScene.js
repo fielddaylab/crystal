@@ -47,6 +47,7 @@ var ComicScene = function(game, stage)
     var y = dc.height/2;
     var w = dc.width;
     var h = dc.height;
+    if(imgs.length) h = imgs[0].height*(w/imgs[0].width);
     slots[0] = { x:-w/2,         y:y-h/4,     w:w/2,   h:h/2   }; //off
     slots[1] = { x:-w/3 ,        y:y-h/3,     w:2*w/3, h:2*h/3 }; //visible
     slots[2] = { x:x-(3*w/8),    y:y-(3*h/8), w:3*w/4, h:3*h/4 }; //center
