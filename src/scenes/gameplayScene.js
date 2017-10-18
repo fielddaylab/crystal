@@ -229,6 +229,7 @@ var GamePlayScene = function(game, stage)
   var drop_auds = [];
   for(var i = 0; i < 4; i++)
     drop_auds[i] = new Audio("assets/sound/drop_"+i+".wav");
+  var drop_aud_i = 0; //to cycle through
 
   var grow_aud = new Audio("assets/sound/grow.wav");
 
@@ -239,8 +240,9 @@ var GamePlayScene = function(game, stage)
   var rot_auds = [];
   for(var i = 0; i < 4; i++)
     rot_auds[i] = new Audio("assets/sound/rot_"+i+".wav");
-  var star_auds = [];
+  var rot_aud_i = 0; //to cycle through
 
+  var star_auds = [];
   for(var i = 0; i < 3; i++)
     star_auds[i] = new Audio("assets/sound/star_"+i+".wav");
 
@@ -1710,7 +1712,8 @@ var GamePlayScene = function(game, stage)
     {
       if(self.click_ticks < 20 && self.target_rot == 0)
       {
-        rot_auds[randIntBelow(rot_auds.length)].play();
+        rot_auds[rot_aud_i].play();
+        rot_aud_i = (rot_aud_i+1)%rot_auds.length;
         self.base_rot = self.rot;
         self.target_rot += halfpi;
         if(self.target_rot >= twopi-0.001) self.target_rot = 0;
@@ -1800,7 +1803,14 @@ var GamePlayScene = function(game, stage)
       var molecule;
       var cx = round(self.wx+0.5);
       var cy = round(self.wy+0.5);
-      if(self.up) drop_auds[randIntBelow(drop_auds.length)].play();
+      if(self.up)
+      {
+        if(self.up_ticks > 5)
+        {
+          drop_auds[drop_aud_i].play();
+          drop_aud_i = (drop_aud_i+1)%drop_auds.length;
+        }
+      }
       self.up = false;
       for(var i = 0; !self.up && i < molecules.length; i++)
       {
