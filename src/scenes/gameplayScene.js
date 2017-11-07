@@ -715,7 +715,7 @@ var GamePlayScene = function(game, stage)
         ctx.fillText("Total:",            x - 120, y+40);
         ctx.fillText(score,               x + 120, y+40);
         strokeR(x-80, y+70, 160, 50, 20, ctx);
-        ctx.fillText("Next Level", x-72, y+105);
+        ctx.fillText("Next Level", x-45, y+105);
       }
     }
   }
