@@ -199,8 +199,8 @@ var LoadingScene = function(game, stage)
           w = 534/1.5;
           h = 22/1.5;
           ctx.drawImage(loading_imgs[0],240,260+280,w,h);
-          w = 534/1.5;
-          h = 118;
+          w = 534/2;
+          h = 118/1.2;
           ctx.drawImage(loading_imgs[5],240,260+20,w,h);
         }
         ctx.globalAlpha = 1;
