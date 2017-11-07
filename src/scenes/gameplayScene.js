@@ -228,23 +228,23 @@ var GamePlayScene = function(game, stage)
 
   var drop_auds = [];
   for(var i = 0; i < 4; i++)
-    drop_auds[i] = new Audio("assets/sound/drop_"+i+".wav");
+    drop_auds[i] = new Audio("assets/sound/drop_"+i+".mp3");
   var drop_aud_i = 0; //to cycle through
 
-  var grow_aud = new Audio("assets/sound/grow.wav");
+  var grow_aud = new Audio("assets/sound/grow.mp3");
 
   var lvl_auds = [];
   for(var i = 0; i < 9; i++)
-    lvl_auds[i] = new Audio("assets/sound/lvl_"+i+".wav");
+    lvl_auds[i] = new Audio("assets/sound/lvl_"+i+".mp3");
 
   var rot_auds = [];
   for(var i = 0; i < 4; i++)
-    rot_auds[i] = new Audio("assets/sound/rot_"+i+".wav");
+    rot_auds[i] = new Audio("assets/sound/rot_"+i+".mp3");
   var rot_aud_i = 0; //to cycle through
 
   var star_auds = [];
   for(var i = 0; i < 3; i++)
-    star_auds[i] = new Audio("assets/sound/star_"+i+".wav");
+    star_auds[i] = new Audio("assets/sound/star_"+i+".mp3");
 
   var crystal_titles = [];
   crystal_titles.push("Amethyst");
