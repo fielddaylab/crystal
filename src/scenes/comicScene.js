@@ -138,6 +138,12 @@ var ComicScene = function(game, stage)
     hit_ui = false;
   };
 
+  function drawImageCenteredWithin(img,x,y,w,h)
+  {
+    var nw = img.width*h/img.height;
+    ctx.drawImage(img,x+w/2-nw/2,y,nw,h);
+  }
+
   self.draw = function()
   {
     ctx.font = "30px Architects Daughter";
@@ -147,25 +153,25 @@ var ComicScene = function(game, stage)
     {
       var slot;
       var lerp_slot;
-      if(cur_img-2 >= 0)                        { slot = slots[0]; lerp_slot = slot; if(delta_goal < 0) lerp_slot = slots[1]; ctx.drawImage(imgs[cur_img-2],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
-      if(cur_img+2 < imgs.length)               { slot = slots[4]; lerp_slot = slot; if(delta_goal > 0) lerp_slot = slots[3]; ctx.drawImage(imgs[cur_img+2],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+      if(cur_img-2 >= 0)                        { slot = slots[0]; lerp_slot = slot; if(delta_goal < 0) lerp_slot = slots[1]; drawImageCenteredWithin(imgs[cur_img-2],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+      if(cur_img+2 < imgs.length)               { slot = slots[4]; lerp_slot = slot; if(delta_goal > 0) lerp_slot = slots[3]; drawImageCenteredWithin(imgs[cur_img+2],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
       if(delta_goal == 0)
       {
-        if(cur_img-1 >= 0)                        { slot = slots[1]; lerp_slot = slot; ctx.drawImage(imgs[cur_img-1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
-        if(cur_img+1 < imgs.length)               { slot = slots[3]; lerp_slot = slot; ctx.drawImage(imgs[cur_img+1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
-        if(cur_img >= 0 && cur_img < imgs.length) { slot = slots[2]; lerp_slot = slot; ctx.drawImage(imgs[cur_img  ],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+        if(cur_img-1 >= 0)                        { slot = slots[1]; lerp_slot = slot; drawImageCenteredWithin(imgs[cur_img-1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+        if(cur_img+1 < imgs.length)               { slot = slots[3]; lerp_slot = slot; drawImageCenteredWithin(imgs[cur_img+1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+        if(cur_img >= 0 && cur_img < imgs.length) { slot = slots[2]; lerp_slot = slot; drawImageCenteredWithin(imgs[cur_img  ],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
       }
       else if(delta_goal < 0)
       {
-        if(cur_img+1 < imgs.length)               { slot = slots[3]; lerp_slot = slots[4]; ctx.drawImage(imgs[cur_img+1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
-        if(cur_img >= 0 && cur_img < imgs.length) { slot = slots[2]; lerp_slot = slots[3]; ctx.drawImage(imgs[cur_img  ],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
-        if(cur_img-1 >= 0)                        { slot = slots[1]; lerp_slot = slots[2]; ctx.drawImage(imgs[cur_img-1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+        if(cur_img+1 < imgs.length)               { slot = slots[3]; lerp_slot = slots[4]; drawImageCenteredWithin(imgs[cur_img+1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+        if(cur_img >= 0 && cur_img < imgs.length) { slot = slots[2]; lerp_slot = slots[3]; drawImageCenteredWithin(imgs[cur_img  ],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+        if(cur_img-1 >= 0)                        { slot = slots[1]; lerp_slot = slots[2]; drawImageCenteredWithin(imgs[cur_img-1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
       }
       else if(delta_goal > 0)
       {
-        if(cur_img-1 >= 0)                        { slot = slots[1]; lerp_slot = slots[0]; ctx.drawImage(imgs[cur_img-1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
-        if(cur_img >= 0 && cur_img < imgs.length) { slot = slots[2]; lerp_slot = slots[1]; ctx.drawImage(imgs[cur_img  ],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
-        if(cur_img+1 < imgs.length)               { slot = slots[3]; lerp_slot = slots[2]; ctx.drawImage(imgs[cur_img+1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+        if(cur_img-1 >= 0)                        { slot = slots[1]; lerp_slot = slots[0]; drawImageCenteredWithin(imgs[cur_img-1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+        if(cur_img >= 0 && cur_img < imgs.length) { slot = slots[2]; lerp_slot = slots[1]; drawImageCenteredWithin(imgs[cur_img  ],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
+        if(cur_img+1 < imgs.length)               { slot = slots[3]; lerp_slot = slots[2]; drawImageCenteredWithin(imgs[cur_img+1],lerp(slot.x,lerp_slot.x,abs(delta)),lerp(slot.y,lerp_slot.y,abs(delta)),lerp(slot.w,lerp_slot.w,abs(delta)),lerp(slot.h,lerp_slot.h,abs(delta))); }
       }
 
       var x;
