@@ -2603,7 +2603,7 @@ var GamePlayScene = function(game, stage)
             {
               var h = 160;
               var w = crystal_imgs[index].width*(h/crystal_imgs[index].height);
-              ctx.drawImage(crystal_imgs[index], museum.x+105+j*190-w/2, museum.y+200+i*175-h/2, w, h);
+              ctx.drawImage(crystal_imgs[index], museum.x+105+j*190-w/2, museum.y+185+i*175-h/2, w, h);
               ctx.font = "20px Roboto Mono";
               ctx.textAlign = "center";
               //ctx.fillText(crystal_titles[index], museum.x+30+j*190+75, museum.y+130+i*180+135);
