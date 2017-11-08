@@ -2611,10 +2611,12 @@ var GamePlayScene = function(game, stage)
             }
             else
             {
+            /*
               ctx.drawImage(star_full,museum.x+30+j*190,museum.y+130+i*180,40,40);
               ctx.font = default_font;
               ctx.textAlign = "left";
               ctx.fillText("X"+(index+1)*3,museum.x+30+j*190+45,museum.y+130+i*180+30);
+            */
             }
           }
         }
