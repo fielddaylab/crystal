@@ -236,6 +236,7 @@ var GamePlayScene = function(game, stage)
   var lvl_auds = [];
   for(var i = 0; i < 9; i++)
     lvl_auds[i] = new Audio("assets/sound/lvl_"+i+".mp3");
+  var lvl_auds_should_play = 0;
 
   var rot_auds = [];
   for(var i = 0; i < 4; i++)
@@ -244,7 +245,7 @@ var GamePlayScene = function(game, stage)
 
   var star_auds = [];
   for(var i = 0; i < 3; i++)
-    star_auds[i] = new Audio("assets/sound/star_"+i+".mp3");
+    star_auds[i] = new Audio("assets/sound/star_"+(2-i)+".mp3");
 
   var crystal_titles = [];
   crystal_titles.push("Amethyst");
@@ -541,7 +542,7 @@ var GamePlayScene = function(game, stage)
     {
       if(total_stars < self.level.lock_stars) return;
       console.log(self.level.id);
-      lvl_auds[self.level.id].play();
+      lvl_auds_should_play = 10;
       set_level(self.level.id);
       if(cur_level.comic) cur_level.comic();
 
@@ -684,9 +685,9 @@ var GamePlayScene = function(game, stage)
           offy = sin(halfpi)*self.h/3-250;
           switch(i)
           {
-            case 0: if(t == 90) { self.bounces[i].vel = 2; star_auds[i].play(); } break;
-            case 1: if(t == 60) { self.bounces[i].vel = 2; star_auds[i].play(); } break;
-            case 2: if(t == 30) { self.bounces[i].vel = 2; star_auds[i].play(); } break;
+            case 0: if(t == 90) { self.bounces[i].vel = 2; if(cur_level.cur_stars > 2-i) star_auds[i].play(); } break;
+            case 1: if(t == 60) { self.bounces[i].vel = 2; if(cur_level.cur_stars > 2-i) star_auds[i].play(); } break;
+            case 2: if(t == 30) { self.bounces[i].vel = 2; if(cur_level.cur_stars > 2-i) star_auds[i].play(); } break;
           }
           var bs = s;
           self.bounces[i].tick();
@@ -1803,14 +1804,6 @@ var GamePlayScene = function(game, stage)
       var molecule;
       var cx = round(self.wx+0.5);
       var cy = round(self.wy+0.5);
-      if(self.up)
-      {
-        if(self.up_ticks > 5)
-        {
-          drop_auds[drop_aud_i].play();
-          drop_aud_i = (drop_aud_i+1)%drop_auds.length;
-        }
-      }
       self.up = false;
       for(var i = 0; !self.up && i < molecules.length; i++)
       {
@@ -1863,6 +1856,11 @@ var GamePlayScene = function(game, stage)
         self.cy = cy;
         self.wx = cx-0.5;
         self.wy = cy-0.5;
+        if(self.up_ticks > 8)
+        {
+          drop_auds[drop_aud_i].play();
+          drop_aud_i = (drop_aud_i+1)%drop_auds.length;
+        }
         self.up_ticks = 0;
         bring_to_bottom(self);
       }
@@ -2107,6 +2105,7 @@ var GamePlayScene = function(game, stage)
     {
       if(self.click_ticks < 20 && self.target_rot == 0)
       {
+        rot_auds[rot_aud_i].play();
         self.base_rot = self.rot;
         self.target_rot += halfpi;
         if(self.target_rot >= twopi-0.001) self.target_rot = 0;
@@ -2255,6 +2254,12 @@ var GamePlayScene = function(game, stage)
   self.tick = function()
   {
     n_ticks++;
+    lvl_auds_should_play--;
+    if(lvl_auds_should_play < 0) lvl_auds_should_play = 0;
+    if(lvl_auds_should_play == 1 && lvl_auds[cur_level.id])
+    {
+      lvl_auds[cur_level.id].play();
+    }
 
     //lerp cam
     if(mode == MODE_MENU || mode == MODE_MUSEUM)
