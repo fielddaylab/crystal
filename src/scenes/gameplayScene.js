@@ -541,7 +541,6 @@ var GamePlayScene = function(game, stage)
     self.click = function(evt)
     {
       if(total_stars < self.level.lock_stars) return;
-      console.log(self.level.id);
       lvl_auds_should_play = 10;
       set_level(self.level.id);
       if(cur_level.comic) cur_level.comic();
