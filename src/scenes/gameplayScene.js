@@ -19,6 +19,134 @@ var GamePlayScene = function(game, stage)
   var dragger;
   var hoverer;
 
+  var moleculeStartPos;
+  var moleculeEndPos = {};
+  var dragStartTime;
+  var dragEndTime;
+  var moleculeStartStab;
+  var moleculeEndStab;
+  var numRotations = 0;
+  var moleculeStartRot = 0;
+  var moleculeEndRot;
+  var numClears = 0;
+  var museumTimeOpened;
+  var museumTimeClosed;
+  var museumTotalTime = 0;
+
+  //log functions
+  var log_level_begin = function(selectedLevel)
+  {
+    var log_data =
+    {
+      level:selectedLevel,
+      event:"BEGIN",
+      event_data_complex:{}
+    };
+    for(var i = 0; i < levels.length; i++)
+    {
+      log_data.event_data_complex[i] = (levels[i].stars);
+    }
+    
+    log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+    //console.log(log_data);
+    mySlog.log(log_data);
+  }
+  var log_drag_molecule = function(startPos, endPos, dragTime, startStab, endStab)
+  {
+    var log_data =
+    {
+      event:"CUSTOM",
+      event_custom:0, // "MOLECULE_RELEASE"
+      event_data_complex:{
+        event_custom:"MOLECULE_RELEASE",
+        startPosition:startPos,
+        endPosition:endPos,
+        time:dragTime,
+        startStability:startStab,
+        endStability:endStab
+      }
+    };
+    
+    log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+    //console.log(log_data);
+    mySlog.log(log_data);
+  }
+  var log_rotate_molecule = function(isStamp, startRot, endRot, numRots, startStab, endStab)
+  {
+    var log_data =
+    {
+      event:"CUSTOM",
+      event_custom:1, // "MOLECULE_ROTATE"
+      event_data_complex:{
+        event_custom:"MOLECULE_ROTATE",
+        isStamp:isStamp,
+        startRotation:startRot,
+        endRotation:endRot,
+        numRotations:numRots,
+        startStability:startStab,
+        endStability:endStab
+      }
+    };
+    
+    log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+    //console.log(log_data);
+    mySlog.log(log_data);
+  }
+  var log_clear_press = function(stability)
+  {
+    var log_data =
+    {
+      event:"CUSTOM",
+      event_custom:2, // "CLEAR_BTN_PRESS"
+      event_data_complex:{
+        event_custom:"CLEAR_BTN_PRESS",
+        numTimesPressed:numClears,
+        numMolecules:molecules.length,
+        stability:stability
+      }
+    };
+    
+    log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+    //console.log(log_data);
+    mySlog.log(log_data);
+  }
+  var log_grow_press = function(stability)
+  {
+    var log_data =
+    {
+      event:"CUSTOM",
+      event_custom:3, // "GROW_BTN_PRESS"
+      event_data_complex:{
+        event_custom:"GROW_BTN_PRESS",
+        stability:stability
+      }
+    };
+    for(var i = 0; i < levels.length; i++)
+    {
+      log_data.event_data_complex[i] = (levels[i].stars);
+    }
+    
+    log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+    //console.log(log_data);
+    mySlog.log(log_data);
+  }
+  var log_museum_close = function()
+  {
+    var log_data =
+    {
+      event:"CUSTOM",
+      event_custom:4, // "MUSEUM_CLOSE"
+      event_data_complex:{
+        event_custom:"MUSEUM_CLOSE",
+        timeOpen:museumTotalTime
+      }
+    };
+    
+    log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+    //console.log(log_data);
+    mySlog.log(log_data);
+  }
+
   //enums
   var ENUM = 0;
 
@@ -541,6 +669,7 @@ var GamePlayScene = function(game, stage)
     self.click = function(evt)
     {
       if(total_stars < self.level.lock_stars) return;
+      log_level_begin(self.level.id);
       lvl_auds_should_play = 10;
       set_level(self.level.id);
       if(cur_level.comic) cur_level.comic();
@@ -1578,6 +1707,7 @@ var GamePlayScene = function(game, stage)
     }
     self.dragStart = function(evt)
     {
+      dragStartTime = new Date().getTime();
       worldevt.wx = worldSpaceX(cam,canv,evt.doX);
       worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       last_drag_wevt.wx = worldevt.wx;
@@ -1772,10 +1902,23 @@ var GamePlayScene = function(game, stage)
     }
     self.dragStart = function(evt)
     {
+      dragStartTime = new Date().getTime();
+      for(var i = 0; i < self.template.blocks.length; i++)
+      {
+        var block = self.template.blocks[i];
+        x = self.cx+block.cx-bounds.wx+floor(bounds.ww/2-0.1);
+        y = -(self.cy+block.cy-bounds.wy+floor(bounds.wh/2-0.1))+5;
+        moleculeStartPos['coord_'+i] = {x, y};
+      }
+      score_board.populate();
+      score_board.score();
+      moleculeStartStab = {pack:score_pack, charge:score_charge};
+
       worldevt.wx = worldSpaceX(cam,canv,evt.doX);
       worldevt.wy = worldSpaceY(cam,canv,evt.doY);
       worldoff.wx = worldevt.wx-self.wx;
       worldoff.wy = worldevt.wy-self.wy;
+      
       self.drag(evt);
     }
     self.drag = function(evt)
@@ -1791,6 +1934,40 @@ var GamePlayScene = function(game, stage)
         remove_molecule(self);
       self.snap();
       if(dragging_molecule == self) dragging_molecule = 0;
+
+      for(var i = 0; i < self.template.blocks.length; i++)
+      {
+        var block = self.template.blocks[i];
+        x = self.cx+block.cx-bounds.wx+floor(bounds.ww/2-0.1);
+        y = -(self.cy+block.cy-bounds.wy+floor(bounds.wh/2-0.1))+5;
+        moleculeEndPos['coord_'+i] = {x, y};
+      }
+      setTimeout(function () {
+        if (molecules.includes(self)) { // Make sure this molecule isn't being removed
+          if ((self.target_rot == 0)) { // Check if the molecule is being rotated
+            score_board.populate();
+            score_board.score();
+            moleculeEndStab = {pack:score_pack, charge:score_charge};
+            dragEndTime = new Date().getTime();
+            var dragTime = (dragEndTime - dragStartTime) / 1000;
+  
+            if (!moleculeStartStab) moleculeStartStab = {pack:0, charge:0}
+            if (!moleculeStartPos) {
+              moleculeStartPos = {};
+              for(var i = 0; i < self.template.blocks.length; i++)
+              {
+                moleculeStartPos['coord_'+i] = {x:null, y:null};
+              }
+            }
+            log_drag_molecule(moleculeStartPos, moleculeEndPos, dragTime, moleculeStartStab, moleculeEndStab);
+          } else {
+            numRotations++;
+            moleculeStartRot = (self.template.rotation == 0) ? 3 : self.template.rotation - 1;
+            moleculeEndRot = self.template.rotation;
+            log_rotate_molecule(false, moleculeStartRot, moleculeEndRot, numRotations, moleculeStartStab, moleculeEndStab);
+          }
+        } else { /* log molecule remove? */ } 
+      }, 200)
     }
 
     var blocks_collide = function(x0,y0,x1,y1)
@@ -2109,6 +2286,13 @@ var GamePlayScene = function(game, stage)
         self.target_rot += halfpi;
         if(self.target_rot >= twopi-0.001) self.target_rot = 0;
         self.rot_ticks = 0;
+
+        numRotations++;
+        moleculeStartRot = (self.template.rotation == 0) ? 3 : self.template.rotation - 1;
+        moleculeEndRot = self.template.rotation;
+        if (!moleculeStartStab) moleculeStartStab = {pack:0, charge:0}
+        if (!moleculeEndStab) moleculeEndStab = {pack:0, charge:0}
+        log_rotate_molecule(true, moleculeStartRot, moleculeEndRot, numRotations, moleculeStartStab, moleculeEndStab);
       }
       self.click_ticks = 0;
     }
@@ -2167,12 +2351,15 @@ var GamePlayScene = function(game, stage)
       clicker.flush();
       dragger.flush();
       hoverer.flush();
+      if (mySlog) mySlog.flush();
       return;
     }
     readied = true;
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
     hoverer = new Hoverer({source:stage.dispCanv.canvas});
+
+    mySlog = new slog("CRYSTAL",1);
 
     n_ticks = 0;
     total_stars = 0;
@@ -2216,6 +2403,12 @@ var GamePlayScene = function(game, stage)
     clear_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     clear_btn.click = function(evt)
     {
+      numClears++;
+      score_board.populate();
+      score_board.score();
+      var clearStability = {pack:score_pack, charge:score_charge};
+      log_clear_press(clearStability);
+
       for(var i = 0; i < molecules.length ;)
       {
         if(molecules[i].locked) i++;
@@ -2226,13 +2419,46 @@ var GamePlayScene = function(game, stage)
     clear_btn.ww = game_cam.ww/5;
 
     submit_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    submit_btn.click = function(evt) { mode = MODE_SUBMIT; grow_aud.play(); submitting_t = 0; var old_total = total_stars; countLevelStars(); var new_total = total_stars; total_stars = old_total; if(floor(new_total/3) > floor(old_total/3) && (floor(new_total/3)-1) < crystal_titles.length) outro.unlocked = (floor(new_total/3)-1); evt.hitUI = true; }
+    submit_btn.click = function(evt) {
+      score_board.populate();
+      score_board.score();
+      var growStability = {pack:score_pack, charge:score_charge};
+      log_grow_press(growStability);
+
+      mode = MODE_SUBMIT;
+      grow_aud.play();
+      submitting_t = 0;
+      var old_total = total_stars; 
+      countLevelStars();
+      var new_total = total_stars;
+      total_stars = old_total; 
+      if(floor(new_total/3) > floor(old_total/3) && (floor(new_total/3)-1) < crystal_titles.length)
+        outro.unlocked = (floor(new_total/3)-1); evt.hitUI = true;
+    }
 
     museum_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    museum_btn.click = function(evt) { if(mode == MODE_MENU) { mode = MODE_MUSEUM; museum_t = 0; } else mode = MODE_MENU; evt.hitUI = true; }
+    museum_btn.click = function(evt) {
+      if(mode == MODE_MENU) {
+        museumTimeOpened = new Date().getTime();
+        mode = MODE_MUSEUM;
+        museum_t = 0;
+      } else {
+        museumTimeClosed = new Date().getTime();
+        museumTotalTime += ((museumTimeClosed - museumTimeOpened)/1000)
+        log_museum_close();
+        mode = MODE_MENU;
+      }
+        evt.hitUI = true;
+    }
 
     museum = {x:0,y:0,w:0,h:0,wx:0,wy:0,ww:0,wh:0};
-    museum.click = function(evt) { mode = MODE_MENU; evt.hitUI = true; }
+    museum.click = function(evt) {
+      museumTimeClosed = new Date().getTime();
+      museumTotalTime += ((museumTimeClosed - museumTimeOpened)/1000)
+      log_museum_close();
+      mode = MODE_MENU;
+      evt.hitUI = true;
+    }
 
     museum_btn.ww = menu_cam.ww/10;
     museum_btn.wh = menu_cam.wh/10;
