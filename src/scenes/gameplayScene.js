@@ -44,7 +44,7 @@ var GamePlayScene = function(game, stage)
     };
     for(var i = 0; i < levels.length; i++)
     {
-      log_data.event_data_complex[i] = (levels[i].stars);
+      log_data.event_data_complex["stars_"+i] = (levels[i].stars);
     }
     
     log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
@@ -55,8 +55,9 @@ var GamePlayScene = function(game, stage)
   {
     var log_data =
     {
+      level:cur_level.id,
       event:"CUSTOM",
-      event_custom:0, // "MOLECULE_RELEASE"
+      event_custom:1, // "MOLECULE_RELEASE"
       event_data_complex:{
         event_custom:"MOLECULE_RELEASE",
         startPosition:startPos,
@@ -75,8 +76,9 @@ var GamePlayScene = function(game, stage)
   {
     var log_data =
     {
+      level:cur_level.id,
       event:"CUSTOM",
-      event_custom:1, // "MOLECULE_ROTATE"
+      event_custom:2, // "MOLECULE_ROTATE"
       event_data_complex:{
         event_custom:"MOLECULE_ROTATE",
         isStamp:isStamp,
@@ -96,8 +98,9 @@ var GamePlayScene = function(game, stage)
   {
     var log_data =
     {
+      level:cur_level.id,
       event:"CUSTOM",
-      event_custom:2, // "CLEAR_BTN_PRESS"
+      event_custom:3, // "CLEAR_BTN_PRESS"
       event_data_complex:{
         event_custom:"CLEAR_BTN_PRESS",
         numTimesPressed:numClears,
@@ -114,8 +117,9 @@ var GamePlayScene = function(game, stage)
   {
     var log_data =
     {
+      level:cur_level.id,
       event:"CUSTOM",
-      event_custom:3, // "GROW_BTN_PRESS"
+      event_custom:4, // "GROW_BTN_PRESS"
       event_data_complex:{
         event_custom:"GROW_BTN_PRESS",
         stability:stability
@@ -134,8 +138,9 @@ var GamePlayScene = function(game, stage)
   {
     var log_data =
     {
+      level:cur_level.id,
       event:"CUSTOM",
-      event_custom:4, // "MUSEUM_CLOSE"
+      event_custom:5, // "MUSEUM_CLOSE"
       event_data_complex:{
         event_custom:"MUSEUM_CLOSE",
         timeOpen:museumTotalTime
