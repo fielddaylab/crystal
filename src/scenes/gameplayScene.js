@@ -2356,7 +2356,6 @@ var GamePlayScene = function(game, stage)
       clicker.flush();
       dragger.flush();
       hoverer.flush();
-      if (mySlog) mySlog.flush();
       return;
     }
     readied = true;
