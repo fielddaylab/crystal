@@ -1,6 +1,6 @@
 var Game = function(init)
 {
-  var mySlog;
+  window.mySlog = new slog("CRYSTAL",1);
   var default_init =
   {
     width:640,

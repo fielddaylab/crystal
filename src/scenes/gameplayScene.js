@@ -67,7 +67,7 @@ var GamePlayScene = function(game, stage)
     
     log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
     //console.log(log_data);
-    mySlog.log(log_data);
+    window.mySlog.log(log_data);
   }
   var log_drag_molecule = function(startPos, endPos, dragTime, startStab, endStab)
   {
@@ -88,7 +88,7 @@ var GamePlayScene = function(game, stage)
     
     log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
     //console.log(log_data);
-    mySlog.log(log_data);
+    window.mySlog.log(log_data);
   }
   var log_rotate_molecule = function(isStamp, startRot, endRot, numRots, startStab, endStab)
   {
@@ -110,7 +110,7 @@ var GamePlayScene = function(game, stage)
     
     log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
     //console.log(log_data);
-    mySlog.log(log_data);
+    window.mySlog.log(log_data);
   }
   var log_clear_press = function(stability)
   {
@@ -129,7 +129,7 @@ var GamePlayScene = function(game, stage)
     
     log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
     //console.log(log_data);
-    mySlog.log(log_data);
+    window.mySlog.log(log_data);
   }
   var log_grow_press = function(stability)
   {
@@ -150,7 +150,7 @@ var GamePlayScene = function(game, stage)
     
     log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
     //console.log(log_data);
-    mySlog.log(log_data);
+    window.mySlog.log(log_data);
   }
   var log_museum_close = function()
   {
@@ -167,7 +167,7 @@ var GamePlayScene = function(game, stage)
     
     log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
     //console.log(log_data);
-    mySlog.log(log_data);
+    window.mySlog.log(log_data);
   }
 
   //enums
@@ -695,7 +695,7 @@ var GamePlayScene = function(game, stage)
                 }
               };
               log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
-              mySlog.log(log_data);
+              window.mySlog.log(log_data);
               done = true;
             }
             cache_myoff += 24;
@@ -720,7 +720,7 @@ var GamePlayScene = function(game, stage)
                 }
               };
               log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
-              mySlog.log(log_data);
+              window.mySlog.log(log_data);
               done = true;
             }
             cache_myoff += 24;
@@ -746,7 +746,7 @@ var GamePlayScene = function(game, stage)
                 }
               };
               log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
-              mySlog.log(log_data);
+              window.mySlog.log(log_data);
               done = true;
             }
             cache_myoff += 24;
@@ -771,7 +771,7 @@ var GamePlayScene = function(game, stage)
                 }
               };
               log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
-              mySlog.log(log_data);
+              window.mySlog.log(log_data);
               done = true;
             }
             cache_myoff += 24;
@@ -1523,6 +1523,8 @@ var GamePlayScene = function(game, stage)
     levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     i++;
+
+    console.log(levels)
 
     char_xs = [p(0,canv.width),p(0,canv.width),p(0,canv.width),p(0.02987012987012987,canv.width)];
     char_ys = [p(0.55,canv.height),p(0.55,canv.height),p(0.6,canv.height),p(0.5,canv.height)];
@@ -2685,8 +2687,6 @@ var GamePlayScene = function(game, stage)
     clicker = new Clicker({source:stage.dispCanv.canvas});
     dragger = new Dragger({source:stage.dispCanv.canvas});
     hoverer = new Hoverer({source:stage.dispCanv.canvas});
-
-    if (!mySlog) mySlog = new slog("CRYSTAL",1);
 
     quiz_t = 0;
     n_ticks = 0;
