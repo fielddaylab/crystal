@@ -2686,7 +2686,7 @@ var GamePlayScene = function(game, stage)
     dragger = new Dragger({source:stage.dispCanv.canvas});
     hoverer = new Hoverer({source:stage.dispCanv.canvas});
 
-    mySlog = new slog("CRYSTAL",1);
+    if (!mySlog) mySlog = new slog("CRYSTAL",1);
 
     quiz_t = 0;
     n_ticks = 0;
