@@ -1,5 +1,6 @@
 var Game = function(init)
 {
+  var mySlog;
   var default_init =
   {
     width:640,
