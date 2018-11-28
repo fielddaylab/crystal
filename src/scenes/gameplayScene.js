@@ -33,6 +33,24 @@ var GamePlayScene = function(game, stage)
   var museumTimeClosed;
   var museumTotalTime = 0;
 
+  var quiz;
+  var quiz_t;
+  var quiz_char_ts = [0,0,0,0];
+
+  ENUM = 0;
+  var CHAR_GIRL  = ENUM; ENUM++;
+  var CHAR_ANNOY = ENUM; ENUM++;
+  var CHAR_AXE   = ENUM; ENUM++;
+  var CHAR_TALL  = ENUM; ENUM++;
+
+  var char_xs;
+  var char_ys;
+  var char_ws;
+  var char_hs;
+  var char_imgs;
+
+  var click_aud;
+
   //log functions
   var log_level_begin = function(selectedLevel)
   {
@@ -100,7 +118,7 @@ var GamePlayScene = function(game, stage)
     {
       level:cur_level.id,
       event:"CUSTOM",
-      event_custom:3, // "CLEAR_BTN_PRESS"
+      event_custom:6, // "CLEAR_BTN_PRESS"
       event_data_complex:{
         event_custom:"CLEAR_BTN_PRESS",
         numTimesPressed:numClears,
@@ -155,11 +173,12 @@ var GamePlayScene = function(game, stage)
   //enums
   var ENUM = 0;
 
-  var MODE_MENU   = ENUM; ENUM++;
-  var MODE_MUSEUM = ENUM; ENUM++;
-  var MODE_GAME   = ENUM; ENUM++;
-  var MODE_SUBMIT = ENUM; ENUM++;
-  var MODE_INTRO  = ENUM; ENUM++;
+  var MODE_MENU       = ENUM; ENUM++;
+  var MODE_MUSEUM     = ENUM; ENUM++;
+  var MODE_GAME       = ENUM; ENUM++;
+  var MODE_SUBMIT     = ENUM; ENUM++;
+  var MODE_QUIZ  = ENUM; ENUM++;
+  var MODE_INTRO      = ENUM; ENUM++;
 
   //params
   var shadow_dist = 8;
@@ -180,6 +199,13 @@ var GamePlayScene = function(game, stage)
   var charge_pos = "#22FF22";
   var charge_neg = "#FF2222";
   var btn_bg = "#53BBB9";
+
+  var grad_img = GenIcon(10,100);
+  var grd=grad_img.context.createLinearGradient(0,0,0,grad_img.height);
+  grd.addColorStop(0,"rgba(99,228,248,0)");
+  grd.addColorStop(0.5,"rgba(99,228,248,1)");
+  grad_img.context.fillStyle = grd;
+  grad_img.context.fillRect(0,0,grad_img.width,grad_img.height);
 
   var star_outro_sub_slide = 40;
   var star_outro_sub_star = 100;
@@ -520,6 +546,260 @@ var GamePlayScene = function(game, stage)
   un_charge.context.stroke();
   un_charge.context.fillText("-",w/2,10);
 
+  var Quiz = function(scene)
+  {
+    var self = this;
+    self.x = 0;
+    self.y = 0;
+    self.w = canv.width;
+    self.h = canv.height;
+
+    self.img = 0;
+    self.qimg = 0;
+    self.aimg = 0;
+    self.qtxt = "";
+    self.atxta = "";
+    self.atxtb = "";
+    self.atxtc = "";
+    self.atxtd = "";
+    self.qlines;
+    self.alinesa;
+    self.alinesb;
+    self.alinesc;
+    self.alinesd;
+    self.correct = 0;
+    self.question = 0;
+
+    self.text_x = 250;
+    self.text_w = canv.width-self.text_x-20;
+    self.text_h = 100;
+    self.text_y = canv.height-self.text_h-20;
+
+    self.loadQuiz = function(quiz, canv)
+    {
+      var first_line = quiz[0];
+      self.img   = first_line[0];
+      self.qimg  = first_line[1];
+      self.aimg  = first_line[2];
+      self.qtxt  = first_line[3];
+      self.atxta = first_line[4];
+      self.atxtb = first_line[5];
+      self.atxtc = first_line[6];
+      self.atxtd = first_line[7];
+      self.correct = first_line[8];
+      self.question = first_line[9];
+      self.rest_lines = quiz.slice(1);
+      self.canv = canv;
+      self.format(canv);
+    }
+
+    self.format = function(canv)
+    {
+      self.qlines = textToLines("20px Open Sans",self.text_w-20,self.qtxt,canv.context);
+      self.alinesa = textToLines("20px Open Sans",self.text_w-20,self.atxta,canv.context);
+      self.alinesb = textToLines("20px Open Sans",self.text_w-20,self.atxtb,canv.context);
+      self.alinesc = textToLines("20px Open Sans",self.text_w-20,self.atxtc,canv.context);
+      self.alinesd = textToLines("20px Open Sans",self.text_w-20,self.atxtd,canv.context);
+    }
+
+    self.draw = function(canv)
+    {
+      var box_height = 188;
+      var yoff = 400-400*quiz_t;
+      canv.context.drawImage(grad_img,0,canv.height-box_height+yoff,canv.width,box_height);
+
+      if(self.qlines)
+      {
+        canv.context.font = "20px Open Sans";
+        canv.context.textAlign = "left";
+        canv.context.fillStyle = "#FFFFFF";
+        canv.fillRoundRect(self.text_x,self.text_y,self.text_w,self.text_h,5);
+        canv.context.beginPath();
+        canv.context.moveTo(self.text_x   ,self.text_y+10);
+        canv.context.lineTo(self.text_x-10,self.text_y+15);
+        canv.context.lineTo(self.text_x   ,self.text_y+20);
+        canv.context.fill();
+        canv.context.fillStyle = "#000000";
+        var myoff = 24;
+        for(var i = 0; i < self.qlines.length; i++)
+        {
+          canv.context.fillText(self.qlines[i],self.text_x+10,self.text_y+myoff,self.text_w);
+          myoff += 24;
+        }
+        canv.context.fillStyle = "#0576B9";
+        var cache_myoff = myoff;
+        for(var i = 0; i < self.alinesa.length; i++)
+        {
+          canv.context.fillText(self.alinesa[i],self.text_x+10,self.text_y+cache_myoff,self.text_w);
+          cache_myoff += 24;
+        }
+        for(var i = 0; i < self.alinesb.length; i++)
+        {
+          canv.context.fillText(self.alinesb[i],self.text_x+10,self.text_y+cache_myoff,self.text_w);
+          cache_myoff += 24;
+        }
+        cache_myoff = myoff;
+        for(var i = 0; i < self.alinesc.length; i++)
+        {
+          canv.context.fillText(self.alinesc[i],self.text_x+10+self.text_w/2,self.text_y+cache_myoff,self.text_w);
+          cache_myoff += 24;
+        }
+        for(var i = 0; i < self.alinesd.length; i++)
+        {
+          canv.context.fillText(self.alinesd[i],self.text_x+10+self.text_w/2,self.text_y+cache_myoff,self.text_w);
+          cache_myoff += 24;
+        }
+        canv.context.fillStyle = "#000000";
+      }
+
+      for(var i = 0; i < char_imgs.length; i++)
+      {
+        if(i == self.img) quiz_char_ts[i] = lerp(quiz_char_ts[i],1,0.1);
+        else              quiz_char_ts[i] = lerp(quiz_char_ts[i],0,0.1);
+        canv.context.drawImage(char_imgs[i],char_xs[i]+20,char_ys[i]+150+400-(400*quiz_char_ts[i])+yoff,char_ws[i],char_hs[i]);
+      }
+      if(self.qimg) canv.context.drawImage(self.qimg, 100, 200, 300, 300);
+      if(self.aimg) canv.context.drawImage(self.aimg, 500, 200, 300, 300);
+    }
+
+    self.click = function(evt)
+    {
+      var done = false;
+      if(self.alinesa[0] && self.alinesa[0] != "") //a quiz!
+      {
+        if(self.qlines)
+        {
+          var myoff = 0;//24;
+          for(var i = 0; i < self.qlines.length; i++)
+          {
+            myoff += 24;
+          }
+          var cache_myoff = myoff;
+          for(var i = 0; i < self.alinesa.length && !done; i++)
+          {
+            if(ptWithin(self.text_x, self.text_y+cache_myoff, self.text_w/3, 24, evt.doX, evt.doY))
+            {
+              if(self.correct == 0) self.rest_lines.splice(1,1);
+              else                  self.rest_lines = self.rest_lines.slice(1);
+              var log_data =
+              {
+                level:cur_level,
+                event:"CUSTOM",
+                event_custom:3, //3 = QUESTION_ANSWER
+                event_data_complex:
+                {
+                  event_custom:"QUESTION_ANSWER",
+                  question:self.question,
+                  answered:0,
+                  answer:self.correct,
+                }
+              };
+              log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+              mySlog.log(log_data);
+              done = true;
+            }
+            cache_myoff += 24;
+          }
+          for(var i = 0; i < self.alinesb.length && !done; i++)
+          {
+            if(ptWithin(self.text_x, self.text_y+cache_myoff, self.text_w/3, 24, evt.doX, evt.doY))
+            {
+              if(self.correct == 1) self.rest_lines.splice(1,1);
+              else                  self.rest_lines = self.rest_lines.slice(1);
+              var log_data =
+              {
+                level:cur_level,
+                event:"CUSTOM",
+                event_custom:3, //3 = QUESTION_ANSWER
+                event_data_complex:
+                {
+                  event_custom:"QUESTION_ANSWER",
+                  question:self.question,
+                  answered:1,
+                  answer:self.correct,
+                }
+              };
+              log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+              mySlog.log(log_data);
+              done = true;
+            }
+            cache_myoff += 24;
+          }
+          cache_myoff = myoff;
+          for(var i = 0; i < self.alinesc.length && !done; i++)
+          {
+            if(ptWithin(self.text_x+self.text_w/2, self.text_y+cache_myoff, self.text_w/3, 24, evt.doX, evt.doY))
+            {
+              if(self.correct == 2) self.rest_lines.splice(1,1);
+              else                  self.rest_lines = self.rest_lines.slice(1);
+              var log_data =
+              {
+                level:cur_level,
+                event:"CUSTOM",
+                event_custom:3, //3 = QUESTION_ANSWER
+                event_data_complex:
+                {
+                  event_custom:"QUESTION_ANSWER",
+                  question:self.question,
+                  answered:2,
+                  answer:self.correct,
+                }
+              };
+              log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+              mySlog.log(log_data);
+              done = true;
+            }
+            cache_myoff += 24;
+          }
+          for(var i = 0; i < self.alinesd.length && !done; i++)
+          {
+            if(ptWithin(self.text_x+self.text_w/2, self.text_y+cache_myoff, self.text_w/3, 24, evt.doX, evt.doY))
+            {
+              if(self.correct == 3) self.rest_lines.splice(1,1);
+              else                  self.rest_lines = self.rest_lines.slice(1);
+              var log_data =
+              {
+                level:cur_level,
+                event:"CUSTOM",
+                event_custom:3, //3 = QUESTION_ANSWER
+                event_data_complex:
+                {
+                  event_custom:"QUESTION_ANSWER",
+                  question:self.question,
+                  answered:3,
+                  answer:self.correct,
+                }
+              };
+              log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+              mySlog.log(log_data);
+              done = true;
+            }
+            cache_myoff += 24;
+          }
+        }
+      }
+      else done = true;
+
+      if(done)
+      {
+        click_aud.play();
+        if(self.rest_lines && self.rest_lines.length > 0)
+          self.loadQuiz(self.rest_lines, self.canv);
+        else
+        {
+          self.qlines = undefined;
+          self.alinesa = undefined;
+          self.alinesb = undefined;
+          self.alinesc = undefined;
+          self.alinesd = undefined;
+          self.qimg = undefined;
+          self.aimg = undefined;
+          mode = MODE_MENU;
+        }
+      }
+    }
+  }
+
   var loadLevelStars = function()
   {
     for(var i = 0; i < levels.length; i++)
@@ -592,6 +872,9 @@ var GamePlayScene = function(game, stage)
     self.click = function(evt){};
     self.introtick = function(){ return self.intro; }
     self.introdraw = function(){}
+
+    self.quiz = false;
+    self.quiz_seen = false;
   }
 
   var level_button = function(wx,wy,ww,wh,level)
@@ -720,10 +1003,10 @@ var GamePlayScene = function(game, stage)
       if(!self.displaying_unlocked && self.unlocked != -1) self.displaying_unlocked = 1;
       else
       {
-        mode = MODE_MENU;
         countLevelStars();
         self.unlocked = -1;
         self.displaying_unlocked = 0;
+        popQuiz();
       }
     }
 
@@ -904,6 +1187,12 @@ var GamePlayScene = function(game, stage)
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("<- This is a molecule",bounds.x-110,350); ctx.fillText("Stack 'em here ->",bounds.x+50,400); }
     levels[i].comic = function() { game.setScene(2,{start:0,length:8}); };
+    levels[i].quiz = [
+      [CHAR_GIRL, null, null, "Question time!", "","","","",0,0],
+      [CHAR_GIRL, GenImg("assets/q1.png"), null, "What wave property is shown by the label 'G'?", "Amplitude","Wavelength","Crest","Trough",0,0],
+      [CHAR_GIRL, null, null, "Correct!", "","","","",0,0],
+      [CHAR_GIRL, GenImg("assets/q1.png"), null, "Nope- 'G' is labeling the 'Amplitude' of the wave!", "","","","",0,0],
+    ];
     i++;
 
     //tetris s- no charge
@@ -929,6 +1218,12 @@ var GamePlayScene = function(game, stage)
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Some patterns can",bounds.x+50,300); ctx.fillText("fill the space completely.",bounds.x+50,330); ctx.fillText("Find those patterns!",bounds.x+50,400); }
     levels[i].comic = function() { game.setScene(2,{start:8,length:7}); };
+    levels[i].quiz = [
+      [CHAR_GIRL, null, null, "Question time!", "","","","",2,1],
+      [CHAR_GIRL, GenImg("assets/q1.png"), null, "What is the answer to question 2?", "Answer A","I wonder what happens if an answer is really long and can't be displayed all on one line","C","All of the above",2,1],
+      [CHAR_GIRL, null, null, "Correct!", "","","","",2,1],
+      [CHAR_GIRL, GenImg("assets/q1.png"), null, "The correct answer is C.", "","","","",2,1],
+    ];
     i++;
 
     //tetris T- no charge
@@ -953,6 +1248,12 @@ var GamePlayScene = function(game, stage)
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Double click",bounds.x+50,300); ctx.fillText("to rotate",bounds.x+50,330); }
+    levels[i].quiz = [
+      [CHAR_GIRL, null, null, "Question time!", "","","","",3,2],
+      [CHAR_GIRL, GenImg("assets/q1.png"), null, "What is the answer to question 3?", "Answer A","All of the below","C","All of the above",3,2],
+      [CHAR_GIRL, null, null, "Correct!", "","","","",3,2],
+      [CHAR_GIRL, GenImg("assets/q1.png"), null, "The correct answer is D.", "","","","",3,2],
+    ];
     i++;
 
     //domino- flip charge
@@ -1222,6 +1523,28 @@ var GamePlayScene = function(game, stage)
     levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     i++;
+
+    char_xs = [p(0,canv.width),p(0,canv.width),p(0,canv.width),p(0.02987012987012987,canv.width)];
+    char_ys = [p(0.55,canv.height),p(0.55,canv.height),p(0.6,canv.height),p(0.5,canv.height)];
+    char_ws = [p(0.2,canv.width),p(0.23,canv.width),p(0.23,canv.width),p(0.14675324675324675,canv.width)];
+    char_hs = [p(0.4247159090909091,canv.height),p(0.4,canv.height),p(0.368,canv.height),p(0.4671875,canv.height)];
+    char_ts = [0,0,0,0];
+    quiz_char_ts = [0,0,0,0];
+
+    char_imgs = [];
+    char_imgs[CHAR_GIRL] = new Image();
+    char_imgs[CHAR_GIRL].src = "assets/francis.png";
+    char_imgs[CHAR_ANNOY] = new Image();
+    char_imgs[CHAR_ANNOY].src = "assets/honey.png";
+    char_imgs[CHAR_AXE] = new Image();
+    char_imgs[CHAR_AXE].src = "assets/jack.png";
+    char_imgs[CHAR_TALL] = new Image();
+    char_imgs[CHAR_TALL].src = "assets/scout.png";
+
+    quiz = new Quiz(self)
+
+    click_aud = new Aud("assets/sound/click_0.wav");
+    click_aud.load();
   }
 
   var set_level = function(i)
@@ -2365,6 +2688,7 @@ var GamePlayScene = function(game, stage)
 
     mySlog = new slog("CRYSTAL",1);
 
+    quiz_t = 0;
     n_ticks = 0;
     total_stars = 0;
     score = 0;
@@ -2480,6 +2804,18 @@ var GamePlayScene = function(game, stage)
     score_bounce = new bounce();
   }
 
+  var popQuiz = function()
+  {
+    if(cur_level.quiz && !cur_level.quiz_seen)
+    {
+      quiz.loadQuiz(cur_level.quiz, canv);
+      mode = MODE_QUIZ;
+      cur_level.quiz_seen = true;
+    }
+    else
+      mode = MODE_MENU;
+  }
+
   self.tick = function()
   {
     n_ticks++;
@@ -2513,7 +2849,7 @@ var GamePlayScene = function(game, stage)
       bg_cam.ww = lerp(bg_cam.ww,game_bg_cam.ww,0.1);
       bg_cam.wh = lerp(bg_cam.wh,game_bg_cam.wh,0.1);
     }
-    if(mode == MODE_SUBMIT)
+    if(mode == MODE_SUBMIT || mode == MODE_QUIZ)
     {
       var t = min(1,submitting_t/(star_outro_sub_slide+star_outro_sub_star+star_outro_sub_zoom));
       cam.wx = lerp(cam.wx,game_cam.wx,0.1);
@@ -2592,6 +2928,10 @@ var GamePlayScene = function(game, stage)
       clicker.filter(outro);
       hoverer.filter(outro.ibox_pack);
       hoverer.filter(outro.ibox_charge);
+    }
+    else if(mode == MODE_QUIZ)
+    {
+      clicker.filter(quiz);
     }
 
     clicker.flush();
@@ -2693,11 +3033,11 @@ var GamePlayScene = function(game, stage)
     var h_spacing = 1;
 
     ctx.fillStyle = grid_fill;
-    ctx.fillRect(bounds.x,bounds.y,bounds.w,bounds.h);
+    if (mode != MODE_QUIZ) ctx.fillRect(bounds.x,bounds.y,bounds.w,bounds.h);
     ctx.strokeStyle = grid_stroke;
 
     wy = floor(min_wy/v_spacing)*v_spacing;
-    while(wy < max_wy)
+    if (mode != MODE_QUIZ) while(wy < max_wy)
     {
       y = screenSpaceY(cam,canv,wy);
       if(y > bounds.y && y < bounds.y+bounds.h)
@@ -2711,7 +3051,7 @@ var GamePlayScene = function(game, stage)
     }
 
     wx = floor(min_wx/h_spacing)*h_spacing;
-    while(wx < max_wx)
+    if (mode != MODE_QUIZ) while(wx < max_wx)
     {
       x = screenSpaceX(cam,canv,wx);
       if(x > bounds.x && x < bounds.x+bounds.w)
@@ -2725,20 +3065,20 @@ var GamePlayScene = function(game, stage)
     }
 
     var draw_n = 1;
-    if(mode == MODE_SUBMIT)
+    if(mode == MODE_SUBMIT || mode == MODE_QUIZ)
     {
       draw_n = round(0.5+sub_t*2);
       if(sub_t == 1) draw_n++;
     }
 
     //defects
-    for(var i = 0; i < cur_level.defect.length; i++)
+    if (mode != MODE_QUIZ) for(var i = 0; i < cur_level.defect.length; i++)
       draw_blocks(cur_level.defect[i].wx,cur_level.defect[i].wy,0,0,0,0,0,1,1,1,0,cur_level.defect[i].template);
 
     //molecules back
-    for(var i = molecules.length-1; i >= 0; i--)
+    if (mode != MODE_QUIZ) for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_down(draw_n);
-    for(var i = molecules.length-1; i >= 0; i--)
+      if (mode != MODE_QUIZ) for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_down();
 
     //borders
@@ -2755,14 +3095,14 @@ var GamePlayScene = function(game, stage)
 
     ctx.strokeStyle = bounds_stroke;
     ctx.lineWidth = 2;
-    ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
+    if (mode != MODE_QUIZ) ctx.strokeRect(bounds.x,bounds.y,bounds.w,bounds.h);
 
     //molecules front
-    for(var i = molecules.length-1; i >= 0; i--)
+    if (mode != MODE_QUIZ) for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_behind_up(draw_n);
 
     //scroll
-    if(mode == MODE_SUBMIT)
+    if(mode == MODE_SUBMIT || mode == MODE_QUIZ)
       ctx.globalAlpha = (1-quick_sub_t);
 
     ctx.fillStyle = scroll_fill;
@@ -2776,36 +3116,38 @@ var GamePlayScene = function(game, stage)
     for(var i = molecules.length-1; i >= 0; i--)
       molecules[i].draw_front_up();
 
-    if(mode == MODE_SUBMIT)
+    if(mode == MODE_SUBMIT || mode == MODE_QUIZ)
       ctx.globalAlpha = (1-quick_sub_t);
 
-    //UI
-    ctx.strokeStyle = white;
-    strokeRBox(back_btn,20,ctx);
-    strokeRBox(clear_btn,20,ctx);
-    ctx.fillStyle = white;
-    fillRBox(submit_btn,20,ctx);
+    if (mode != MODE_QUIZ) {
+      //UI
+      ctx.strokeStyle = white;
+      strokeRBox(back_btn,20,ctx);
+      strokeRBox(clear_btn,20,ctx);
 
-    ctx.font = default_font;
-    ctx.fillStyle = white;
-    ctx.fillText("Crystal Stability: ",scroll.x+13,scroll.y+115);
-    var oldfont = ctx.font;
-    ctx.font = (20+10*score_bounce.v)+"px Architects Daughter";
-    ctx.fillText(score,scroll.x+175,scroll.y+115);
-    ctx.font = oldfont;
-    ctx.fillText("< Menu",back_btn.x+10,back_btn.y+back_btn.h/2+10);
-    ctx.fillText("Clear",clear_btn.x+10+5,clear_btn.y+clear_btn.h/2+10);
-    ctx.fillStyle = black;
-    ctx.fillText("Grow Crystal",submit_btn.x+10+5,submit_btn.y+submit_btn.h/2+10);
-
-    var b = cur_stars_bounce.v*10;
-    var y = scroll.y+70-b/2;
-    for(var i = 0; i < 3; i++)
-    {
-      if(cur_level.cur_stars > i)
-        ctx.drawImage(star_full,scroll.x+65+30*i-b/2,y,20+b,20+b);
-      else
-        ctx.drawImage(star     ,scroll.x+65+30*i,y+b/2,20,20);
+      ctx.fillStyle = white;
+      fillRBox(submit_btn,20,ctx);
+      ctx.font = default_font;
+      ctx.fillStyle = white;
+      ctx.fillText("Crystal Stability: ",scroll.x+13,scroll.y+115);
+      var oldfont = ctx.font;
+      ctx.font = (20+10*score_bounce.v)+"px Architects Daughter";
+      ctx.fillText(score,scroll.x+175,scroll.y+115);
+      ctx.font = oldfont;
+      ctx.fillText("< Menu",back_btn.x+10,back_btn.y+back_btn.h/2+10);
+      ctx.fillText("Clear",clear_btn.x+10+5,clear_btn.y+clear_btn.h/2+10);
+      ctx.fillStyle = black;
+      ctx.fillText("Grow Crystal",submit_btn.x+10+5,submit_btn.y+submit_btn.h/2+10);
+  
+      var b = cur_stars_bounce.v*10;
+      var y = scroll.y+70-b/2;
+      for(var i = 0; i < 3; i++)
+      {
+        if(cur_level.cur_stars > i)
+          ctx.drawImage(star_full,scroll.x+65+30*i-b/2,y,20+b,20+b);
+        else
+          ctx.drawImage(star     ,scroll.x+65+30*i,y+b/2,20,20);
+      }
     }
 
     //ctx.fillText("Choose a   ^",levels[0].button.x-100,levels[0].button.y+125);
@@ -2820,6 +3162,15 @@ var GamePlayScene = function(game, stage)
       outro.draw();
     if(mode == MODE_INTRO)
       cur_level.introdraw();
+    if(mode == MODE_QUIZ)
+      quiz_t = lerp(quiz_t,1,0.1);
+    else
+    {
+      quiz_t = lerp(quiz_t,0,0.1);
+      for(var i = 0; i < quiz_char_ts.length; i++)
+        quiz_char_ts[i] = lerp(quiz_char_ts[i],0,0.1);
+    }
+    quiz.draw(canv);
 
     ctx.drawImage(logo_img,levels[0].button.x,levels[0].button.y-100,levels[0].button.w*3.5,logo_img.height*(levels[0].button.w*3.5/logo_img.width));
     if(museum_t != -1)

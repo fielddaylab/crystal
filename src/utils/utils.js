@@ -411,15 +411,15 @@ var space = function(minv,maxv,obv,nobs,obi)
   return minv+pad+(obv+pad)*obi;
 }
 
-var textToLines = function(canv, font, width, text)
+var textToLines = function(font, width, text, ctx)
 {
   var lines = [];
   var found = 0;
   var searched = 0;
   var tentative_search = 0;
 
-  canv.context.save();
-  canv.context.font = font;
+  ctx.save();
+  ctx.font = font;
 
   while(found < text.length)
   {
@@ -427,7 +427,7 @@ var textToLines = function(canv, font, width, text)
     if(searched == -1) searched = text.length;
     tentative_search = text.indexOf(" ",searched+1);
     if(tentative_search == -1) tentative_search = text.length;
-    while(canv.context.measureText(text.substring(found,tentative_search)).width < width && searched != text.length)
+    while(ctx.measureText(text.substring(found,tentative_search)).width < width && searched != text.length)
     {
       searched = tentative_search;
       tentative_search = text.indexOf(" ",searched+1);
@@ -438,7 +438,7 @@ var textToLines = function(canv, font, width, text)
     found = searched;
   }
 
-  canv.context.restore();
+  ctx.restore();
   return lines;
 }
 
@@ -618,3 +618,9 @@ function getCookie(name)
   return "";
 }
 
+var GenImg = function(src)
+{
+  var img = new Image();
+  img.src = src;
+  return img;
+}
