@@ -136,8 +136,7 @@ var GamePlayScene = function(game, stage)
     var log_data =
     {
       level:cur_level.id,
-      event:"CUSTOM",
-      event_custom:4, // "GROW_BTN_PRESS"
+      event:"COMPLETE",
       event_data_complex:{
         event_custom:"GROW_BTN_PRESS",
         stability:stability
