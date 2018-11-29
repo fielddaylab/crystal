@@ -138,7 +138,6 @@ var GamePlayScene = function(game, stage)
       level:cur_level.id,
       event:"COMPLETE",
       event_data_complex:{
-        event_custom:"GROW_BTN_PRESS",
         stability:stability
       }
     };
