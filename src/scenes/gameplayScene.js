@@ -681,7 +681,7 @@ var GamePlayScene = function(game, stage)
               else                  self.rest_lines = self.rest_lines.slice(1);
               var log_data =
               {
-                level:cur_level,
+                level:cur_level.id,
                 event:"CUSTOM",
                 event_custom:3, //3 = QUESTION_ANSWER
                 event_data_complex:
@@ -706,7 +706,7 @@ var GamePlayScene = function(game, stage)
               else                  self.rest_lines = self.rest_lines.slice(1);
               var log_data =
               {
-                level:cur_level,
+                level:cur_level.id,
                 event:"CUSTOM",
                 event_custom:3, //3 = QUESTION_ANSWER
                 event_data_complex:
@@ -732,7 +732,7 @@ var GamePlayScene = function(game, stage)
               else                  self.rest_lines = self.rest_lines.slice(1);
               var log_data =
               {
-                level:cur_level,
+                level:cur_level.id,
                 event:"CUSTOM",
                 event_custom:3, //3 = QUESTION_ANSWER
                 event_data_complex:
@@ -757,7 +757,7 @@ var GamePlayScene = function(game, stage)
               else                  self.rest_lines = self.rest_lines.slice(1);
               var log_data =
               {
-                level:cur_level,
+                level:cur_level.id,
                 event:"CUSTOM",
                 event_custom:3, //3 = QUESTION_ANSWER
                 event_data_complex:
@@ -1185,12 +1185,6 @@ var GamePlayScene = function(game, stage)
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("<- This is a molecule",bounds.x-110,350); ctx.fillText("Stack 'em here ->",bounds.x+50,400); }
     levels[i].comic = function() { game.setScene(2,{start:0,length:8}); };
-    levels[i].quiz = [
-      [CHAR_GIRL, null, null, "Question time!", "","","","",0,0],
-      [CHAR_GIRL, GenImg("assets/q1.png"), null, "What wave property is shown by the label 'G'?", "Amplitude","Wavelength","Crest","Trough",0,0],
-      [CHAR_GIRL, null, null, "Correct!", "","","","",0,0],
-      [CHAR_GIRL, GenImg("assets/q1.png"), null, "Nope- 'G' is labeling the 'Amplitude' of the wave!", "","","","",0,0],
-    ];
     i++;
 
     //tetris s- no charge
@@ -1216,12 +1210,6 @@ var GamePlayScene = function(game, stage)
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Some patterns can",bounds.x+50,300); ctx.fillText("fill the space completely.",bounds.x+50,330); ctx.fillText("Find those patterns!",bounds.x+50,400); }
     levels[i].comic = function() { game.setScene(2,{start:8,length:7}); };
-    levels[i].quiz = [
-      [CHAR_GIRL, null, null, "Question time!", "","","","",2,1],
-      [CHAR_GIRL, GenImg("assets/q1.png"), null, "What is the answer to question 2?", "Answer A","I wonder what happens if an answer is really long and can't be displayed all on one line","C","All of the above",2,1],
-      [CHAR_GIRL, null, null, "Correct!", "","","","",2,1],
-      [CHAR_GIRL, GenImg("assets/q1.png"), null, "The correct answer is C.", "","","","",2,1],
-    ];
     i++;
 
     //tetris T- no charge
@@ -1247,10 +1235,14 @@ var GamePlayScene = function(game, stage)
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Double click",bounds.x+50,300); ctx.fillText("to rotate",bounds.x+50,330); }
     levels[i].quiz = [
-      [CHAR_GIRL, null, null, "Question time!", "","","","",3,2],
-      [CHAR_GIRL, GenImg("assets/q1.png"), null, "What is the answer to question 3?", "Answer A","All of the below","C","All of the above",3,2],
-      [CHAR_GIRL, null, null, "Correct!", "","","","",3,2],
-      [CHAR_GIRL, GenImg("assets/q1.png"), null, "The correct answer is D.", "","","","",3,2],
+      [CHAR_GIRL, null, null, "Question time!", "","","","",0,0],
+      [CHAR_GIRL, GenImg("assets/q1.png"), null, "Which of these is a crystal?", "A","B","Both","Neither",0,0],
+      [CHAR_GIRL, null, null, "Perfect! Crystals have ordered, repeating structures of atoms.", "","","","",0,0],
+      [CHAR_GIRL, GenImg("assets/q1.png"), null, "Not quite. Crystals have ordered, repeating structures of atoms.", "","","","",0,0],
+      [CHAR_GIRL, null, null, "Next question:", "","","","",1,1],
+      [CHAR_GIRL, GenImg("assets/q2.png"), null, "Which of these structures will have higher stability?", "A","B","Both","Neither",1,1],
+      [CHAR_GIRL, null, null, "Great! Structures with few gaps and tighter arrangement are more stable.", "","","","",1,1],
+      [CHAR_GIRL, GenImg("assets/q2.png"), null, "Not quite. Structures with few gaps and tighter arrangement are more stable.", "","","","",1,1]
     ];
     i++;
 
@@ -1357,6 +1349,12 @@ var GamePlayScene = function(game, stage)
     levels[i].bounds_w = 21;
     levels[i].bounds_h = 14;
     levels[i].scroll_w = 9;
+    levels[i].quiz = [
+      [CHAR_GIRL, null, null, "Question time!", "","","","",1,2],
+      [CHAR_GIRL, GenImg("assets/q3.png"), null, "Which of these structures will have higher stability?", "A","B","Both","Neither",1,2],
+      [CHAR_GIRL, null, null, "Great! Structures where opposite charges are next to each other are more stable.", "","","","",1,2],
+      [CHAR_GIRL, GenImg("assets/q3.png"), null, "Not quite. Structures where opposite charges are next to each other are more stable.", "","","","",1,2],
+    ];
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
     levels[i].lock_stars = levels[i-1].lock_stars+2;
@@ -1521,8 +1519,6 @@ var GamePlayScene = function(game, stage)
     levels[i].available_templates[j++] = new template(0.5,0.5,[{cx:0,cy:0,c:bottom_pos},{cx: 0,cy: 1,c:left_neg  },{cx: 1,cy:0,c:right_neg },{cx: 1,cy:1,c:top_pos   }]); //box
     levels[i].button = new level_button(lvlx(i),lvly(i),lvlw(i),lvlh(i),levels[i]);
     i++;
-
-    console.log(levels)
 
     char_xs = [p(0,canv.width),p(0,canv.width),p(0,canv.width),p(0.02987012987012987,canv.width)];
     char_ys = [p(0.55,canv.height),p(0.55,canv.height),p(0.6,canv.height),p(0.5,canv.height)];
@@ -3170,7 +3166,11 @@ var GamePlayScene = function(game, stage)
     }
     quiz.draw(canv);
 
-    ctx.drawImage(logo_img,levels[0].button.x,levels[0].button.y-100,levels[0].button.w*3.5,logo_img.height*(levels[0].button.w*3.5/logo_img.width));
+    if (mode == MODE_MENU || mode == MODE_MUSEUM) {
+      total_stars_disp.draw();
+      ctx.drawImage(logo_img,levels[0].button.x,levels[0].button.y-100,levels[0].button.w*3.5,logo_img.height*(levels[0].button.w*3.5/logo_img.width));
+    }
+    
     if(museum_t != -1)
     {
       ctx.drawImage(museum_img,museum_btn.x-30,museum.y-45,museum_btn.w+museum.w+80,museum.h+90);
@@ -3219,8 +3219,6 @@ var GamePlayScene = function(game, stage)
         ctx.drawImage(tab_crystal_img,museum.x-60+t*100,museum.y+50,40,40);
       }
     }
-
-    total_stars_disp.draw();
 
     if(mode == MODE_SUBMIT)
     {
