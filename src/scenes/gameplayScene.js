@@ -656,7 +656,7 @@ var GamePlayScene = function(game, stage)
         else              quiz_char_ts[i] = lerp(quiz_char_ts[i],0,0.1);
         canv.context.drawImage(char_imgs[i],char_xs[i]+20,char_ys[i]+150+400-(400*quiz_char_ts[i])+yoff,char_ws[i],char_hs[i]);
       }
-      if(self.qimg) canv.context.drawImage(self.qimg, 100, 200, 300, 300);
+      if(self.qimg) canv.context.drawImage(self.qimg, 100, 200, 500, 500 * (self.qimg.height/self.qimg.width));
       if(self.aimg) canv.context.drawImage(self.aimg, 500, 200, 300, 300);
     }
 
@@ -1236,13 +1236,13 @@ var GamePlayScene = function(game, stage)
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Double click",bounds.x+50,300); ctx.fillText("to rotate",bounds.x+50,330); }
     levels[i].quiz = [
       [CHAR_GIRL, null, null, "Question time!", "","","","",0,0],
-      [CHAR_GIRL, GenImg("assets/q1.png"), null, "Which of these is a crystal?", "A","B","Both","Neither",0,0],
-      [CHAR_GIRL, null, null, "Perfect! Crystals have ordered, repeating structures of atoms.", "","","","",0,0],
-      [CHAR_GIRL, GenImg("assets/q1.png"), null, "Not quite. Crystals have ordered, repeating structures of atoms.", "","","","",0,0],
-      [CHAR_GIRL, null, null, "Next question:", "","","","",1,1],
-      [CHAR_GIRL, GenImg("assets/q2.png"), null, "Which of these structures will have higher stability?", "A","B","Both","Neither",1,1],
-      [CHAR_GIRL, null, null, "Great! Structures with few gaps and tighter arrangement are more stable.", "","","","",1,1],
-      [CHAR_GIRL, GenImg("assets/q2.png"), null, "Not quite. Structures with few gaps and tighter arrangement are more stable.", "","","","",1,1]
+      [CHAR_GIRL, GenImg("assets/quiz/answer-group_1.png"), null, "Which of these is a crystal?", "A","B","Both","Neither",1,0],
+      [CHAR_GIRL, null, null, "Perfect! Crystals have ordered, repeating structures of atoms.", "","","","",1,0],
+      [CHAR_GIRL, GenImg("assets/quiz/answer-group_1.png"), null, "Not quite. Crystals have ordered, repeating structures of atoms.", "","","","",1,0],
+      [CHAR_GIRL, null, null, "Next question:", "","","","",0,1],
+      [CHAR_GIRL, GenImg("assets/quiz/answer-group_2.png"), null, "Which of these structures will have higher stability?", "A","B","Both","Neither",0,1],
+      [CHAR_GIRL, null, null, "Great! Structures with few gaps and tighter arrangement are more stable.", "","","","",0,1],
+      [CHAR_GIRL, GenImg("assets/quiz/answer-group_2.png"), null, "Not quite. Structures with few gaps and tighter arrangement are more stable.", "","","","",0,1]
     ];
     i++;
 
@@ -1351,9 +1351,9 @@ var GamePlayScene = function(game, stage)
     levels[i].scroll_w = 9;
     levels[i].quiz = [
       [CHAR_GIRL, null, null, "Question time!", "","","","",1,2],
-      [CHAR_GIRL, GenImg("assets/q3.png"), null, "Which of these structures will have higher stability?", "A","B","Both","Neither",1,2],
-      [CHAR_GIRL, null, null, "Great! Structures where opposite charges are next to each other are more stable.", "","","","",1,2],
-      [CHAR_GIRL, GenImg("assets/q3.png"), null, "Not quite. Structures where opposite charges are next to each other are more stable.", "","","","",1,2],
+      [CHAR_GIRL, GenImg("assets/quiz/answer-group_3.png"), null, "Which of these structures will have higher stability?", "A","B","Both","Neither",0,2],
+      [CHAR_GIRL, null, null, "Great! Structures where opposite charges are next to each other are more stable.", "","","","",0,2],
+      [CHAR_GIRL, GenImg("assets/quiz/answer-group_3.png"), null, "Not quite. Structures where opposite charges are next to each other are more stable.", "","","","",0,2],
     ];
     if(PERFECT)
     levels[i].scroll_w = (levels[i].bounds_w+2)*4/3-(levels[i].bounds_w+2);
