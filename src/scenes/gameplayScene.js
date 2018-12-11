@@ -293,7 +293,7 @@ var GamePlayScene = function(game, stage)
   q_img.context.arc(w/2,w/2,w/3,0,twopi);
   q_img.context.stroke();
   q_img.context.textAlign = "center"
-  q_img.context.font = "40px Architects Daughter";
+  q_img.context.font = quiz_font;
   q_img.context.fillText("?",w/2,2*h/3);
 
   in_r = w/4;
@@ -424,6 +424,7 @@ var GamePlayScene = function(game, stage)
 
   var default_font = "20px Architects Daughter";
   var instr_font = "30px Architects Daughter";
+  var quiz_font = "20px Architects Daughter";
 
   var bgbox;
   var museum;
@@ -593,11 +594,11 @@ var GamePlayScene = function(game, stage)
 
     self.format = function(canv)
     {
-      self.qlines = textToLines("20px Open Sans",self.text_w-20,self.qtxt,canv.context);
-      self.alinesa = textToLines("20px Open Sans",self.text_w-20,self.atxta,canv.context);
-      self.alinesb = textToLines("20px Open Sans",self.text_w-20,self.atxtb,canv.context);
-      self.alinesc = textToLines("20px Open Sans",self.text_w-20,self.atxtc,canv.context);
-      self.alinesd = textToLines("20px Open Sans",self.text_w-20,self.atxtd,canv.context);
+      self.qlines = textToLines(quiz_font,self.text_w-20,self.qtxt,canv.context);
+      self.alinesa = textToLines(quiz_font,self.text_w-20,self.atxta,canv.context);
+      self.alinesb = textToLines(quiz_font,self.text_w-20,self.atxtb,canv.context);
+      self.alinesc = textToLines(quiz_font,self.text_w-20,self.atxtc,canv.context);
+      self.alinesd = textToLines(quiz_font,self.text_w-20,self.atxtd,canv.context);
     }
 
     self.draw = function(canv)
@@ -608,7 +609,7 @@ var GamePlayScene = function(game, stage)
 
       if(self.qlines)
       {
-        canv.context.font = "20px Open Sans";
+        canv.context.font = quiz_font;
         canv.context.textAlign = "left";
         canv.context.fillStyle = "#FFFFFF";
         canv.fillRoundRect(self.text_x,self.text_y,self.text_w,self.text_h,5);
@@ -656,7 +657,7 @@ var GamePlayScene = function(game, stage)
         else              quiz_char_ts[i] = lerp(quiz_char_ts[i],0,0.1);
         canv.context.drawImage(char_imgs[i],char_xs[i]+20,char_ys[i]+150+400-(400*quiz_char_ts[i])+yoff,char_ws[i],char_hs[i]);
       }
-      if(self.qimg) canv.context.drawImage(self.qimg, 100, 200, 500, 500 * (self.qimg.height/self.qimg.width));
+      if(self.qimg) canv.context.drawImage(self.qimg, (canv.width / 2) - (250), 200, 500, 500 * (self.qimg.height/self.qimg.width));
       if(self.aimg) canv.context.drawImage(self.aimg, 500, 200, 300, 300);
     }
 
