@@ -2721,7 +2721,24 @@ var GamePlayScene = function(game, stage)
     outro = new star_outro();
 
     back_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
-    back_btn.click = function(evt) { mode = MODE_MENU; countLevelStars(); evt.hitUI = true; }
+    back_btn.click = function(evt) { 
+      // Log back to menu
+      var log_data =
+      {
+        level:cur_level.id,
+        event:"CUSTOM",
+        event_custom:7, // "BACK_TO_MENU"
+        event_data_complex:{
+          event_custom:"BACK_TO_MENU",
+        }
+      };
+      
+      log_data.event_data_complex = JSON.stringify(log_data.event_data_complex);
+      //console.log(log_data);
+      window.mySlog.log(log_data);
+      mode = MODE_MENU; 
+      countLevelStars(); 
+      evt.hitUI = true; }
 
     clear_btn = {wx:0,wy:0,ww:0,wh:0,x:0,y:0,w:0,h:0};
     clear_btn.click = function(evt)
