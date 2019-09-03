@@ -9,6 +9,7 @@ Note: Note: event_custom will always map to a string of the event name. For exam
 #### Change Log
 Versions:
 1. Original Version
+1. Added return to menu log (7/25/2019)
 
 ### Event Categories
 - [COMPLETE](#COMPLETE)
