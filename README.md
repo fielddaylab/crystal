@@ -10,6 +10,7 @@ Note: Note: event_custom will always map to a string of the event name. For exam
 Versions:
 1. Original Version
 1. Added return to menu log (7/25/2019)
+1. Simple log now sends player_id (if present) from the URL to log.php (9/24/2019)
 
 ### Event Categories
 - [COMPLETE](#COMPLETE)
