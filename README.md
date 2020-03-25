@@ -6,6 +6,28 @@ Each log is sent with a number of fields required by [simplelog](https://github.
 Each log_data is a JSON object for that specific category as defined below.
 Note: Note: event_custom will always map to a string of the event name. For example, if an event called FOO had a field of "event_custom", its value would be a string "FOO". Not all events have this field.
 
+### Game Notes:
+- The game has 9 levels, refered to in the logs as 0-8.
+- Each level involves putting atoms in a crystaline formation. Fill the box to complete the level (The box does not need to be completely filled).
+- The player gets a stability score for each level. Different score threshholds are required for different amount of stars.
+- Stars are collected to unlock gems in the museum and more levels.
+- Later levels (lvl4+) have atoms that have charge, which give more or less stability depending on how they are placed.
+- Stability is calculated by adding charge (stability due to charge) + pack (stability given by filling squares in the box).
+
+#### Certain numbers of starts are required for each level.
+| Level | Number of Stars Required |
+| --- | --- |
+|1 | available from start|
+|2 | |
+|3 | |
+|4 | |
+|5 | |
+|6 | |
+|7 | 13|
+|8 | 15|
+|9 | 16|
+
+
 #### Change Log
 Versions:
 1. Original Version
@@ -25,18 +47,20 @@ Versions:
 <a name="COMPLETE"/>
 
 #### COMPLETE
+Occurs when player completes a level.
+
 | event Name | Description | Note |
 | --- | --- | --- |
-|0 |int | |
-|1 |int | |
-|2 |int | |
-|3 |int | |
-|4 |int | |
-|5 |int | |
-|6 |int | |
-|7 |int | |
-|8 |int | |
-|stability |{'pack': 'int', 'charge': 'int'} | |
+|0 |int | number of stars achieved in level 1|
+|1 |int | number of stars achieved in level 2|
+|2 |int | number of stars achieved in level 3|
+|3 |int | number of stars achieved in level 4|
+|4 |int | number of stars achieved in level 5|
+|5 |int | number of stars achieved in level 6|
+|6 |int | number of stars achieved in level 7|
+|7 |int | number of stars achieved in level 8|
+|8 |int | number of stars achieved in level 9|
+|stability |{'pack': 'int', 'charge': 'int'} | See game notes. |
 
 
 
@@ -44,17 +68,19 @@ Versions:
 <a name="BEGIN"/>
 
 #### BEGIN
+Occurs when player starts a level.
+
 | event Name | Description | Note |
 | --- | --- | --- |
-|stars_0 |int | |
-|stars_1 |int | |
-|stars_2 |int | |
-|stars_3 |int | |
-|stars_4 |int | |
-|stars_5 |int | |
-|stars_6 |int | |
-|stars_7 |int | |
-|stars_8 |int | |
+|stars_0 |int | number of stars achieved in level 1|
+|stars_1 |int | number of stars achieved in level 2|
+|stars_2 |int | number of stars achieved in level 3|
+|stars_3 |int | number of stars achieved in level 4|
+|stars_4 |int | number of stars achieved in level 5|
+|stars_5 |int | number of stars achieved in level 6|
+|stars_6 |int | number of stars achieved in level 7|
+|stars_7 |int | number of stars achieved in level 7|
+|stars_8 |int | number of stars achieved in level 8|
 
 
 
@@ -62,6 +88,8 @@ Versions:
 <a name="MOLECULE_RELEASE"/>
 
 #### MOLECULE_RELEASE
+
+
 | event Name | Description | Note |
 | --- | --- | --- |
 |event_custom | string | always "MOLECULE_RELEASE" |
