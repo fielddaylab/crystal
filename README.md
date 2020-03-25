@@ -6,9 +6,17 @@ Each log is sent with a number of fields required by [simplelog](https://github.
 Each log_data is a JSON object for that specific category as defined below.
 Note: Note: event_custom will always map to a string of the event name. For example, if an event called FOO had a field of "event_custom", its value would be a string "FOO". Not all events have this field.
 
+
+#### Change Log
+Versions:
+1. Original Version
+1. Added return to menu log (7/25/2019)
+1. Simple log now sends player_id (if present) from the URL to log.php (9/24/2019)
+
+
 ### Game Notes:
 - The game has 9 levels, refered to in the logs as 0-8.
-- Each level involves putting atoms in a crystaline formation. Fill the box to complete the level (The box does not need to be completely filled).
+- Each level involves putting atoms in a crystaline formation. Fill the box to complete the level (The box does not need to be completely filled). Players fill the box with crystals by rotating and moving the crystals around until they are densely packed.
 - The player gets a stability score for each level. Different score threshholds are required for different amount of stars.
 - Stars are collected to unlock gems in the museum and more levels.
 - Later levels (lvl4+) have atoms that have charge, which give more or less stability depending on how they are placed.
@@ -26,13 +34,6 @@ Note: Note: event_custom will always map to a string of the event name. For exam
 |7 | 13|
 |8 | 15|
 |9 | 16|
-
-
-#### Change Log
-Versions:
-1. Original Version
-1. Added return to menu log (7/25/2019)
-1. Simple log now sends player_id (if present) from the URL to log.php (9/24/2019)
 
 ### Event Categories
 - [COMPLETE](#COMPLETE)
