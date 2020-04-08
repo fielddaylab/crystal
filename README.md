@@ -49,6 +49,7 @@ Versions:
 
 #### COMPLETE
 Occurs when player completes a level.
+Note: This event is not always accurate. Assume that any COMPLETE event with pack=0 and charge=0 is false.
 
 | event Name | Description | Note |
 | --- | --- | --- |
