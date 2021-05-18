@@ -1091,6 +1091,9 @@ var GamePlayScene = function(game, stage)
         var offy;
         var t = (n_ticks-self.start_ticks)%200;
         var p;
+
+        var numStars = 0;
+
         for(var i = 0; i < 3; i++)
         {
           theta = quarterpi+(i/2)*halfpi;
@@ -1108,7 +1111,10 @@ var GamePlayScene = function(game, stage)
           self.bounces[i].tick();
           bs += self.bounces[i].v;
           if(cur_level.cur_stars > 2-i && n_ticks-self.start_ticks > 30*(3-i))
+          {
             ctx.drawImage(star_full,x+offx-bs/2,y+offy-bs/2,bs,bs);
+            numStars ++;
+          }
           else
             ctx.drawImage(star_empty,x+offx-bs/2,y+offy-bs/2,bs,bs);
         }
@@ -1132,6 +1138,12 @@ var GamePlayScene = function(game, stage)
         ctx.fillText(score,               x + 120, y+40);
         strokeR(x-80, y+70, 160, 50, 20, ctx);
         ctx.fillText("Next Level", x-45, y+105);
+        if (!sentProgress)
+        {
+          sentProgress = true;
+          console.log("cur_level: "+cur_level.id);
+          completeLevel(cur_level.id, numStars);
+        }
       }
     }
   }
@@ -1185,7 +1197,7 @@ var GamePlayScene = function(game, stage)
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("<- This is a molecule",bounds.x-110,350); ctx.fillText("Stack 'em here ->",bounds.x+50,400); }
-    levels[i].comic = function() { game.setScene(2,{start:0,length:8}); };
+    levels[i].comic = function() { game.setScene(2,{start:0,length:8});};
     i++;
 
     //tetris s- no charge
@@ -1210,7 +1222,7 @@ var GamePlayScene = function(game, stage)
     levels[i].click = function(evt) { cur_level.intro = false; }
     levels[i].introtick = function() { return cur_level.intro; }
     levels[i].introdraw = function() { ctx.fillStyle = white; ctx.font = instr_font; ctx.fillText("Some patterns can",bounds.x+50,300); ctx.fillText("fill the space completely.",bounds.x+50,330); ctx.fillText("Find those patterns!",bounds.x+50,400); }
-    levels[i].comic = function() { game.setScene(2,{start:8,length:7}); };
+    levels[i].comic = function() { game.setScene(2,{start:8,length:7});};
     i++;
 
     //tetris T- no charge
@@ -2830,6 +2842,7 @@ var GamePlayScene = function(game, stage)
 
   self.tick = function()
   {
+    if (gameIsPaused) return;
     n_ticks++;
     lvl_auds_should_play--;
     if(lvl_auds_should_play < 0) lvl_auds_should_play = 0;
@@ -2841,6 +2854,7 @@ var GamePlayScene = function(game, stage)
     //lerp cam
     if(mode == MODE_MENU || mode == MODE_MUSEUM)
     {
+      sentProgress = false;
       cam.wx = lerp(cam.wx,menu_cam.wx,0.1);
       cam.wy = lerp(cam.wy,menu_cam.wy,0.1);
       cam.ww = lerp(cam.ww,menu_cam.ww,0.1);
