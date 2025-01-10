@@ -51,6 +51,18 @@ var GamePlayScene = function(game, stage)
 
   var click_aud;
 
+  var remove_vault_button = function () {
+    const vaultDropdown =
+      window.parent.document.querySelector("floating-dropdown");
+    if (vaultDropdown) {
+      vaultDropdown.remove();
+    } else {
+      console.warn(
+        "[Vault Plugin] Failed attempt to remove element <floating-dropdown>"
+      );
+    }
+  };
+
   //log functions
   var log_level_begin = function(selectedLevel)
   {
@@ -956,6 +968,8 @@ var GamePlayScene = function(game, stage)
     self.click = function(evt)
     {
       if(total_stars < self.level.lock_stars) return;
+			remove_vault_button();
+
       log_level_begin(self.level.id);
       lvl_auds_should_play = 10;
       set_level(self.level.id);

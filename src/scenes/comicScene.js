@@ -23,17 +23,6 @@ var ComicScene = function (game, stage) {
 
 	var blue;
 
-	self.remove_vault_button = function () {
-		const vaultDropdown =
-			window.parent.document.querySelector("floating-dropdown");
-		if (vaultDropdown) {
-			vaultDropdown.remove();
-		} else {
-			console.warn(
-				"[Vault Plugin] Failed attempt to remove element <floating-dropdown>"
-			);
-		}
-	};
 
 	self.ready = function (args) {
 		clicker = new Clicker({ source: stage.dispCanv.canvas });
@@ -167,7 +156,6 @@ var ComicScene = function (game, stage) {
 	var duh = 0;
 	self.tick = function () {
 		if (cur_img >= imgs.length) {
-			self.remove_vault_button();
 			game.nextScene();
 		} else {
 			for (var i = 0; i < nodes.length; i++) clicker.filter(nodes[i]);
