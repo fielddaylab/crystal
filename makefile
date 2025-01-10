@@ -10,3 +10,6 @@ server:
 
 deploy:
 	rsync -vrc * tyg@theyardgames.org:/httpdocs/game/crystal --exclude-from rsync-exclude
+
+deploy:
+	rsync -vrc * tyg@theyardgames.org:/httpdocs/game/crystal/test --exclude-from rsync-exclude
